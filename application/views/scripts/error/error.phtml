@@ -1,0 +1,10 @@
+<div id="exception">
+    <?php echo $this->message ?>
+</div>
+<div id="dev-exception">
+    <h2>Exception Message:</h2>
+    <pre class="major"><?php echo $this->exception->getMessage(); ?></pre>
+
+    <h2>Exception Information:</h2>
+    <pre><?php echo $this->formattedException; ?></pre>
+</div>
