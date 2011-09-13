@@ -62,12 +62,23 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
         $frontController->registerPlugin(new Vulnero_Controller_Plugin_Login());
 
         add_action('send_headers', array($this, 'onSendHeaders'));
+        add_action('plugins_loaded', array($this, 'onPluginsLoaded'));
+        add_action('the_content', array($this, 'onTheContent'));
+        add_action('wp_print_styles', array($this, 'onWpPrintStyles'));
+        add_action('wp_footer', array($this, 'onWpFooter'));
+        add_action('wp_head', array($this, 'onWpHead'));
+        add_action('wp_title', array($this, 'onWpTitle'));
+
+        // TODO:
+        // add_action('admin_menu', array($this, 'onAdminMenu'));
+        // add_action('admin_init', array($this, 'onAdminInit'));
     }
 
     /**
      * WordPress send_headers hook
      * Note: Permalinks must be enabled in WordPress for Vulnero to extend routing.
      * Create a new Zend_Controller_Request_Http object with the WordPress
+    ewordpress',
      * route. Upon failure, we assume the route isn't handled and let WordPress
      * deal with it.
      *
@@ -101,6 +112,84 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
     }
 
     /**
+     * WordPress wp_title hook
+     * Change or alter the page title (if supported by the theme).
+     *
+     * @param   string
+     * @return  string
+     */
+    public function onWpTitle($title)
+    {
+        return $title;
+    }
+
+    /**
+     * WordPress wp_footer hook
+     * Allows us to inject dynamic content (as a string) into the WordPress footer
+     * (if supported by the theme).
+     *
+     * @return string
+     */
+    public function onWpFooter()
+    {
+        return '<p>Powered by <a href="http://www.vulnero.com/" target="_blank">Vulnero</a>';
+    }
+
+    /**
+     * WordPress wp_head hook
+     * Allows us to inject dynamic content (as a string) into the WordPress header
+     * (if supported by the theme).
+     *
+     * @return string
+     */
+    public function onWpHead()
+    {
+        return '';
+    }
+
+    /**
+     * WordPress the_content hook
+     * Allows us to inject dynamic content (as a string) into WordPress.
+     *
+     * @return string
+     */
+    public function onTheContent()
+    {
+        return ''; // you can extend me!
+    }
+
+    /**
+     * WordPress wp_print_styles hook
+     * Allows us to inject stylesheets into WordPress.
+     *
+     * @return void
+     */
+    public function onWpPrintStyles()
+    {
+        // wp_register_style('unique id', '/path/to/css');
+    }
+
+    /**
+     * WordPress plugins_loaded hook
+     * Allows our application to inject sidebar widgets, scripts or stylesheets
+     * into WordPress (if our application doesn't handle the route).
+     *
+     * @return  void
+     */
+    public function onPluginsLoaded()
+    {
+//         wp_register_sidebar_widget(
+//             'UNIQUE NAME',
+//             'FRIENDLY TITLE',
+//             array($this, 'function'),
+//             array(
+//                 'classname' => 'CSS CLASS',
+//                 'description' => 'Friendly description'
+//             )
+//         );
+    }
+
+    /**
      * Retrieves our initialized Zend_Config object and saves it in
      * the registry for easy access.
      *
@@ -108,9 +197,7 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
      */
     protected function _initConfig()
     {
-        $config = new Zend_Config($this->getOptions());
-        Zend_Registry::set('config', $config);
-        return $config;
+        return Zend_Registry::get('config');
     }
 
     /**
@@ -122,13 +209,21 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
      */
     protected function _initRouter()
     {
+        $cache = $this->bootstrap('cache')
+                      ->getResource('cache');
+
         $router = $this->bootstrap('frontController')
                        ->getResource('frontController')
                        ->getRouter();
         $router->removeDefaultRoutes();
-        $router->addConfig(
-            new Zend_Config_Ini(APPLICATION_PATH . '/config/routes.ini')
-        );
+
+        // Cache the routes configuration file to speed up processing
+        if (!$routes = $cache->load('routes')) {
+            $routes = new Zend_Config_Ini(APPLICATION_PATH . '/config/routes.ini');
+            $cache->save($routes, 'routes');
+        }
+
+        $router->addConfig($routes);
 
         return $router;
     }
@@ -205,5 +300,81 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
                     ->setCredentialTreatment('MD5(?)');
 
         return $authAdapter;
+    }
+
+    /**
+     * Initializes a cache adapter in the following order of precedence:
+     * 1) application/config/config.ini section if available:
+     *    Example: cache.backend.* (see config for details)
+     * 2) W3 Super Cache Memcache connection
+     * 3) APC (if installed)
+     * 4) SQLite (if installed) in cache/cache.sqlite.db
+     * 5) File based, in cache/cache.obj
+     *
+     * It is recommended to configure your caching connection in the config
+     * file.
+     *
+     * @return  Zend
+     */
+    protected function _initCache()
+    {
+        $config = $this->bootstrap('config')
+                       ->getResource('config');
+
+        if (isset($config->cache->backend->memcached)) {
+            $adapterName = 'Libmemcached';
+            $options = $config->cache->backend->memcached->toArray();
+        } elseif (isset($config->cache->backend->memcache)) {
+            $adapterName = 'Memcached';
+            $options = $config->cache->backend->memcache->toArray();
+        } elseif (isset($config->cache->backend->apc)) {
+            $adapterName = 'Apc';
+            $options = $config->cache->backend->apc->toArray();
+        } elseif (isset($config->cache->backend->xcache)) {
+            $adapterName = 'Xcache';
+            $options = $config->cache->backend->xcache->toArray();
+        } elseif (isset($config->cache->backend->sqlite)) {
+            $adapterName = 'Sqlite';
+            $options = $config->cache->backend->sqlite->toArray();
+        } elseif (isset($config->cache->backend->file)) {
+            $adapterName = 'File';
+            $options = $config->cache->backend->file->toArray();
+        } else {
+            // Auto-detect best available option
+            if (extension_loaded('apc')) {
+                $adapterName = 'Apc';
+                $options = array();
+            } elseif (extension_loaded('sqlite')) {
+                $adapterName = 'Sqlite';
+                $options = array(
+                    'cache_db_complete_path' => PROJECT_BASE_PATH . '/cache/cache.sqlite.db'
+                );
+            } else {
+                $adapterName = 'File';
+                $options = array(
+                    'cache_dir'     => PROJECT_BASE_PATH . '/cache',
+                    'file_locking'  => true
+                );
+            }
+        }
+
+        if (isset($config->cache->frontend)) {
+            $frontendOptions = $config->cache->frontend->toArray();
+        } else {
+            $frontendOptions = array(
+                'lifetime' => 3600,
+                'logging' => false,
+                'automatic_serialization' => true
+            );
+        }
+
+        $cache = Zend_Cache::factory('Core', $adapterName, $frontendOptions, $options);
+
+        Zend_Registry::set('cache', $cache);
+        Zend_Db_Table_Abstract::setDefaultMetadataCache($cache);
+        Zend_Date::setOptions(array('cache' => $cache));
+        Zend_Locale::setCache($cache);
+
+        return $cache;
     }
 }

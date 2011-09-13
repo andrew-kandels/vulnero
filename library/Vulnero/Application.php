@@ -60,7 +60,7 @@ class Vulnero_Application extends Zend_Application
             $cache = Zend_Cache::factory('File', 'Apc', $frontendOptions);
         } else {
             $cache = Zend_Cache::factory('File', 'File', $frontendOptions, array(
-                'cache_dir'     => PROJECT_PATH_BASE . '/cache',
+                'cache_dir'     => PROJECT_BASE_PATH . '/cache',
                 'file_locking'  => true
             ));
         }
@@ -106,14 +106,9 @@ class Vulnero_Application extends Zend_Application
             'stylesheet_directory'  => get_bloginfo('stylesheet_directory'),
             'template_url'          => get_bloginfo('template_url'),
             'pingback_url'          => get_bloginfo('pingback_url'),
-//            'atom_url'              => get_bloginfo('atom_url'),
-//            'rdf_url'               => get_bloginfo('rdf_url'),
-//            'rss_url'               => get_bloginfo('rss_url'),
-//            'rss2_url'              => get_bloginfo('rss2_url'),
-//            'comments_atom_url'     => get_bloginfo('comments_atom_url'),
-//            'comments_rss2_url'     => get_bloginfo('comments_rss2_url'),
-//            'tags'                  => array(),
-//            'categories'            => array()
+            'tags'                  => array(),
+            'categories'            => array(),
+            'template'              => get_template()
         );
 
         // Store WordPress tags in a convenience array

@@ -47,6 +47,10 @@ Author URI: http://andrewkandels.com/
  * @link        http://andrewkandels.com/vulnero
  */
 
+if (!defined('APPLICATION_ENV')) {
+    define('APPLICATION_ENV', 'development');
+}
+
 if (!defined('PROJECT_BASE_PATH')) {
     define('PROJECT_BASE_PATH', realpath(dirname(__FILE__)));
 }
@@ -67,8 +71,8 @@ $autoLoader = Zend_Loader_Autoloader::getInstance();
 $autoLoader->setFallbackAutoloader(true);
 $autoLoader->suppressNotFoundWarnings(true);
 
-$application = new Zend_Application(
-    'wordpress',
+$application = new Vulnero_Application(
+    APPLICATION_ENV,
     APPLICATION_PATH . '/config/config.ini'
 );
 $application->bootstrap();
