@@ -1,15 +1,6 @@
 <?php
-/*
-Plugin Name: Vulnero
-Plugin URI: http://andrewkandels.com/vulnero/
-Description: Vulnero is a WordPress plugin that transforms WordPress into an object-oriented CMS by implementing a Zend Framework application that interfaces with its API.
-Version: 0.1.0
-Author: Andrew Kandels
-Author URI: http://andrewkandels.com/
-*/
-
 /**
- * Vulnero
+ * Default admin view script.
  *
  * Copyright (c) 2011, Andrew Kandels <me@andrewkandels.com>.
  * All rights reserved.
@@ -46,36 +37,14 @@ Author URI: http://andrewkandels.com/
  * @license     http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link        http://andrewkandels.com/vulnero
  */
-
-ini_set('display_errors', '1');
-ini_set('error_reporting', E_ALL);
-
-if (!defined('APPLICATION_ENV')) {
-    define('APPLICATION_ENV', 'development');
+class Vulnero_Admin_View extends Zend_View
+{
+    /**
+     *
+     */
+    public function renderWordPress()
+    {
+        $this->setScriptPath(APPLICATION_PATH . '/views/scripts/default');
+        echo parent::render('admin.phtml');
+    }
 }
-
-if (!defined('PROJECT_BASE_PATH')) {
-    define('PROJECT_BASE_PATH', realpath(dirname(__FILE__)));
-}
-
-if (!defined('APPLICATION_PATH')) {
-    define('APPLICATION_PATH', PROJECT_BASE_PATH . '/application');
-}
-
-set_include_path(implode(PATH_SEPARATOR, array(
-    PROJECT_BASE_PATH . '/library',
-    APPLICATION_PATH . '/models',
-    APPLICATION_PATH . '/forms',
-    get_include_path()
-)));
-
-require 'Zend/Loader/Autoloader.php';
-$autoLoader = Zend_Loader_Autoloader::getInstance();
-$autoLoader->setFallbackAutoloader(true);
-$autoLoader->suppressNotFoundWarnings(true);
-
-$application = new Vulnero_Application(
-    APPLICATION_ENV,
-    APPLICATION_PATH . '/config/config.ini'
-);
-$application->bootstrap();

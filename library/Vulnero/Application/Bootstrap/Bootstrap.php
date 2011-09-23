@@ -68,10 +68,7 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
         add_action('wp_footer', array($this, 'onWpFooter'));
         add_action('wp_head', array($this, 'onWpHead'));
         add_action('wp_title', array($this, 'onWpTitle'));
-
-        // TODO:
-        // add_action('admin_menu', array($this, 'onAdminMenu'));
-        // add_action('admin_init', array($this, 'onAdminInit'));
+        add_action('admin_menu', array($this, 'onAdminMenu'));
     }
 
     /**
@@ -91,7 +88,6 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
         if ($wpRequest = $wordpress->request) {
             $frontController = $this->bootstrap('frontController')
                                     ->getResource('frontController');
-            $zfRequest       = $frontController->getRequest();
             $router          = $this->bootstrap('router')
                                     ->getResource('router');
 
@@ -376,5 +372,48 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
         Zend_Locale::setCache($cache);
 
         return $cache;
+    }
+
+    /**
+     * Creates a Vulnero_Form_Admin or descendent object which implements
+     * an inject method to convert and inject its elements into the WordPress
+     * admin panel.
+     *
+     * @return  Vulnero_Form_Admin  $form
+     */
+    protected function _initAdmin()
+    {
+        return new Vulnero_Form_Admin_Default();
+    }
+
+    /**
+     * WordPress admin_menu hook
+     * Initializes an admin panel from a Zend_Form object and injects it into
+     * WordPress.
+     *
+     * @return  Zend
+     */
+    public function onAdminMenu()
+    {
+        if ($form = $this->bootstrap('admin')->getResource('admin')) {
+            $frontController = $this->bootstrap('frontController')
+                                    ->getResource('frontController');
+            $request         = new Zend_Controller_Request_Http();
+
+            $view = new Vulnero_Admin_View();
+            $view->form = $form;
+
+            if ($request->isPost() && $form->isValid($request->getPost())) {
+                // handle save
+            }
+
+            add_options_page(
+                'Vulnero Title',        // Title
+                'Vulnero Menu Title',   // Menu Title
+                'manage_options',       // WordPress Access Level
+                'vulnero',              // Plugin Name
+                array($view, 'renderWordPress')
+            );
+        }
     }
 }
