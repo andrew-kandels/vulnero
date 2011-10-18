@@ -61,14 +61,17 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
         $frontController->registerPlugin(new Vulnero_Controller_Plugin_Router());
         $frontController->registerPlugin(new Vulnero_Controller_Plugin_Login());
 
-        add_action('send_headers', array($this, 'onSendHeaders'));
-        add_action('plugins_loaded', array($this, 'onPluginsLoaded'));
-        add_action('the_content', array($this, 'onTheContent'));
-        add_action('wp_print_styles', array($this, 'onWpPrintStyles'));
-        add_action('wp_footer', array($this, 'onWpFooter'));
-        add_action('wp_head', array($this, 'onWpHead'));
-        add_action('wp_title', array($this, 'onWpTitle'));
-        add_action('admin_menu', array($this, 'onAdminMenu'));
+        // unit tests / cli won't have WordPress API
+        if (function_exists('add_action')) {
+            add_action('send_headers', array($this, 'onSendHeaders'));
+            add_action('plugins_loaded', array($this, 'onPluginsLoaded'));
+            add_action('the_content', array($this, 'onTheContent'));
+            add_action('wp_print_styles', array($this, 'onWpPrintStyles'));
+            add_action('wp_footer', array($this, 'onWpFooter'));
+            add_action('wp_head', array($this, 'onWpHead'));
+            add_action('wp_title', array($this, 'onWpTitle'));
+            add_action('admin_menu', array($this, 'onAdminMenu'));
+        }
     }
 
     /**
@@ -243,9 +246,12 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
         $view->headMeta()->appendHttpEquiv('Content-Type', 'text/html; charset=utf-8')
                                 ->appendHttpEquiv('Content-Language', 'en_US');
 
-        Zend_Layout::startMvc(array(
-            'layoutPath' => sprintf('%s/%s', get_theme_root(), get_template())
-        ));
+        // unit tests / cli
+        if (function_exists('get_theme_root') && function_exists('get_template')) {
+            Zend_Layout::startMvc(array(
+                'layoutPath' => sprintf('%s/%s', get_theme_root(), get_template())
+            ));
+        }
 
         return $view;
     }
@@ -264,15 +270,30 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
      */
     protected function _initDb()
     {
-        $db = Zend_Db::factory('Pdo_Mysql', array(
-            'host'      => DB_HOST,
-            'username'  => DB_USER,
-            'password'  => DB_PASSWORD,
-            'dbname'    => DB_NAME
-        ));
+        if (defined('DB_HOST') &&
+            defined('DB_USER') &&
+            defined('DB_PASSWORD') &&
+            defined('DB_NAME')) {
+            $db = Zend_Db::factory('Pdo_Mysql', array(
+                'host'      => DB_HOST,
+                'username'  => DB_USER,
+                'password'  => DB_PASSWORD,
+                'dbname'    => DB_NAME
+            ));
+        } else {
+            try {
+                $db = Zend_Db::factory('Pdo_Sqlite', array(
+                    'file' => PROJECT_BASE_PATH . '/sqlite.db'
+                ));
+            } catch (Exception $e) {
+                $db = null;
+            }
+        }
 
-        Zend_Registry::set('db', $db);
-        Zend_Db_Table_Abstract::setDefaultAdapter($db);
+        if ($db) {
+            Zend_Registry::set('db', $db);
+            Zend_Db_Table_Abstract::setDefaultAdapter($db);
+        }
 
         return $db;
     }
@@ -287,13 +308,16 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
     {
         $config = $this->bootstrap('config')
                        ->getResource('config');
-        $db     = $this->bootstrap('db')
-                       ->getResource('db');
-        $authAdapter = new Zend_Auth_Adapter_DbTable($db);
-        $authAdapter->setTableName($config->wordpress->tablePrefix . 'users')
-                    ->setIdentityColumn('user_login')
-                    ->setCredential('user_pass')
-                    ->setCredentialTreatment('MD5(?)');
+
+        if ($db = $this->bootstrap('db')->getResource('db')) {
+            $authAdapter = new Zend_Auth_Adapter_DbTable($db);
+            $authAdapter->setTableName($config->wordpress->tablePrefix . 'users')
+                        ->setIdentityColumn('user_login')
+                        ->setCredential('user_pass')
+                        ->setCredentialTreatment('MD5(?)');
+        } else {
+            $authAdapter = null;
+        }
 
         return $authAdapter;
     }

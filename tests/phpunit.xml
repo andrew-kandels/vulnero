@@ -1,0 +1,21 @@
+<phpunit bootstrap="./bootstrap.php" colors="true">
+    <testsuites>
+        <testsuite name="ApplicationTestSuite">
+            <directory>application</directory>
+        </testsuite>
+    </testsuites>
+    <filter>
+        <whitelist>
+            <directory suffix=".php">../application</directory>
+/*            <exclude>
+                <directory suffix=".phtml">../application/views</directory>
+            </exclude>
+*/
+        </whitelist>
+    </filter>
+    <logging>
+        <log type="coverage-html" target="log" charset="UTF-8"
+            yui="true" highlight="true" lowUpperBound="35" highLowerBound="70"/>
+    </logging>
+</phpunit>
+

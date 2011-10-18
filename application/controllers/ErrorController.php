@@ -54,6 +54,8 @@ class ErrorController extends Zend_Controller_Action
         $exception = $errors->exception;
         $this->view->assign('exception', $exception);
 
+        die($exception);
+
         switch ($errors->type)
         {
             case Zend_Controller_Plugin_ErrorHandler::EXCEPTION_NO_ROUTE:
