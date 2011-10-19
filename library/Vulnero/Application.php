@@ -92,11 +92,6 @@ class Vulnero_Application extends Zend_Application
     protected function _initWordPress(array $config)
     {
         if (!function_exists('get_bloginfo')) {
-            // unit tests / cli
-            if (PHP_SAPI == 'cli') {
-                return $config;
-            }
-
             throw new RuntimeException('Vulnero must be installed and run through '
                 . 'WordPress as a plugin. WordPress get_bloginfo() global function '
                 . 'not detected.'

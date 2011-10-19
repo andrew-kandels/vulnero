@@ -61,17 +61,19 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
         $frontController->registerPlugin(new Vulnero_Controller_Plugin_Router());
         $frontController->registerPlugin(new Vulnero_Controller_Plugin_Login());
 
-        // unit tests / cli won't have WordPress API
-        if (function_exists('add_action')) {
-            add_action('send_headers', array($this, 'onSendHeaders'));
-            add_action('plugins_loaded', array($this, 'onPluginsLoaded'));
-            add_action('the_content', array($this, 'onTheContent'));
-            add_action('wp_print_styles', array($this, 'onWpPrintStyles'));
-            add_action('wp_footer', array($this, 'onWpFooter'));
-            add_action('wp_head', array($this, 'onWpHead'));
-            add_action('wp_title', array($this, 'onWpTitle'));
-            add_action('admin_menu', array($this, 'onAdminMenu'));
-        }
+        add_action('send_headers', $this->bootstrap('onSendHeaders')->getResource('onSendHeaders'));
+        add_action('plugins_loaded', array($this, 'onPluginsLoaded'));
+        add_action('the_content', array($this, 'onTheContent'));
+        add_action('wp_print_styles', array($this, 'onWpPrintStyles'));
+        add_action('wp_footer', array($this, 'onWpFooter'));
+        add_action('wp_head', array($this, 'onWpHead'));
+        add_action('wp_title', array($this, 'onWpTitle'));
+        add_action('admin_menu', array($this, 'onAdminMenu'));
+    }
+
+    protected function _initOnSendHeaders()
+    {
+        return array($this, 'onSendHeaders');
     }
 
     /**
@@ -88,13 +90,14 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
     public function onSendHeaders($wordpress)
     {
         // Permalinks must be enabled in WordPress for request to be set
-        if ($wpRequest = $wordpress->request) {
+        if (isset($wordpress->request) && ($wpRequest = $wordpress->request)) {
             $frontController = $this->bootstrap('frontController')
                                     ->getResource('frontController');
             $router          = $this->bootstrap('router')
                                     ->getResource('router');
 
-            $uri             = get_bloginfo('siteurl') . '/' . $wpRequest;
+            $options         = $this->getOptions();
+            $uri             = $options['wordpress']['siteurl'] . '/' . $wpRequest;
             $uriObj          = Zend_Uri::factory($uri);
 
             $frontController->setRequest(
@@ -103,7 +106,23 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
 
             try {
                 $frontController->dispatch();
-                exit(0);
+
+                // Trick WordPress into thinking we're just asking for the home page
+                $wp->request = '/';
+                $wp->query_string = '';
+                $wp->matched_rule = '(/)(/.*)$';
+                $wp->matched_query = 'pagename=/&page=';
+                $wp->query_vars = array(
+                    'page' => '',
+                    'pagename' => '/'
+                );
+                $wp->extra_query_vars = array();
+
+                if (PHP_SAPI == 'cli') {
+                    return $frontController->getRequest();
+                } else {
+                    exit(0);
+                }
             } catch (Zend_Controller_Router_Exception $e) {
                 // let WordPress handle the route
             }
@@ -244,14 +263,11 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
         $view->setEncoding('UTF-8');
         $view->headTitle('Vulnero');
         $view->headMeta()->appendHttpEquiv('Content-Type', 'text/html; charset=utf-8')
-                                ->appendHttpEquiv('Content-Language', 'en_US');
+                         ->appendHttpEquiv('Content-Language', 'en_US');
 
-        // unit tests / cli
-        if (function_exists('get_theme_root') && function_exists('get_template')) {
-            Zend_Layout::startMvc(array(
-                'layoutPath' => sprintf('%s/%s', get_theme_root(), get_template())
-            ));
-        }
+        Zend_Layout::startMvc(array(
+            'layoutPath' => sprintf('%s/%s', get_theme_root(), get_template())
+        ));
 
         return $view;
     }

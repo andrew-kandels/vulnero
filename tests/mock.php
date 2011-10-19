@@ -1,15 +1,9 @@
 <?php
-/*
-Plugin Name: Vulnero
-Plugin URI: http://andrewkandels.com/vulnero/
-Description: Vulnero is a WordPress plugin that transforms WordPress into an object-oriented CMS by implementing a Zend Framework application that interfaces with its API.
-Version: 0.1.0
-Author: Andrew Kandels
-Author URI: http://andrewkandels.com/
-*/
-
 /**
- * Vulnero
+ * Vulerno
+ *
+ * Fake WordPress methods to simulate an actual WordPress installation
+ * for the purposes of unit testing.
  *
  * Copyright (c) 2011, Andrew Kandels <me@andrewkandels.com>.
  * All rights reserved.
@@ -47,37 +41,50 @@ Author URI: http://andrewkandels.com/
  * @link        http://andrewkandels.com/vulnero
  */
 
-ini_set('display_errors', '1');
-ini_set('error_reporting', E_ALL);
-
-if (!defined('APPLICATION_ENV')) {
-    define('APPLICATION_ENV', 'development');
+function get_bloginfo($name)
+{
+    switch ($name) {
+        case 'siteurl': return 'http://localhost';
+        case 'name': return 'Test';
+        case 'description': return 'Fake blog for testing.';
+        case 'wpurl': return 'http://localhost';
+        case 'siteurl': return 'http://localhost';
+        case 'admin_email': return 'me@domain.com';
+        case 'charset': return 'utf8';
+        case 'version': return '1.0.0';
+        case 'html_type': return '';
+        case 'text_direction': return '';
+        case 'language': return 'en_US';
+        case 'stylesheet_url': return '';
+        case 'stylesheet_directory': return '';
+        case 'template_url': return '';
+        case 'pingback_url': return '';
+        case 'tags': return '';
+        case 'categories': return '';
+        case 'template': return '';
+        default:
+            throw new InvalidArgumentException($name . ' is not a valid argument to get_bloginfo.');
+    }
 }
 
-if (!defined('PROJECT_BASE_PATH')) {
-    define('PROJECT_BASE_PATH', realpath(dirname(__FILE__)));
+function add_action($hook, array $callBack) {}
+
+function get_theme_root()
+{
+    return PROJECT_BASE_PATH;
 }
 
-if (!defined('APPLICATION_PATH')) {
-    define('APPLICATION_PATH', PROJECT_BASE_PATH . '/application');
+function get_template()
+{
+    return 'tests';
 }
 
-set_include_path(implode(PATH_SEPARATOR, array(
-    PROJECT_BASE_PATH . '/library',
-    get_include_path()
-)));
-
-if (empty($autoLoader)) {
-    require 'Zend/Loader/Autoloader.php';
-    $autoLoader = Zend_Loader_Autoloader::getInstance();
-    $autoLoader->setFallbackAutoloader(true);
-    $autoLoader->suppressNotFoundWarnings(true);
+function get_tags()
+{
+    return array();
 }
 
-$application = new Vulnero_Application(
-    APPLICATION_ENV,
-    APPLICATION_PATH . '/config/config.ini'
-);
-$application->bootstrap();
-
-Zend_Registry::set('application', $application);
+function wp_get_post_categories()
+{
+    return array();
+}
