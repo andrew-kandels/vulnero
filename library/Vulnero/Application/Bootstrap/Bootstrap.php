@@ -98,9 +98,8 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
             $options         = $this->getOptions();
             $uri             = $options['wordpress']['siteurl'] . '/' . $wpRequest;
             $uriObj          = Zend_Uri::factory($uri);
-            $frontController->setRequest(
-                new Zend_Controller_Request_Http($uriObj)
-            );
+            $request         = new Zend_Controller_Request_Http($uriObj);
+            $frontController->setRequest($request);
 
             try {
                 // We need to capture the output so as to insert it only via the
@@ -133,20 +132,17 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
                         'pagename' => $wpRoute
                     );
                     $wordpress->extra_query_vars = array();
-                } else {
-                    if (PHP_SAPI == 'cli') {
-                        // Unit testing needs the request object to verify the route
-                        return $frontController->getRequest();
-                    } else {
-                        // Non-WordPress enabled route, end execution
-                        echo $output;
-                        exit(0);
-                    }
+                } elseif (PHP_SAPI != 'cli') {
+                    // Non-WordPress enabled route, end execution
+                    echo $output;
+                    exit(0);
                 }
             } catch (Zend_Controller_Router_Exception $e) {
                 // our application didn't answer the route, so it passes control
                 // back to WordPress simply by doing nothing
             }
+
+            return $frontController->getRequest();
         }
     }
 

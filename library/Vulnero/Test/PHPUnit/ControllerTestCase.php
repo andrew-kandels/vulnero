@@ -45,11 +45,12 @@ class Vulnero_Test_PHPUnit_ControllerTestCase extends Zend_Test_PHPUnit_Controll
     public function dispatch($url = null)
     {
         $wordpress = new stdclass();
-        $wordpress->request = 'helloworld';
+        $wordpress->request = $url;
         $callBack = $this->_application
             ->getBootstrap()
             ->bootstrap('onSendHeaders')
             ->getResource('onSendHeaders');
         $this->_request = call_user_func($callBack, $wordpress);
+        return $wordpress;
     }
 }
