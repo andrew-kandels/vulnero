@@ -1,6 +1,6 @@
 <?php
 /**
- * Default WordPress admin form.
+ * WordPress admin panel form for this application.
  *
  * Copyright (c) 2011, Andrew Kandels <me@andrewkandels.com>.
  * All rights reserved.
@@ -37,7 +37,7 @@
  * @license     http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link        http://andrewkandels.com/vulnero
  */
-class Vulnero_Form_Admin_Default extends Zend_Form
+class Form_Admin extends Zend_Form
 {
     /**
      * Adds the default elements to the form.

@@ -50,4 +50,17 @@ class Bootstrap extends Vulnero_Application_Bootstrap_Bootstrap
 
     /* Uncomment to disable or replace Vulnero database integration with WordPress */
     // protected function _initDb() {}
+
+    /**
+     * Returns a form to use for the WordPress admin panel for this plugin. Form changes will
+     * be routed to the saveadminpanel route in application/config/routes.ini.
+     *
+     * Comment out this function if you don't want an admin panel.
+     *
+     * @return  Zend_Form           Form object
+     */
+    protected function _initAdmin()
+    {
+        return new Form_Admin();
+    }
 }

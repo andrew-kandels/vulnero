@@ -11,6 +11,8 @@ Author URI: http://andrewkandels.com/
 /**
  * Vulnero
  *
+ * WordPress entry-point file containing plug-in definition.
+ *
  * Copyright (c) 2011, Andrew Kandels <me@andrewkandels.com>.
  * All rights reserved.
  *
@@ -64,6 +66,7 @@ if (!defined('APPLICATION_PATH')) {
 
 set_include_path(implode(PATH_SEPARATOR, array(
     PROJECT_BASE_PATH . '/library',
+    APPLICATION_PATH,
     get_include_path()
 )));
 

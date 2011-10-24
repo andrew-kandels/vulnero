@@ -431,15 +431,14 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
     }
 
     /**
-     * Creates a Vulnero_Form_Admin or descendent object which implements
-     * an inject method to convert and inject its elements into the WordPress
-     * admin panel.
+     * Can be overridden by a child class to implement admin panel functionality
+     * by returning a Zend_Form object.
      *
      * @return  Vulnero_Form_Admin  $form
      */
     protected function _initAdmin()
     {
-        return new Vulnero_Form_Admin_Default();
+        return null;
     }
 
     /**
@@ -454,13 +453,14 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
         if ($form = $this->bootstrap('admin')->getResource('admin')) {
             $frontController = $this->bootstrap('frontController')
                                     ->getResource('frontController');
+
             $request         = new Zend_Controller_Request_Http();
 
             $view = new Vulnero_Admin_View();
             $view->form = $form;
 
             if ($request->isPost() && $form->isValid($request->getPost())) {
-                // handle save
+                $view->success = true;
             }
 
             add_options_page(
