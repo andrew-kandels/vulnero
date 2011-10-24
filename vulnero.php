@@ -80,4 +80,7 @@ $application = new Vulnero_Application(
 );
 $application->bootstrap();
 
-Zend_Registry::set('application', $application);
+// Unit testing
+if (PHP_SAPI == 'cli') {
+    Zend_Registry::set('application', $application);
+}

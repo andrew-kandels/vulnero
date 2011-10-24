@@ -63,7 +63,6 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
 
         add_action('send_headers', $this->bootstrap('onSendHeaders')->getResource('onSendHeaders'));
         add_action('plugins_loaded', array($this, 'onPluginsLoaded'));
-        add_action('the_content', array($this, 'onTheContent'));
         add_action('wp_print_styles', array($this, 'onWpPrintStyles'));
         add_action('wp_footer', array($this, 'onWpFooter'));
         add_action('wp_head', array($this, 'onWpHead'));
@@ -80,7 +79,6 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
      * WordPress send_headers hook
      * Note: Permalinks must be enabled in WordPress for Vulnero to extend routing.
      * Create a new Zend_Controller_Request_Http object with the WordPress
-    ewordpress',
      * route. Upon failure, we assume the route isn't handled and let WordPress
      * deal with it.
      *
@@ -93,38 +91,61 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
         if (isset($wordpress->request) && ($wpRequest = $wordpress->request)) {
             $frontController = $this->bootstrap('frontController')
                                     ->getResource('frontController');
-            $router          = $this->bootstrap('router')
-                                    ->getResource('router');
+            $routes          = $this->bootstrap('routes')
+                                    ->getResource('routes');
 
+            // Generate a new request object built from the WordPress route
             $options         = $this->getOptions();
             $uri             = $options['wordpress']['siteurl'] . '/' . $wpRequest;
             $uriObj          = Zend_Uri::factory($uri);
-
             $frontController->setRequest(
                 new Zend_Controller_Request_Http($uriObj)
             );
 
             try {
-                $frontController->dispatch();
+                // We need to capture the output so as to insert it only via the
+                // WordPress the_content() hook so it's displayed in the correct
+                // position on the page
+                $frontController->returnResponse(true);
+                $output = $frontController->dispatch();
 
-                // Trick WordPress into thinking we're just asking for the home page
-                $wp->request = '/';
-                $wp->query_string = '';
-                $wp->matched_rule = '(/)(/.*)$';
-                $wp->matched_query = 'pagename=/&page=';
-                $wp->query_vars = array(
-                    'page' => '',
-                    'pagename' => '/'
-                );
-                $wp->extra_query_vars = array();
+                // Controller plugin injects content into the WordPress the_content() hook
+                if ($router = $frontController->getPlugin('Vulnero_Controller_Plugin_Router')) {
+                    $router->setPageContent($output);
+                }
 
-                if (PHP_SAPI == 'cli') {
-                    return $frontController->getRequest();
+                $routeName = $frontController->getRouter()->getCurrentRouteName();
+
+                // Application specified a WordPress route to wrap this request like a
+                // layout.
+                if (isset($routes->$routeName->wordpress->route)) {
+                    // Processing will be passed to WordPress and our application
+                    // content will be inserted into the the_content() hook via
+                    // the router controller plugin
+                    $wpRoute = $routes->$routeName->wordpress->route;
+
+                    $wordpress->request = $wpRoute;
+                    $wordpress->query_string = '';
+                    $wordpress->matched_rule = '(' . preg_quote($wpRoute) . ')(/.*)$';
+                    $wordpress->matched_query = 'pagename=' . urlencode($wpRoute) . '&page=';
+                    $wordpress->query_vars = array(
+                        'page' => '',
+                        'pagename' => $wpRoute
+                    );
+                    $wordpress->extra_query_vars = array();
                 } else {
-                    exit(0);
+                    if (PHP_SAPI == 'cli') {
+                        // Unit testing needs the request object to verify the route
+                        return $frontController->getRequest();
+                    } else {
+                        // Non-WordPress enabled route, end execution
+                        echo $output;
+                        exit(0);
+                    }
                 }
             } catch (Zend_Controller_Router_Exception $e) {
-                // let WordPress handle the route
+                // our application didn't answer the route, so it passes control
+                // back to WordPress simply by doing nothing
             }
         }
     }
@@ -163,17 +184,6 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
     public function onWpHead()
     {
         return '';
-    }
-
-    /**
-     * WordPress the_content hook
-     * Allows us to inject dynamic content (as a string) into WordPress.
-     *
-     * @return string
-     */
-    public function onTheContent()
-    {
-        return ''; // you can extend me!
     }
 
     /**
@@ -219,6 +229,27 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
     }
 
     /**
+     * Initializes and caches the application/config/routes.ini routes
+     * configuration file, which are routes that are answered by your
+     * application and not by WordPress.
+     *
+     * @return Zend_Router_Route
+     */
+    protected function _initRoutes()
+    {
+        $cache = $this->bootstrap('cache')
+                      ->getResource('cache');
+
+        // Cache the routes configuration file to speed up processing
+        if (!$routes = $cache->load('routes')) {
+            $routes = new Zend_Config_Ini(APPLICATION_PATH . '/config/routes.ini');
+            $cache->save($routes, 'routes');
+        }
+
+        return $routes;
+    }
+
+    /**
      * Initializes the Zend router to handle default routes (we want those
      * to fall back to WordPress) and to use the config/routes.ini config
      * file.
@@ -227,19 +258,12 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
      */
     protected function _initRouter()
     {
-        $cache = $this->bootstrap('cache')
-                      ->getResource('cache');
-
+        $routes = $this->bootstrap('routes')
+                       ->getResource('routes');
         $router = $this->bootstrap('frontController')
                        ->getResource('frontController')
                        ->getRouter();
         $router->removeDefaultRoutes();
-
-        // Cache the routes configuration file to speed up processing
-        if (!$routes = $cache->load('routes')) {
-            $routes = new Zend_Config_Ini(APPLICATION_PATH . '/config/routes.ini');
-            $cache->save($routes, 'routes');
-        }
 
         $router->addConfig($routes);
 
@@ -264,10 +288,6 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
         $view->headTitle('Vulnero');
         $view->headMeta()->appendHttpEquiv('Content-Type', 'text/html; charset=utf-8')
                          ->appendHttpEquiv('Content-Language', 'en_US');
-
-        Zend_Layout::startMvc(array(
-            'layoutPath' => sprintf('%s/%s', get_theme_root(), get_template())
-        ));
 
         return $view;
     }

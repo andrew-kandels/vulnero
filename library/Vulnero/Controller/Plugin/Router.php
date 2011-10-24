@@ -41,6 +41,14 @@
 class Vulnero_Controller_Plugin_Router extends Zend_Controller_Plugin_Abstract
 {
     /**
+     * Contains the layout and view contents for injection into WordPress via
+     * the the_content hook.
+     *
+     * @var string
+     */
+    protected $_pageContent;
+
+    /**
      * Called before Zend_Controller_Front calls on the router to evaluate the
      * request against the registered routes. Registers a callback for the WordPress
      * the_content() function, which is evaluated in most Wordpress page templates.
@@ -54,6 +62,18 @@ class Vulnero_Controller_Plugin_Router extends Zend_Controller_Plugin_Abstract
     }
 
     /**
+     * Injects dynamic application content into the WordPress the_content hook.
+     *
+     * @param   string      Content
+     * @return  Vulnero_Controller_Plugin_Router
+     */
+    public function setPageContent($content)
+    {
+        $this->_pageContent = $content;
+        return $this;
+    }
+
+    /**
      * Called from most WordPress page templates to retrieve the contents of the
      * body. We pass in our layout object's content placeholder which contains the
      * contents of our Zend_View.
@@ -62,7 +82,6 @@ class Vulnero_Controller_Plugin_Router extends Zend_Controller_Plugin_Abstract
      */
     public function onTheContent()
     {
-        $layout = Zend_Layout::getMvcInstance();
-        return $layout->content;
+        return $this->_pageContent;
     }
 }
