@@ -78,10 +78,6 @@ class Bootstrap extends Vulnero_Application_Bootstrap_Bootstrap
         $view->doctype('XHTML1_STRICT');
         $view->setEncoding('UTF-8');
 
-        $view->headTitle('My Project');
-
-        $view->headLink()->appendStylesheet(PROJECT_BASE_URI . '/public/styles/main.css');
-
         $view->headMeta()->appendHttpEquiv('Content-Type', 'text/html; charset=utf-8')
                          ->appendHttpEquiv('Content-Language', 'en_US');
     }
@@ -98,7 +94,7 @@ class Bootstrap extends Vulnero_Application_Bootstrap_Bootstrap
      */
     protected function _initStylesheets()
     {
-        return array('main.css');
+        return array();
     }
 
     /**
