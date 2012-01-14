@@ -54,6 +54,10 @@ ini_set('error_reporting', E_ALL);
 
 define('VULNERO_VERSION', '0.1.0');
 
+if (!defined('PLUGIN_NAME')) {
+    define('PLUGIN_NAME', basename(__DIR__));
+}
+
 if (!defined('APPLICATION_ENV')) {
     define('APPLICATION_ENV', 'development');
 }

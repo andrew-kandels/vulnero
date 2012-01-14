@@ -9,6 +9,7 @@ class DefaultController extends Zend_Controller_Action
      */
     public function helloworldAction()
     {
+        // $this->_helper->layout()->setLayout('empty');
     }
 
     /**

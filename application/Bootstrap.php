@@ -71,10 +71,15 @@ class Bootstrap extends Vulnero_Application_Bootstrap_Bootstrap
         $view = $this->bootstrap('view')
                      ->getResource('view');
 
+        $pathToPlugin = WP_PLUGIN_URL . '/' . PLUGIN_NAME;
+
         $view->doctype('XHTML1_STRICT');
         $view->setEncoding('UTF-8');
+
         $view->headTitle('My Project');
-        $view->headTitle()->setSeparator(' - ');
+
+        $view->headLink()->appendStylesheet($pathToPlugin . '/public/styles/main.css');
+
         $view->headMeta()->appendHttpEquiv('Content-Type', 'text/html; charset=utf-8')
                          ->appendHttpEquiv('Content-Language', 'en_US');
     }
