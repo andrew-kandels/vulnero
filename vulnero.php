@@ -52,6 +52,8 @@ Author URI: http://andrewkandels.com/
 ini_set('display_errors', '1');
 ini_set('error_reporting', E_ALL);
 
+define('VULNERO_VERSION', '0.1.0');
+
 if (!defined('APPLICATION_ENV')) {
     define('APPLICATION_ENV', 'development');
 }
@@ -66,6 +68,8 @@ if (!defined('APPLICATION_PATH')) {
 
 set_include_path(implode(PATH_SEPARATOR, array(
     PROJECT_BASE_PATH . '/library',
+    APPLICATION_PATH . '/widgets',
+    APPLICATION_PATH . '/forms',
     APPLICATION_PATH,
     get_include_path()
 )));

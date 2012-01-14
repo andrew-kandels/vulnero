@@ -52,12 +52,17 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
     protected function _initWordPress()
     {
         // Setup WordPress hooks and filters we'll subscribe to
-        add_action('plugins_loaded',    array($this, 'onPluginsLoaded'));
+        add_action('plugins_loaded', array($this, 'onPluginLoaded'));
 
         $registry = Zend_Registry::getInstance();
         if (isset($registry['plugin-activated'])) {
             $this->onPluginActivated();
         }
+
+        $frontController = $this->bootstrap('frontController')
+                                ->getResource('frontController');
+        $frontController->setParam('view', $this->bootstrap('view')
+                                                ->getResource('view'));
     }
 
     /**
@@ -71,34 +76,118 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
     }
 
     /**
-     * Overrides your theme's page.php template file with the wordpress-page.php
+     * WordPress plugins_loaded hook
+     * Allows our application to inject sidebar widgets, scripts or stylesheets
+     * into WordPress (if our application doesn't handle the route).
+     *
+     * @return  void
+     */
+    public function onPluginLoaded()
+    {
+    }
+
+    /**
+     * Initializes any Vulnero_Widget classes located in application/widgets.
+     *
+     * @return  void
+     */
+    protected function _initWpWidgets()
+    {
+        add_action('widgets_init', array($this, 'onWpWidgetsInit'));
+    }
+
+    /**
+     * WordPress widgets_init hook
+     * Registers plugin widgets
+     *
+     * @return  void
+     */
+    public function onWpWidgetsInit()
+    {
+        $cache = $this->bootstrap('cache')
+                      ->getResource('cache');
+
+        if (!$widgets = $cache->load('widgets')) {
+            // Automatically detect and load any widget classes, caching the work
+            $widgets = array();
+
+            $di = new DirectoryIterator(APPLICATION_PATH . '/widgets/Widget');
+            foreach ($di as $item) {
+                if ($item->isFile() && substr($item->getFilename(), -4) == '.php') {
+                    $widgets[] = 'Widget_' . substr($item->getFilename(), 0, -4);
+                }
+            }
+
+            $cache->save($widgets, 'widgets');
+        }
+
+        foreach ($widgets as $widget) {
+            register_widget($widget);
+        }
+    }
+
+    /**
+     * Overrides your theme's home and page template files with the wordpress-page.php
      * file in the plugin directory for all routes handled by Vulnero.
      *
      * @return  void
      */
-    protected function _initPageTemplate()
+    protected function _initWpTemplates()
     {
-        add_filter('page_template', array($this, 'onPageTemplate'));
+        add_filter('home_template', array($this, 'onWpHomeTemplate'));
+        add_filter('page_template', array($this, 'onWpPageTemplate'));
+        add_filter('single_template', array($this, 'onWpSingleTemplate'));
+    }
+
+    /**
+     * WordPress home_template filter
+     *
+     * @return  void
+     */
+    public function onWpHomeTemplate()
+    {
+        return $this->onWpTemplates('home');
     }
 
     /**
      * WordPress page_template filter
-     * Called when WordPress attempts to locate the page template (page.php) in the
-     * theme. If this is a valid WordPress request, we're going to override it and
-     * instead specify that the template is page-template.php in the plugin's
-     * directory.
      *
      * @return  void
      */
-    public function onPageTemplate()
+    public function onWpPageTemplate()
+    {
+        return $this->onWpTemplates('page');
+    }
+
+    /**
+     * WordPress single_template filter
+     *
+     * @return  void
+     */
+    public function onWpSingleTemplate()
+    {
+        return $this->onWpTemplates('single');
+    }
+
+    /**
+     * WordPress home_template filter
+     * Called when WordPress attempts to locate a template (e.g.: home.php) in the
+     * theme. If this is a valid WordPress request, we're going to override it and
+     * instead specify that the template is wordpress-template.php in the plugin's
+     * directory.
+     *
+     * @param   string          Template type (e.g.: home, page)
+     * @return  void
+     */
+    public function onWpTemplates($template)
     {
         $frontController = $this->bootstrap('frontController')
                                 ->getResource('frontController');
         if (($router = $frontController->getPlugin('Vulnero_Controller_Plugin_Router')) &&
             $router->hasPageContent()) {
-            return PROJECT_BASE_PATH . '/wordpress-page.php';
+            return PROJECT_BASE_PATH . '/wordpress-template.php';
         } else {
-            return locate_template(array('page'));
+            return locate_template(array($template));
         }
     }
 
@@ -142,13 +231,18 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
 
                 $routeName = $frontController->getRouter()->getCurrentRouteName();
 
+                // Wrap in WordPress or render stand-alone?
+                $isWpRoute = isset($routes->$routeName->wordpress)
+                    ? (boolean) $routes->$routeName->wordpress
+                    : true;
+
                 // Application specified a WordPress route to wrap this request like a
                 // layout.
-                if (isset($routes->$routeName->wordpress->route)) {
+                if ($isWpRoute) {
                     // Processing will be passed to WordPress and our application
                     // content will be inserted into the the_content() hook via
                     // the router controller plugin
-                    $wpRoute = $routes->$routeName->wordpress->route;
+                    $wpRoute = '';
 
                     $wordpress->request = $wpRoute;
                     $wordpress->query_string = '';
@@ -272,26 +366,6 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
     public function onWpPrintStyles()
     {
         // wp_register_style('unique id', '/path/to/css');
-    }
-
-    /**
-     * WordPress plugins_loaded hook
-     * Allows our application to inject sidebar widgets, scripts or stylesheets
-     * into WordPress (if our application doesn't handle the route).
-     *
-     * @return  void
-     */
-    public function onPluginsLoaded()
-    {
-//         wp_register_sidebar_widget(
-//             'UNIQUE NAME',
-//             'FRIENDLY TITLE',
-//             array($this, 'function'),
-//             array(
-//                 'classname' => 'CSS CLASS',
-//                 'description' => 'Friendly description'
-//             )
-//         );
     }
 
     /**
@@ -521,9 +595,9 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
      *
      * @return  Zend
      */
-    public function onAdmin(Zend_Form $form = null)
+    public function onAdmin()
     {
-        if ($form) {
+        if (0) {
             $frontController = $this->bootstrap('frontController')
                                     ->getResource('frontController');
 

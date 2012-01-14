@@ -40,48 +40,176 @@
 abstract class Vulnero_Widget extends WP_Widget
 {
     /**
+     * Widget name.
+     * @var string
+     */
+    protected $_name;
+
+    /**
+     * Whether to print and filter the widget wrappers from WordPress such
+     * as before_widget and such.
+     * @var boolean
+     */
+    protected $_wrappers = true;
+
+    /**
+     * The rendered content, typically from a controller's view.
+     * @var string
+     */
+    protected $_content = '';
+
+    /**
+     * Options form to render in the WordPress administration panel.
      * @var Zend_Form
      */
-    private $_options;
+    protected $_form;
+
+    /**
+     * The view object to render the widget's contents. It should be
+     * placed in application/views/scripts/widgets/your-widget-name.phtml.
+     * Inherits properties from your bootstrapped view automatically.
+     * @var Zend_View
+     */
+    protected $view;
 
     /**
      * Instantiates a new widget and registers it with WordPress.
      *
-     * @param   string          Name for the Widget
-     * @param   string          Description shown in the settings
-     * @param   Zend_Form       Optional form for collecting options
+     * @param   string          Name of the widget (e.g.: About Vulnero)
+     * @param   string          Description (shown in the administration panel to describe it)
      * @return  Vulnero_Widget
      */
-    public function __construct($name, $description, Zend_Form $options = null)
+    public function __construct($name, $description = '')
     {
-        parent::__construct(
-            false,
-            $name,
+        parent::WP_Widget(
+            strtolower(get_class($this)),
+            $this->_name = $name,
             array('description' => $description)
         );
 
-        register_widget(get_class($this));
+        $frontController = Zend_Controller_Front::getInstance();
+        $this->view = clone $frontController->getParam('view');
+        $this->view->setScriptPath(APPLICATION_PATH . '/views/scripts/widgets');
     }
 
     /**
-     * Unregisters this widget from WordPress. Called when unset()ing
-     * the object.
+     * Gets the rendered output content to be displayed.
      *
-     * @return void
+     * @return  string              Content
      */
-    public function __destruct()
+    public function getContent()
     {
-        unregister_widget(get_class($this));
+        $name = str_replace('_', '-', strtolower(get_class()));
+        return $this->view->render($name . '.phtml');
+    }
+
+    /**
+     * Injects a form to be displayed in the WordPress administration panel.
+     *
+     * @param   Zend_Form       Form object
+     * @return  Vulerno_Widget
+     */
+    public function setForm(Zend_Form $form)
+    {
+        $this->_form = $form;
+        return $this;
+    }
+
+    /**
+     * Gets the form to be displayed in the WordPress administration panel.
+     *
+     * @return  Zend_Form       Form object
+     */
+    public function getForm()
+    {
+        return $this->_form;
+    }
+
+    /**
+     * Sets whether or not to print and filter the wrappers from WordPress such
+     * as before_widget or widget_title.
+     *
+     * @param   boolean         New value
+     * @return  Vulnero_Widget
+     */
+    public function setWrappers($b)
+    {
+        $this->_wrappers = (boolean) $b;
+        return $this;
+    }
+
+    /**
+     * Returns whether or not to print and filter the wrappers from WordPress such
+     * as before_widget or widget_title.
+     *
+     * @return  boolean
+     */
+    public function getWrappers()
+    {
+        return $this->_wrappers;
     }
 
     /**
      * Echo the widget content.
      *
-     * @param array $args Display arguments including before_title, after_title, before_widget, and after_widget.
-     * @param array $instance The settings for the particular instance of the widget
+     * @param   array $args     Display arguments including before_title, after_title,
+                                before_widget, and after_widget.
+     * @param   array $instance The settings for the particular instance of the widget
+     * @return  void
      */
-    public function widget(array $args, array $instance)
+    public final function widget(array $args, array $instance)
     {
-        return '';
+        $stack = array();
+
+        if ($this->_wrappers) {
+            $stack[] = $args['before_widget'];
+
+            if ($title = apply_filters('widget_title', $this->_name)) {
+                $stack[] = $args['before_title'];
+                $stack[] = $title;
+                $stack[] = $args['after_title'];
+            }
+        }
+
+        $stack[] = $this->getContent();
+
+        if ($this->_wrappers) {
+            $stack[] = $args['after_title'];
+        }
+
+        echo implode('', $stack);
+    }
+
+    /**
+     * An administrative user is saving options for our widget.
+     * Typically this is overriden and handles validation of user-generated
+     * values.
+     *
+     * @param   array       Changed settings
+     * @param   array       Current settings
+     * @return  array       Final settings
+     */
+    public function update(array $newSettings, array $oldSettings)
+    {
+        foreach ($newSettings as $key => $value) {
+            $oldSettings[$key] = $newSettings[$key];
+        }
+
+        return $oldSettings;
+    }
+
+    /**
+     * If a Zend_Form object was given to the constructor then display
+     * it in the WordPress administration panel to configure our widget.
+     *
+     * @param   array       Current settings
+     * @return  void
+     */
+    public function form(array $settings)
+    {
+        if ($this->_form) {
+            $this->_form->setDefaults($settings);
+            echo $this->_form;
+        }
     }
 }

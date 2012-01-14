@@ -86,7 +86,8 @@ class Bootstrap extends Vulnero_Application_Bootstrap_Bootstrap
      * instead with a corresponding name (e.g.: _initWpHead becomes onWpHead).
      */
     // protected function _initWordPress() {}
-    // protected function _initPageTemplate() {}
+    // protected function _initWpTemplates() {}
+    // protected function _initWpWidgets() {}
     // protected function _initWpFooter() {}
     // protected function _initWpHead() {}
     // protected function _initWpTitle() {}
