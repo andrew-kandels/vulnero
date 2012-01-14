@@ -37,7 +37,7 @@
  * @license     http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link        http://andrewkandels.com/vulnero
  */
-abstract class Vulnero_Widget extends WP_Widget
+abstract class Vulnero_Widget extends WP_Widget implements Vulnero_Widget_Interface
 {
     /**
      * Widget name.
@@ -53,16 +53,11 @@ abstract class Vulnero_Widget extends WP_Widget
     protected $_wrappers = true;
 
     /**
-     * The rendered content, typically from a controller's view.
-     * @var string
+     * Stores the Zend_Application bootstrap for retrieving views and
+     * other bootstrapped items outside of the application flow.
+     * @var Vulnero_Application_Bootstrap_Bootstrap
      */
-    protected $_content = '';
-
-    /**
-     * Options form to render in the WordPress administration panel.
-     * @var Zend_Form
-     */
-    protected $_form;
+    protected $_bootstrap;
 
     /**
      * The view object to render the widget's contents. It should be
@@ -87,8 +82,9 @@ abstract class Vulnero_Widget extends WP_Widget
             array('description' => $description)
         );
 
-        $frontController = Zend_Controller_Front::getInstance();
-        $this->view = clone $frontController->getParam('view');
+        $frontController  = Zend_Controller_Front::getInstance();
+        $this->_bootstrap = $frontController->getParam('bootstrap');
+        $this->view = clone $this->_bootstrap->bootstrap('view')->getResource('view');
         $this->view->setScriptPath(APPLICATION_PATH . '/views/scripts/widgets');
     }
 
@@ -97,32 +93,20 @@ abstract class Vulnero_Widget extends WP_Widget
      *
      * @return  string              Content
      */
-    public function getContent()
+    protected function _getContent()
     {
-        $name = str_replace('_', '-', strtolower(get_class()));
-        return $this->view->render($name . '.phtml');
-    }
+        // Remove the widget class prefix
+        $name = str_replace('widget_', '', strtolower(get_class($this)));
 
-    /**
-     * Injects a form to be displayed in the WordPress administration panel.
-     *
-     * @param   Zend_Form       Form object
-     * @return  Vulerno_Widget
-     */
-    public function setForm(Zend_Form $form)
-    {
-        $this->_form = $form;
-        return $this;
-    }
+        // Convert any nesting to hyphens for file naming
+        $name = str_replace('_', '-', $name);
 
-    /**
-     * Gets the form to be displayed in the WordPress administration panel.
-     *
-     * @return  Zend_Form       Form object
-     */
-    public function getForm()
-    {
-        return $this->_form;
+        // Allow the parent to initialize the view like a controller
+        $this->displayAction();
+
+        // Append the view extension
+        $config = $this->_bootstrap->getOptions();
+        return $this->view->render($name . '.' . $config['resources']['layout']['viewSuffix']);
     }
 
     /**
@@ -159,25 +143,27 @@ abstract class Vulnero_Widget extends WP_Widget
      */
     public final function widget(array $args, array $instance)
     {
-        $stack = array();
+        if ($this->isShown()) {
+            $stack = array();
 
-        if ($this->_wrappers) {
-            $stack[] = $args['before_widget'];
+            if ($this->_wrappers) {
+                $stack[] = $args['before_widget'];
 
-            if ($title = apply_filters('widget_title', $this->_name)) {
-                $stack[] = $args['before_title'];
-                $stack[] = $title;
+                if ($title = apply_filters('widget_title', $this->_name)) {
+                    $stack[] = $args['before_title'];
+                    $stack[] = $title;
+                    $stack[] = $args['after_title'];
+                }
+            }
+
+            $stack[] = $this->_getContent();
+
+            if ($this->_wrappers) {
                 $stack[] = $args['after_title'];
             }
+
+            echo implode('', $stack);
         }
-
-        $stack[] = $this->getContent();
-
-        if ($this->_wrappers) {
-            $stack[] = $args['after_title'];
-        }
-
-        echo implode('', $stack);
     }
 
     /**
@@ -207,9 +193,16 @@ abstract class Vulnero_Widget extends WP_Widget
      */
     public function form(array $settings)
     {
-        if ($this->_form) {
-            $this->_form->setDefaults($settings);
-            echo $this->_form;
-        }
+    }
+
+    /**
+     * Whether the widget should be displayed and rendered. Typically some logic
+     * is performed to qualify the widget for the current route.
+     *
+     * @return  boolean
+     */
+    public function isShown()
+    {
+        return true;
     }
 }

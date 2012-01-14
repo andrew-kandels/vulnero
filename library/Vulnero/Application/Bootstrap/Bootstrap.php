@@ -62,8 +62,68 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
         // The view needs to be saved so that widgets can get ahold of it externally
         $frontController = $this->bootstrap('frontController')
                                 ->getResource('frontController');
-        $frontController->setParam('view', $this->bootstrap('view')
-                                                ->getResource('view'));
+        $frontController->setParam('bootstrap', $this);
+
+        add_action('wp_enqueue_scripts', array($this, 'onWpEnqueueScripts'));
+    }
+
+    /**
+     * Registers any bootstrapped stylesheets or scripts globally for
+     * WordPress as a whole.
+     *
+     * @return  void
+     */
+    public function onWpEnqueueScripts()
+    {
+        $stylesheets = $this->bootstrap('stylesheets')
+                            ->getResource('stylesheets');
+        if ($stylesheets) {
+            foreach ($stylesheets as $stylesheet) {
+                $id  = PLUGIN_NAME . '-' . basename($stylesheet);
+                if (basename($stylesheet) == $stylesheet) {
+                    $url = plugins_url(PLUGIN_NAME . '/public/styles/' . $stylesheet);
+                } else {
+                    $url = $stylesheet;
+                }
+                wp_register_style($id, $url, PROJECT_BASE_PATH);
+                wp_enqueue_style($id);
+            }
+        }
+
+        $scripts = $this->bootstrap('stylesheets')
+                        ->getResource('stylesheets');
+        if ($scripts) {
+            foreach ($scripts as $script) {
+                $id  = PLUGIN_NAME . '-' . basename($script);
+                if (basename($script) == $script) {
+                    $url = plugins_url(PLUGIN_NAME . '/public/scripts/' . $script);
+                } else {
+                    $url = $script;
+                }
+                wp_register_script($id, $url, PROJECT_BASE_PATH);
+                wp_enqueue_script($id);
+            }
+        }
+    }
+
+    /**
+     * Registers and queues CSS stylesheets globally.
+     *
+     * @return  array
+     */
+    protected function _initStylesheets()
+    {
+        return array();
+    }
+
+    /**
+     * Registers and queues JavaScript scripts globally.
+     *
+     * @return  array
+     */
+    protected function _initScripts()
+    {
+        return array();
     }
 
     /**

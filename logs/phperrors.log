@@ -1,0 +1,15 @@
+[14-Jan-2012 16:50:37] PHP Fatal error:  Uncaught exception 'Zend_Application_Bootstrap_Exception' with message 'Resource matching "stylesheets" not found' in /usr/share/php/Zend/Application/Bootstrap/BootstrapAbstract.php:690
+Stack trace:
+#0 /usr/share/php/Zend/Application/Bootstrap/BootstrapAbstract.php(625): Zend_Application_Bootstrap_BootstrapAbstract->_executeResource('stylesheets')
+#1 /usr/share/php/Zend/Application/Bootstrap/BootstrapAbstract.php(582): Zend_Application_Bootstrap_BootstrapAbstract->_bootstrap('stylesheets')
+#2 /var/www/vulnero-website/wp-content/plugins/vulnero/library/Vulnero/Application/Bootstrap/Bootstrap.php(72): Zend_Application_Bootstrap_BootstrapAbstract->bootstrap('stylesheets')
+#3 [internal function]: Vulnero_Application_Bootstrap_Bootstrap->onWpEnqueueScripts('')
+#4 /var/www/vulnero-website/wp-includes/plugin.php(405): call_user_func_array(Array, Array)
+#5 /var/www/vulnero-website/wp-includes/script-loader.php(688): do_action('wp_enqueue_scri...')
+#6 [internal function]: wp_enqueue_scripts('')
+#7 /var/www/vulnero-web in /usr/share/php/Zend/Application/Bootstrap/BootstrapAbstract.php on line 690
+[14-Jan-2012 17:02:15] PHP Notice:  Undefined index: compact_homepage in /var/www/vulnero-website/wp-content/themes/wpbootstrap/theme-options.php on line 129
+[14-Jan-2012 17:14:32] PHP Notice:  Undefined property: Vulnero_Controller_Plugin_Router::$_requestObject in /var/www/vulnero-website/wp-content/plugins/vulnero/library/Vulnero/Controller/Plugin/Router.php on line 118
+[14-Jan-2012 17:14:32] PHP Notice:  Undefined property: Vulnero_Controller_Plugin_Router::$_requestObject in /var/www/vulnero-website/wp-content/plugins/vulnero/library/Vulnero/Controller/Plugin/Router.php on line 118
+[14-Jan-2012 17:15:19] PHP Fatal error:  Call to undefined method Vulnero_Controller_Plugin_Router::getRequestObject() in /var/www/vulnero-website/wp-content/plugins/vulnero/application/widgets/Widget/Download.php on line 80
+[14-Jan-2012 17:15:21] PHP Fatal error:  Call to undefined method Vulnero_Controller_Plugin_Router::getRequestObject() in /var/www/vulnero-website/wp-content/plugins/vulnero/application/widgets/Widget/Download.php on line 80

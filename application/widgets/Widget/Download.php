@@ -1,6 +1,6 @@
 <?php
 /**
- * Sample widget.
+ * Widget which links to download and to view the source on GitHub.
  *
  * Copyright (c) 2011, Andrew Kandels <me@andrewkandels.com>.
  * All rights reserved.
@@ -37,7 +37,7 @@
  * @license     http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link        http://andrewkandels.com/vulnero
  */
-class Widget_AboutVulnero extends Vulnero_Widget
+class Widget_Download extends Vulnero_Widget
 {
     /**
      * Widget setup.
@@ -47,12 +47,10 @@ class Widget_AboutVulnero extends Vulnero_Widget
     public function __construct()
     {
         parent::__construct(
-            'About Vulnero',
-            'Sample widget demonstrating how widgets are creating using the '
-            . 'Vulnero WordPress/Zend Framework plugin.'
+            'Download',
+            'Buttons for downloading the Vulnero plugin and for viewing it '
+            . 'on GitHub.'
         );
-
-        $this->setForm(new Form_Widget_AboutVulnero());
     }
 
     /**
@@ -63,6 +61,10 @@ class Widget_AboutVulnero extends Vulnero_Widget
      */
     public function displayAction()
     {
+        $config = $this->_bootstrap->getOptions();
+
+        $this->view->githubUrl = $config['github']['url'];
+        $this->view->zipFile = $config['github']['zip']['url'];
         $this->view->version = VULNERO_VERSION;
     }
 }

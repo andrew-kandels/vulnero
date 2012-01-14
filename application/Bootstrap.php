@@ -64,6 +64,10 @@ class Bootstrap extends Vulnero_Application_Bootstrap_Bootstrap
     /**
      * Sets up global view parameters and defaults.
      *
+     * Note: Adding scripts or stylesheets to the head*() variety of methods
+     * will only be rendered on Vulnero routes. To globally add stylesheets,
+     * using the
+     *
      * @return  void
      */
     protected function _initViewSettings()
@@ -71,37 +75,44 @@ class Bootstrap extends Vulnero_Application_Bootstrap_Bootstrap
         $view = $this->bootstrap('view')
                      ->getResource('view');
 
-        $pathToPlugin = WP_PLUGIN_URL . '/' . PLUGIN_NAME;
-
         $view->doctype('XHTML1_STRICT');
         $view->setEncoding('UTF-8');
 
         $view->headTitle('My Project');
 
-        $view->headLink()->appendStylesheet($pathToPlugin . '/public/styles/main.css');
+        $view->headLink()->appendStylesheet(PROJECT_BASE_URI . '/public/styles/main.css');
 
         $view->headMeta()->appendHttpEquiv('Content-Type', 'text/html; charset=utf-8')
                          ->appendHttpEquiv('Content-Language', 'en_US');
     }
 
     /**
-     * The following sections can be uncommented to entirely replace the
-     * WordPress hooks from being registered. If you're looking to extend
-     * or override functionality, declare one of the public on... methods
-     * instead with a corresponding name (e.g.: _initWpHead becomes onWpHead).
+     * Registers and queues CSS stylesheets globally. If the stylesheet is
+     * used only by your Vulnero routes, it's recommended to use the
+     * headLink() view helper in your controller or viewSettings bootstrap.
+     *
+     * If no path information is provided they are assumed to be located in
+     * your plugin's public/styles directory.
+     *
+     * @return  array
      */
-    // protected function _initWordPress() {}
-    // protected function _initWpTemplates() {}
-    // protected function _initWpWidgets() {}
-    // protected function _initWpFooter() {}
-    // protected function _initWpHead() {}
-    // protected function _initWpTitle() {}
-    // protected function _initWpPrintStyles() {}
-    // protected function _initConfig() {}
-    // protected function _initRoutes() {}
-    // protected function _initRouter() {}
-    // protected function _initDb() {}
-    // protected function _initAuthAdapter() {}
-    // protected function _initCache() {}
-    // protected function _initAdmin() {}
+    protected function _initStylesheets()
+    {
+        return array('main.css');
+    }
+
+    /**
+     * Registers and queues JavaScript scripts globally. If the script is
+     * used only by your Vulnero routes, it's recommended to use the
+     * headScript() view helper in your controller or viewSettings bootstrap.
+     *
+     * If no path information is provided they are assumed to be located in
+     * your plugin's public/scripts directory.
+     *
+     * @return  array
+     */
+    protected function _initScripts()
+    {
+        return array();
+    }
 }

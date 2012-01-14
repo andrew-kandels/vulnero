@@ -58,6 +58,10 @@ if (!defined('PLUGIN_NAME')) {
     define('PLUGIN_NAME', basename(__DIR__));
 }
 
+if (!defined('PROJECT_BASE_URI')) {
+    define('PROJECT_BASE_URI', WP_PLUGIN_URL . '/' . PLUGIN_NAME);
+}
+
 if (!defined('APPLICATION_ENV')) {
     define('APPLICATION_ENV', 'development');
 }
