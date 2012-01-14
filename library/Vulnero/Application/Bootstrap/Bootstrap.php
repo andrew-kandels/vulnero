@@ -59,6 +59,7 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
             $this->onPluginActivated();
         }
 
+        // The view needs to be saved so that widgets can get ahold of it externally
         $frontController = $this->bootstrap('frontController')
                                 ->getResource('frontController');
         $frontController->setParam('view', $this->bootstrap('view')
@@ -253,6 +254,12 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
                         'pagename' => $wpRoute
                     );
                     $wordpress->extra_query_vars = array();
+
+                    // Register some additional hooks for processing now that we control
+                    // the destination route
+                    add_filter('wp_title',  array($this, 'onWpTitle'), 2);
+                    add_action('wp_head',   array($this, 'onWpHead'));
+                    add_action('wp_footer', array($this, 'onWpFooter'));
                 } elseif (PHP_SAPI != 'cli') {
                     // Non-WordPress enabled route, end execution
                     echo $output;
@@ -268,17 +275,6 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
     }
 
     /**
-     * WordPress wp_footer action
-     * Adds a link to the Vulnero project.
-     *
-     * @return  void
-     */
-    protected function _initWpFooter()
-    {
-        add_action('wp_footer', array($this, 'onWpFooter'));
-    }
-
-    /**
      * WordPress wp_footer hook
      * Allows us to inject dynamic content into the WordPress footer
      * (if supported by the theme).
@@ -288,17 +284,6 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
     public function onWpFooter()
     {
         echo '<p>Powered by <a href="http://www.vulnero.com/" target="_blank">Vulnero</a>';
-    }
-
-    /**
-     * WordPress wp_head hook
-     * Not used by default, allows the application to inject custom headers.
-     *
-     * @return string
-     */
-    public function _initWpHead()
-    {
-        add_action('wp_head', array($this, 'onWpHead'));
     }
 
     /**
@@ -325,17 +310,6 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
 
     /**
      * WordPress wp_title hook
-     * Sets the page title in the header.
-     *
-     * @return string
-     */
-    public function _initWpTitle()
-    {
-        add_filter('wp_title', array($this, 'onWpTitle'));
-    }
-
-    /**
-     * WordPress wp_title hook
      * Change or alter the page title (if supported by the theme).
      *
      * @return  string
@@ -344,28 +318,8 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
     {
         $view = $this->bootstrap('view')
                      ->getResource('view');
-        return strip_tags($view->headTitle());
-    }
-
-    /**
-     * Initializes the wp_print_styles hook for injecting CSS stylesheets.
-     *
-     * @return  void
-     */
-    protected function _initWpPrintStyles()
-    {
-        add_action('wp_print_styles',   array($this, 'onWpPrintStyles'));
-    }
-
-    /**
-     * WordPress wp_print_styles hook
-     * Allows us to inject stylesheets into WordPress.
-     *
-     * @return void
-     */
-    public function onWpPrintStyles()
-    {
-        // wp_register_style('unique id', '/path/to/css');
+        // @todo use separator from the view
+        return strip_tags($view->headTitle()) . ' - ';
     }
 
     /**
