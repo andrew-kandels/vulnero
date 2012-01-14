@@ -38,41 +38,68 @@
  * @license     http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link        http://andrewkandels.com/vulnero
  */
-class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap_Bootstrap
+abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap_Bootstrap
 {
     /**
-     * Initializes Vulnero functionality:
-     * 1) Routing: Registers the WordPress send_headers hook which is used
-     *             by Vulnero to implement Zend routing.
-     * 2) Layouts: Registers the Vulnero controller plugin which injects the
-     *             content of your controller's view script into the layout
-     *             (which is normally set to a WordPress page template from
-     *             your theme).
-     * 3) Admin:   Checks if the current user is logged into WordPress through
-     *             the Vulnero_Controller_Plugin_Login controller plugin and
-     *             updates the Zend_Auth identity if so.
+     * Initializes the basic hooks for core functionality such as
+     * the WordPress plugins_loaded hook for trapping when the
+     * plugin is loaded each request as well as dealing with calling the
+     * onPluginActivated method when the plugin is activated in the
+     * admin panel.
      *
      * @return void
      */
     protected function _initWordPress()
     {
-        $frontController = $this->bootstrap('frontController')
-                                ->getResource('frontController');
-        $frontController->registerPlugin(new Vulnero_Controller_Plugin_Router());
-        $frontController->registerPlugin(new Vulnero_Controller_Plugin_Login());
+        // Setup WordPress hooks and filters we'll subscribe to
+        add_action('plugins_loaded',    array($this, 'onPluginsLoaded'));
 
-        add_action('send_headers', $this->bootstrap('onSendHeaders')->getResource('onSendHeaders'));
-        add_action('plugins_loaded', array($this, 'onPluginsLoaded'));
-        add_action('wp_print_styles', array($this, 'onWpPrintStyles'));
-        add_action('wp_footer', array($this, 'onWpFooter'));
-        add_action('wp_head', array($this, 'onWpHead'));
-        add_action('wp_title', array($this, 'onWpTitle'));
-        add_action('admin_menu', array($this, 'onAdminMenu'));
+        $registry = Zend_Registry::getInstance();
+        if (isset($registry['plugin-activated'])) {
+            $this->onPluginActivated();
+        }
     }
 
-    protected function _initOnSendHeaders()
+    /**
+     * WordPress activate_{plugin name} hook
+     * Called when the plugin is activated for the first time.
+     *
+     * @return void
+     */
+    public function onPluginActivated()
     {
-        return array($this, 'onSendHeaders');
+    }
+
+    /**
+     * Overrides your theme's page.php template file with the wordpress-page.php
+     * file in the plugin directory for all routes handled by Vulnero.
+     *
+     * @return  void
+     */
+    protected function _initPageTemplate()
+    {
+        add_filter('page_template', array($this, 'onPageTemplate'));
+    }
+
+    /**
+     * WordPress page_template filter
+     * Called when WordPress attempts to locate the page template (page.php) in the
+     * theme. If this is a valid WordPress request, we're going to override it and
+     * instead specify that the template is page-template.php in the plugin's
+     * directory.
+     *
+     * @return  void
+     */
+    public function onPageTemplate()
+    {
+        $frontController = $this->bootstrap('frontController')
+                                ->getResource('frontController');
+        if (($router = $frontController->getPlugin('Vulnero_Controller_Plugin_Router')) &&
+            $router->hasPageContent()) {
+            return PROJECT_BASE_PATH . '/wordpress-page.php';
+        } else {
+            return locate_template(array('page'));
+        }
     }
 
     /**
@@ -147,39 +174,93 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
     }
 
     /**
-     * WordPress wp_title hook
-     * Change or alter the page title (if supported by the theme).
+     * WordPress wp_footer action
+     * Adds a link to the Vulnero project.
      *
-     * @param   string
-     * @return  string
+     * @return  void
      */
-    public function onWpTitle($title)
+    protected function _initWpFooter()
     {
-        return $title;
+        add_action('wp_footer', array($this, 'onWpFooter'));
     }
 
     /**
      * WordPress wp_footer hook
-     * Allows us to inject dynamic content (as a string) into the WordPress footer
+     * Allows us to inject dynamic content into the WordPress footer
      * (if supported by the theme).
      *
-     * @return string
+     * @return void
      */
     public function onWpFooter()
     {
-        return '<p>Powered by <a href="http://www.vulnero.com/" target="_blank">Vulnero</a>';
+        echo '<p>Powered by <a href="http://www.vulnero.com/" target="_blank">Vulnero</a>';
     }
 
     /**
      * WordPress wp_head hook
-     * Allows us to inject dynamic content (as a string) into the WordPress header
-     * (if supported by the theme).
+     * Not used by default, allows the application to inject custom headers.
      *
      * @return string
      */
+    public function _initWpHead()
+    {
+        add_action('wp_head', array($this, 'onWpHead'));
+    }
+
+    /**
+     * WordPress wp_head hook
+     * Allows us to inject dynamic content into the WordPress header
+     * (if supported by the theme).
+     *
+     * @return  void
+     */
     public function onWpHead()
     {
-        return '';
+        $view = $this->bootstrap('view')
+                     ->getResource('view');
+
+        $components = array(
+            $view->headMeta(),
+            $view->headStyle(),
+            $view->headLink(),
+            $view->headScript()
+        );
+
+        echo implode(PHP_EOL, $components);
+    }
+
+    /**
+     * WordPress wp_title hook
+     * Sets the page title in the header.
+     *
+     * @return string
+     */
+    public function _initWpTitle()
+    {
+        add_filter('wp_title', array($this, 'onWpTitle'));
+    }
+
+    /**
+     * WordPress wp_title hook
+     * Change or alter the page title (if supported by the theme).
+     *
+     * @return  string
+     */
+    public function onWpTitle()
+    {
+        $view = $this->bootstrap('view')
+                     ->getResource('view');
+        return strip_tags($view->headTitle());
+    }
+
+    /**
+     * Initializes the wp_print_styles hook for injecting CSS stylesheets.
+     *
+     * @return  void
+     */
+    protected function _initWpPrintStyles()
+    {
+        add_action('wp_print_styles',   array($this, 'onWpPrintStyles'));
     }
 
     /**
@@ -227,7 +308,9 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
     /**
      * Initializes and caches the application/config/routes.ini routes
      * configuration file, which are routes that are answered by your
-     * application and not by WordPress.
+     * application and not by WordPress. Also initializes the send_headers
+     * hook which traps all requests so that we can check if they should
+     * be handled by Vulnero.
      *
      * @return Zend_Router_Route
      */
@@ -254,6 +337,10 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
      */
     protected function _initRouter()
     {
+        $frontController = $this->bootstrap('frontController')
+                                ->getResource('frontController');
+        $frontController->registerPlugin(new Vulnero_Controller_Plugin_Router());
+
         $routes = $this->bootstrap('routes')
                        ->getResource('routes');
         $router = $this->bootstrap('frontController')
@@ -263,29 +350,9 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
 
         $router->addConfig($routes);
 
+        add_action('send_headers', array($this, 'onSendHeaders'));
+
         return $router;
-    }
-
-    /**
-     * Configures the Zend_View view scripts doctypes and encodings
-     * and sets up our layout object to use WordPress page templates
-     * instead of our own application layouts so we can benefit from the
-     * WordPress themes' look and feel.
-     *
-     * @return  Zend_View
-     */
-    protected function _initViewSettings()
-    {
-        $view = $this->bootstrap('view')
-                     ->getResource('view');
-
-        $view->doctype('XHTML1_STRICT');
-        $view->setEncoding('UTF-8');
-        $view->headTitle('Vulnero');
-        $view->headMeta()->appendHttpEquiv('Content-Type', 'text/html; charset=utf-8')
-                         ->appendHttpEquiv('Content-Language', 'en_US');
-
-        return $view;
     }
 
     /**
@@ -338,6 +405,10 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
      */
     protected function _initAuthAdapter()
     {
+        $frontController = $this->bootstrap('frontController')
+                                ->getResource('frontController');
+        $frontController->registerPlugin(new Vulnero_Controller_Plugin_Login());
+
         $config = $this->bootstrap('config')
                        ->getResource('config');
 
@@ -438,6 +509,8 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
      */
     protected function _initAdmin()
     {
+        add_action('admin_menu', array($this, 'onAdmin'));
+
         return null;
     }
 
@@ -448,9 +521,9 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
      *
      * @return  Zend
      */
-    public function onAdminMenu()
+    public function onAdmin(Zend_Form $form = null)
     {
-        if ($form = $this->bootstrap('admin')->getResource('admin')) {
+        if ($form) {
             $frontController = $this->bootstrap('frontController')
                                     ->getResource('frontController');
 

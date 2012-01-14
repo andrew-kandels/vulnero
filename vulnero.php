@@ -77,6 +77,9 @@ if (empty($autoLoader)) {
     $autoLoader->suppressNotFoundWarnings(true);
 }
 
+// Called upon first activating the plugin
+register_activation_hook(__FILE__, 'vulnero_activate');
+
 $application = new Vulnero_Application(
     APPLICATION_ENV,
     APPLICATION_PATH . '/config/config.ini'
@@ -86,4 +89,19 @@ $application->bootstrap();
 // Unit testing
 if (PHP_SAPI == 'cli') {
     Zend_Registry::set('application', $application);
+}
+
+// End of Zend Framework bootstrapping
+
+/**
+ * WordPress activate_{plugin name} hook
+ * Called when the Vulnero plugin is activated for the first time.
+ * This can't be called from the bootstrap so we have to resort to
+ * using a Zend_Registry key.
+ *
+ * @return  void
+ */
+function vulnero_activate()
+{
+    Zend_Registry::set('plugin-activated', true);
 }

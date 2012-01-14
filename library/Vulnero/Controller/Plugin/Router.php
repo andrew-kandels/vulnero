@@ -74,6 +74,16 @@ class Vulnero_Controller_Plugin_Router extends Zend_Controller_Plugin_Abstract
     }
 
     /**
+     * Returns true if there's dynamic content to be displayed in WordPress.
+     *
+     * @return  boolean
+     */
+    public function hasPageContent()
+    {
+        return !empty($this->_pageContent);
+    }
+
+    /**
      * Called from most WordPress page templates to retrieve the contents of the
      * body. We pass in our layout object's content placeholder which contains the
      * contents of our Zend_View.

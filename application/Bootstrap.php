@@ -40,27 +40,62 @@
  */
 class Bootstrap extends Vulnero_Application_Bootstrap_Bootstrap
 {
-    /* Uncomment to disable or replace Vulnero routing and authentication integration */
-    // private function _initWordPress() {}
-    // private function _initRouter() {}
-    // private function _initAuthAdapter() {}
-
-    /* Uncomment to disable or replace Vulnero views and layouts for your controller */
-    // private function _initViewSettings() {}
-
-    /* Uncomment to disable or replace Vulnero database integration with WordPress */
-    // protected function _initDb() {}
+    /**
+     * Called each request when the plugin is loaded.
+     *
+     * @return  void
+     */
+    public function onPluginLoaded()
+    {
+        parent::onPluginLoaded();
+    }
 
     /**
-     * Returns a form to use for the WordPress admin panel for this plugin. Form changes will
-     * be routed to the saveadminpanel route in application/config/routes.ini.
+     * Called when the plugin is activated for the first time from
+     * the WordPress administration panel.
      *
-     * Comment out this function if you don't want an admin panel.
-     *
-     * @return  Zend_Form           Form object
+     * @return  void
      */
-    protected function _initAdmin()
+    public function onPluginActivated()
     {
-        return new Form_Admin();
+        parent::onPluginActivated();
     }
+
+    /**
+     * Sets up global view parameters and defaults.
+     *
+     * @return  void
+     */
+    protected function _initViewSettings()
+    {
+        $view = $this->bootstrap('view')
+                     ->getResource('view');
+
+        $view->doctype('XHTML1_STRICT');
+        $view->setEncoding('UTF-8');
+        $view->headTitle('My Project');
+        $view->headTitle()->setSeparator(' - ');
+        $view->headMeta()->appendHttpEquiv('Content-Type', 'text/html; charset=utf-8')
+                         ->appendHttpEquiv('Content-Language', 'en_US');
+    }
+
+    /**
+     * The following sections can be uncommented to entirely replace the
+     * WordPress hooks from being registered. If you're looking to extend
+     * or override functionality, declare one of the public on... methods
+     * instead with a corresponding name (e.g.: _initWpHead becomes onWpHead).
+     */
+    // protected function _initWordPress() {}
+    // protected function _initPageTemplate() {}
+    // protected function _initWpFooter() {}
+    // protected function _initWpHead() {}
+    // protected function _initWpTitle() {}
+    // protected function _initWpPrintStyles() {}
+    // protected function _initConfig() {}
+    // protected function _initRoutes() {}
+    // protected function _initRouter() {}
+    // protected function _initDb() {}
+    // protected function _initAuthAdapter() {}
+    // protected function _initCache() {}
+    // protected function _initAdmin() {}
 }
