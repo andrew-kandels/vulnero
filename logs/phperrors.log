@@ -61,3 +61,54 @@ Stack trace:
 #5 /var/www/vulnero.com/dev/wp-includes/widgets.php(894): call_user_func_array(Array, Array)
 #6 /var/www/vulnero.com/dev/wp-content/themes/wpbootstrap/sidebar.php(20): dynamic_sidebar('primary-widget-...')
 #7 /var/www/vulnero.com/dev/wp-includes/theme.php(1115): require_ in /usr/share/php/Zend/View/Abstract.php on line 988
+[15-Jan-2012 06:42:05] PHP Fatal error:  Uncaught exception 'Zend_Controller_Router_Exception' with message 'No route matched the request' in /usr/share/php/Zend/Controller/Router/Rewrite.php:408
+Stack trace:
+#0 /usr/share/php/Zend/Controller/Front.php(911): Zend_Controller_Router_Rewrite->route(Object(Zend_Controller_Request_Http))
+#1 /var/www/vulnero.com/dev/wp-content/plugins/vulnero/library/Vulnero/Application/Bootstrap/Bootstrap.php(286): Zend_Controller_Front->dispatch()
+#2 [internal function]: Vulnero_Application_Bootstrap_Bootstrap->onSendHeaders(Object(WP))
+#3 /var/www/vulnero.com/dev/wp-includes/plugin.php(486): call_user_func_array(Array, Array)
+#4 /var/www/vulnero.com/dev/wp-includes/class-wp.php(382): do_action_ref_array('send_headers', Array)
+#5 /var/www/vulnero.com/dev/wp-includes/class-wp.php(506): WP->send_headers()
+#6 /var/www/vulnero.com/dev/wp-includes/functions.php(1570): WP->main('')
+#7 /var/www/vulnero.com/dev/wp-blog-header.php(14): wp()
+#8 /var/www/vulnero.com/dev/index.php(17): require('/var/www/vulner...')
+#9 {main}
+  thro in /usr/share/php/Zend/Controller/Router/Rewrite.php on line 408
+[15-Jan-2012 06:45:40] PHP Notice:  Undefined offset: -1 in /var/www/vulnero.com/dev/wp-includes/post-template.php on line 199
+[15-Jan-2012 06:48:10] PHP Notice:  Undefined offset: -1 in /var/www/vulnero.com/dev/wp-includes/post-template.php on line 199
+[15-Jan-2012 06:49:00] PHP Notice:  Undefined offset: -1 in /var/www/vulnero.com/dev/wp-includes/post-template.php on line 199
+[15-Jan-2012 06:50:59] PHP Notice:  Use of undefined constant TEMPLATE_PATH - assumed 'TEMPLATE_PATH' in /var/www/vulnero.com/dev/wp-content/plugins/vulnero/library/Vulnero/Application/Bootstrap/Bootstrap.php on line 198
+[15-Jan-2012 06:51:35] PHP Notice:  Undefined offset: -1 in /var/www/vulnero.com/dev/wp-includes/post-template.php on line 199
+[15-Jan-2012 06:51:52] PHP Notice:  Undefined offset: -1 in /var/www/vulnero.com/dev/wp-includes/post-template.php on line 199
+[15-Jan-2012 06:52:05] PHP Notice:  Undefined offset: -1 in /var/www/vulnero.com/dev/wp-includes/post-template.php on line 199
+[15-Jan-2012 06:52:13] PHP Notice:  Undefined offset: -1 in /var/www/vulnero.com/dev/wp-includes/post-template.php on line 199
+[15-Jan-2012 06:54:33] PHP Notice:  Undefined offset: -1 in /var/www/vulnero.com/dev/wp-includes/post-template.php on line 199
+[15-Jan-2012 06:54:52] PHP Notice:  Undefined offset: -1 in /var/www/vulnero.com/dev/wp-includes/post-template.php on line 199
+[15-Jan-2012 06:59:13] PHP Notice:  Undefined offset: -1 in /var/www/vulnero.com/dev/wp-includes/post-template.php on line 199
+[15-Jan-2012 06:59:23] PHP Notice:  Undefined offset: -1 in /var/www/vulnero.com/dev/wp-includes/post-template.php on line 199
+[15-Jan-2012 07:06:36] PHP Notice:  Undefined offset: -1 in /var/www/vulnero.com/dev/wp-includes/post-template.php on line 199
+[15-Jan-2012 07:08:09] PHP Notice:  Undefined offset: -1 in /var/www/vulnero.com/dev/wp-includes/post-template.php on line 199
+[15-Jan-2012 07:08:36] PHP Warning:  include(/var/www/vulnero.com/dev/wp-content/plugins/vulnero/page.php): failed to open stream: No such file or directory in /var/www/vulnero.com/dev/wp-includes/template-loader.php on line 43
+[15-Jan-2012 07:08:36] PHP Warning:  include(): Failed opening '/var/www/vulnero.com/dev/wp-content/plugins/vulnero/page.php' for inclusion (include_path='/var/www/vulnero.com/dev/wp-content/plugins/vulnero/library:/var/www/vulnero.com/dev/wp-content/plugins/vulnero/application/widgets:/var/www/vulnero.com/dev/wp-content/plugins/vulnero/application/forms:/var/www/vulnero.com/dev/wp-content/plugins/vulnero/application:.:/usr/share/php:/usr/share/pear') in /var/www/vulnero.com/dev/wp-includes/template-loader.php on line 43
+[15-Jan-2012 07:08:44] PHP Notice:  Undefined offset: -1 in /var/www/vulnero.com/dev/wp-includes/post-template.php on line 199
+[15-Jan-2012 07:09:03] PHP Notice:  Undefined offset: -1 in /var/www/vulnero.com/dev/wp-includes/post-template.php on line 199
+[15-Jan-2012 07:13:22] PHP Notice:  Undefined offset: -1 in /var/www/vulnero.com/dev/wp-includes/post-template.php on line 199
+[15-Jan-2012 07:16:08] PHP Notice:  Undefined offset: -1 in /var/www/vulnero.com/dev/wp-includes/post-template.php on line 199
+[15-Jan-2012 07:18:26] PHP Notice:  Undefined offset: -1 in /var/www/vulnero.com/dev/wp-includes/post-template.php on line 199
+[15-Jan-2012 07:18:38] PHP Notice:  Undefined offset: -1 in /var/www/vulnero.com/dev/wp-includes/post-template.php on line 199
+[15-Jan-2012 07:21:48] PHP Notice:  Undefined offset: -1 in /var/www/vulnero.com/dev/wp-includes/post-template.php on line 199
+[15-Jan-2012 07:24:00] PHP Warning:  Missing argument 2 for Zend_Controller_Front::setParam(), called in /var/www/vulnero.com/dev/wp-content/plugins/vulnero/library/Vulnero/Application/Bootstrap/Bootstrap.php on line 292 and defined in /usr/share/php/Zend/Controller/Front.php on line 653
+[15-Jan-2012 07:24:00] PHP Notice:  Undefined variable: value in /usr/share/php/Zend/Controller/Front.php on line 656
+[15-Jan-2012 07:28:46] PHP Fatal error:  Call to undefined method Zend_Controller_Front::hasParam() in /var/www/vulnero.com/dev/wp-content/plugins/vulnero/library/Vulnero/Application/Bootstrap/Bootstrap.php on line 248
+[15-Jan-2012 07:28:56] PHP Notice:  Undefined offset: -1 in /var/www/vulnero.com/dev/wp-includes/post-template.php on line 199
+[15-Jan-2012 07:29:00] PHP Notice:  Undefined offset: -1 in /var/www/vulnero.com/dev/wp-includes/post-template.php on line 199
+[15-Jan-2012 07:29:05] PHP Notice:  Undefined offset: -1 in /var/www/vulnero.com/dev/wp-includes/post-template.php on line 199
+[15-Jan-2012 07:29:24] PHP Notice:  Undefined offset: -1 in /var/www/vulnero.com/dev/wp-includes/post-template.php on line 199
+[15-Jan-2012 07:29:41] PHP Notice:  Undefined offset: -1 in /var/www/vulnero.com/dev/wp-includes/post-template.php on line 199
+[15-Jan-2012 07:30:39] PHP Notice:  Undefined offset: -1 in /var/www/vulnero.com/dev/wp-includes/post-template.php on line 199
+[15-Jan-2012 07:31:03] PHP Notice:  Undefined offset: -1 in /var/www/vulnero.com/dev/wp-includes/post-template.php on line 199
+[15-Jan-2012 07:31:18] PHP Notice:  Undefined offset: -1 in /var/www/vulnero.com/dev/wp-includes/post-template.php on line 199
+[15-Jan-2012 07:32:12] PHP Notice:  Undefined offset: -1 in /var/www/vulnero.com/dev/wp-includes/post-template.php on line 199
+[15-Jan-2012 07:33:39] PHP Notice:  Undefined variable: wp_query in /var/www/vulnero.com/dev/wp-content/plugins/vulnero/library/Vulnero/Application/Bootstrap/Bootstrap.php on line 299
+[15-Jan-2012 07:33:39] PHP Fatal error:  Call to a member function get_queried_object() on a non-object in /var/www/vulnero.com/dev/wp-content/plugins/vulnero/library/Vulnero/Application/Bootstrap/Bootstrap.php on line 299
+[15-Jan-2012 07:34:46] PHP Notice:  Undefined offset: -1 in /var/www/vulnero.com/dev/wp-includes/post-template.php on line 199
