@@ -4,6 +4,7 @@ dl > dd { padding-bottom: 10px; margin-left: 25px; }
 
 body { background: #006760 url(../images/top-bg.png) repeat-x; height: 300px; color: #444; }
 .hero-unit { background: none; margin-top: 5px; color: #006760; padding: 60px 0 30px 0; }
+.hero-unit > img { float: left; position: relative; top: 13px; }
 .hero-unit > h1 { color: white; }
 
 .tabs li.current_page_item a { background-color: #cefaf6; }
