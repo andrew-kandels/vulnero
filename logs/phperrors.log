@@ -19,3 +19,45 @@ Stack trace:
 [14-Jan-2012 23:40:12] PHP Notice:  Undefined variable: sa_settings in /var/www/vulnero.com/dev/wp-content/themes/wpbootstrap/header.php on line 65
 [15-Jan-2012 00:03:47] PHP Notice:  Undefined variable: sa_options in /var/www/vulnero.com/dev/wp-content/themes/wpbootstrap/header.php on line 59
 [15-Jan-2012 00:03:48] PHP Notice:  Undefined variable: sa_options in /var/www/vulnero.com/dev/wp-content/themes/wpbootstrap/header.php on line 59
+[15-Jan-2012 05:20:00] PHP Fatal error:  Class 'Widget_CloudBanner' not found in /var/www/vulnero.com/dev/wp-includes/widgets.php on line 324
+[15-Jan-2012 05:21:00] PHP Fatal error:  Class 'Widget_CloudBanner' not found in /var/www/vulnero.com/dev/wp-includes/widgets.php on line 324
+[15-Jan-2012 05:24:42] PHP Fatal error:  Uncaught exception 'Zend_View_Exception' with message 'script 'cloudbanner.phtml' not found in path (/var/www/vulnero.com/dev/wp-content/plugins/vulnero/application/views/scripts/widgets/)' in /usr/share/php/Zend/View/Abstract.php:988
+Stack trace:
+#0 /usr/share/php/Zend/View/Abstract.php(884): Zend_View_Abstract->_script('cloudbanner.pht...')
+#1 /var/www/vulnero.com/dev/wp-content/plugins/vulnero/library/Vulnero/Widget.php(109): Zend_View_Abstract->render('cloudbanner.pht...')
+#2 /var/www/vulnero.com/dev/wp-content/plugins/vulnero/library/Vulnero/Widget.php(159): Vulnero_Widget->_getContent()
+#3 /var/www/vulnero.com/dev/wp-includes/widgets.php(182): Vulnero_Widget->widget(Array, Array)
+#4 [internal function]: WP_Widget->display_callback(Array, Array)
+#5 /var/www/vulnero.com/dev/wp-includes/widgets.php(894): call_user_func_array(Array, Array)
+#6 /var/www/vulnero.com/dev/wp-content/themes/wpbootstrap/sidebar.php(20): dynamic_sidebar('primary-widget-...')
+#7 /var/www/vulnero.com/dev/wp-includes/theme.php(1115):  in /usr/share/php/Zend/View/Abstract.php on line 988
+[15-Jan-2012 05:24:43] PHP Fatal error:  Uncaught exception 'Zend_View_Exception' with message 'script 'cloudbanner.phtml' not found in path (/var/www/vulnero.com/dev/wp-content/plugins/vulnero/application/views/scripts/widgets/)' in /usr/share/php/Zend/View/Abstract.php:988
+Stack trace:
+#0 /usr/share/php/Zend/View/Abstract.php(884): Zend_View_Abstract->_script('cloudbanner.pht...')
+#1 /var/www/vulnero.com/dev/wp-content/plugins/vulnero/library/Vulnero/Widget.php(109): Zend_View_Abstract->render('cloudbanner.pht...')
+#2 /var/www/vulnero.com/dev/wp-content/plugins/vulnero/library/Vulnero/Widget.php(159): Vulnero_Widget->_getContent()
+#3 /var/www/vulnero.com/dev/wp-includes/widgets.php(182): Vulnero_Widget->widget(Array, Array)
+#4 [internal function]: WP_Widget->display_callback(Array, Array)
+#5 /var/www/vulnero.com/dev/wp-includes/widgets.php(894): call_user_func_array(Array, Array)
+#6 /var/www/vulnero.com/dev/wp-content/themes/wpbootstrap/sidebar.php(20): dynamic_sidebar('primary-widget-...')
+#7 /var/www/vulnero.com/dev/wp-includes/theme.php(1115):  in /usr/share/php/Zend/View/Abstract.php on line 988
+[15-Jan-2012 05:29:39] PHP Fatal error:  Uncaught exception 'Zend_View_Exception' with message 'script '-download.phtml' not found in path (/var/www/vulnero.com/dev/wp-content/plugins/vulnero/application/views/scripts/widgets/)' in /usr/share/php/Zend/View/Abstract.php:988
+Stack trace:
+#0 /usr/share/php/Zend/View/Abstract.php(884): Zend_View_Abstract->_script('-download.phtml')
+#1 /var/www/vulnero.com/dev/wp-content/plugins/vulnero/library/Vulnero/Widget.php(112): Zend_View_Abstract->render('-download.phtml')
+#2 /var/www/vulnero.com/dev/wp-content/plugins/vulnero/library/Vulnero/Widget.php(174): Vulnero_Widget->_getContent()
+#3 /var/www/vulnero.com/dev/wp-includes/widgets.php(182): Vulnero_Widget->widget(Array, Array)
+#4 [internal function]: WP_Widget->display_callback(Array, Array)
+#5 /var/www/vulnero.com/dev/wp-includes/widgets.php(894): call_user_func_array(Array, Array)
+#6 /var/www/vulnero.com/dev/wp-content/themes/wpbootstrap/sidebar.php(20): dynamic_sidebar('primary-widget-...')
+#7 /var/www/vulnero.com/dev/wp-includes/theme.php(1115): require_ in /usr/share/php/Zend/View/Abstract.php on line 988
+[15-Jan-2012 05:29:40] PHP Fatal error:  Uncaught exception 'Zend_View_Exception' with message 'script '-download.phtml' not found in path (/var/www/vulnero.com/dev/wp-content/plugins/vulnero/application/views/scripts/widgets/)' in /usr/share/php/Zend/View/Abstract.php:988
+Stack trace:
+#0 /usr/share/php/Zend/View/Abstract.php(884): Zend_View_Abstract->_script('-download.phtml')
+#1 /var/www/vulnero.com/dev/wp-content/plugins/vulnero/library/Vulnero/Widget.php(112): Zend_View_Abstract->render('-download.phtml')
+#2 /var/www/vulnero.com/dev/wp-content/plugins/vulnero/library/Vulnero/Widget.php(174): Vulnero_Widget->_getContent()
+#3 /var/www/vulnero.com/dev/wp-includes/widgets.php(182): Vulnero_Widget->widget(Array, Array)
+#4 [internal function]: WP_Widget->display_callback(Array, Array)
+#5 /var/www/vulnero.com/dev/wp-includes/widgets.php(894): call_user_func_array(Array, Array)
+#6 /var/www/vulnero.com/dev/wp-content/themes/wpbootstrap/sidebar.php(20): dynamic_sidebar('primary-widget-...')
+#7 /var/www/vulnero.com/dev/wp-includes/theme.php(1115): require_ in /usr/share/php/Zend/View/Abstract.php on line 988
