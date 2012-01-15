@@ -65,6 +65,7 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
         $frontController->setParam('bootstrap', $this);
 
         add_action('wp_enqueue_scripts', array($this, 'onWpEnqueueScripts'));
+        add_action('wp_footer', array($this, 'onWpFooter'));
     }
 
     /**
@@ -195,8 +196,8 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
      */
     protected function _initWpTemplates()
     {
-        add_filter('home_template', array($this, 'onWpHomeTemplate'));
         add_filter('page_template', array($this, 'onWpPageTemplate'));
+        add_filter('home_template', array($this, 'onWpHomeTemplate'));
         add_filter('single_template', array($this, 'onWpSingleTemplate'));
     }
 
@@ -244,8 +245,7 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
     {
         $frontController = $this->bootstrap('frontController')
                                 ->getResource('frontController');
-        if (($router = $frontController->getPlugin('Vulnero_Controller_Plugin_Router')) &&
-            $router->hasPageContent()) {
+        if ($frontController->getParam('output')) {
             return PROJECT_BASE_PATH . '/wordpress-template.php';
         } else {
             return locate_template(array($template));
@@ -286,9 +286,8 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
                 $output = $frontController->dispatch();
 
                 // Controller plugin injects content into the WordPress the_content() hook
-                if ($router = $frontController->getPlugin('Vulnero_Controller_Plugin_Router')) {
-                    $router->setPageContent($output);
-                }
+                $frontController->setParam('output', $output);
+                add_action('the_content', array($this, 'onTheContent'));
 
                 $routeName = $frontController->getRouter()->getCurrentRouteName();
 
@@ -305,12 +304,16 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
                     // the router controller plugin
                     $wpRoute = '';
 
+                    // get the id of the front page, we're going to pretend we're it
+                    $pageId = get_option('page_on_front');
+
+                    // trick WordPress into thinking the request is valid
                     $wordpress->request = $wpRoute;
                     $wordpress->query_string = '';
                     $wordpress->matched_rule = '(' . preg_quote($wpRoute) . ')(/.*)$';
-                    $wordpress->matched_query = 'pagename=' . urlencode($wpRoute) . '&page=';
+                    $wordpress->matched_query = 'pagename=' . urlencode($wpRoute) . '&page=' . $pageId;
                     $wordpress->query_vars = array(
-                        'page' => '',
+                        'page' => $pageId,
                         'pagename' => $wpRoute
                     );
                     $wordpress->extra_query_vars = array();
@@ -319,7 +322,6 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
                     // the destination route
                     add_filter('wp_title',  array($this, 'onWpTitle'), 2);
                     add_action('wp_head',   array($this, 'onWpHead'));
-                    add_action('wp_footer', array($this, 'onWpFooter'));
                 } elseif (PHP_SAPI != 'cli') {
                     // Non-WordPress enabled route, end execution
                     echo $output;
@@ -335,6 +337,19 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
     }
 
     /**
+     * WordPress the_content hook
+     * The rendered view's content.
+     *
+     * @return void
+     */
+    public function onTheContent()
+    {
+        $frontController = $this->bootstrap('frontController')
+                                ->getResource('frontController');
+        echo $frontController->getParam('output');
+    }
+
+    /**
      * WordPress wp_footer hook
      * Allows us to inject dynamic content into the WordPress footer
      * (if supported by the theme).
@@ -343,7 +358,8 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
      */
     public function onWpFooter()
     {
-        echo '<p>Powered by <a href="http://www.vulnero.com/" target="_blank">Vulnero</a>';
+        echo '<p align="center">Powered by <a href="http://www.vulnero.com/" target="_blank">Vulnero</a> '
+            . 'and the <a href="http://framework.zend.com" target="_blank">Zend Framework</a>.';
     }
 
     /**
@@ -425,10 +441,6 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
      */
     protected function _initRouter()
     {
-        $frontController = $this->bootstrap('frontController')
-                                ->getResource('frontController');
-        $frontController->registerPlugin(new Vulnero_Controller_Plugin_Router());
-
         $routes = $this->bootstrap('routes')
                        ->getResource('routes');
         $router = $this->bootstrap('frontController')

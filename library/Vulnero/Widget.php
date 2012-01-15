@@ -95,11 +95,14 @@ abstract class Vulnero_Widget extends WP_Widget implements Vulnero_Widget_Interf
      */
     protected function _getContent()
     {
-        // Remove the widget class prefix
-        $name = str_replace('widget_', '', strtolower(get_class($this)));
+        // Remove the prefixing widget text
+        $name = str_replace('Widget_', '', get_class($this));
+
+        // Convert hungarian notation to underscore
+        $name = preg_replace('/([a-z])([A-Z])/', '$1_$2', $name);
 
         // Convert any nesting to hyphens for file naming
-        $name = str_replace('_', '-', $name);
+        $name = str_replace('_', '-', strtolower($name));
 
         // Allow the parent to initialize the view like a controller
         $this->displayAction();
@@ -107,6 +110,18 @@ abstract class Vulnero_Widget extends WP_Widget implements Vulnero_Widget_Interf
         // Append the view extension
         $config = $this->_bootstrap->getOptions();
         return $this->view->render($name . '.' . $config['resources']['layout']['viewSuffix']);
+    }
+
+    /**
+     * Sets the widget's title, defaults to widget name.
+     *
+     * @param   string
+     * @return  Vulnero_Widget
+     */
+    public function setTitle($title)
+    {
+        $this->_name = $title;
+        return $this;
     }
 
     /**
