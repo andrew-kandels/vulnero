@@ -13,3 +13,9 @@ Stack trace:
 [14-Jan-2012 17:14:32] PHP Notice:  Undefined property: Vulnero_Controller_Plugin_Router::$_requestObject in /var/www/vulnero-website/wp-content/plugins/vulnero/library/Vulnero/Controller/Plugin/Router.php on line 118
 [14-Jan-2012 17:15:19] PHP Fatal error:  Call to undefined method Vulnero_Controller_Plugin_Router::getRequestObject() in /var/www/vulnero-website/wp-content/plugins/vulnero/application/widgets/Widget/Download.php on line 80
 [14-Jan-2012 17:15:21] PHP Fatal error:  Call to undefined method Vulnero_Controller_Plugin_Router::getRequestObject() in /var/www/vulnero-website/wp-content/plugins/vulnero/application/widgets/Widget/Download.php on line 80
+[14-Jan-2012 23:40:12] PHP Notice:  Undefined variable: sa_settings in /var/www/vulnero.com/dev/wp-content/themes/wpbootstrap/header.php on line 58
+[14-Jan-2012 23:40:12] PHP Notice:  Undefined variable: sa_settings in /var/www/vulnero.com/dev/wp-content/themes/wpbootstrap/header.php on line 65
+[14-Jan-2012 23:40:12] PHP Notice:  Undefined variable: sa_settings in /var/www/vulnero.com/dev/wp-content/themes/wpbootstrap/header.php on line 58
+[14-Jan-2012 23:40:12] PHP Notice:  Undefined variable: sa_settings in /var/www/vulnero.com/dev/wp-content/themes/wpbootstrap/header.php on line 65
+[15-Jan-2012 00:03:47] PHP Notice:  Undefined variable: sa_options in /var/www/vulnero.com/dev/wp-content/themes/wpbootstrap/header.php on line 59
+[15-Jan-2012 00:03:48] PHP Notice:  Undefined variable: sa_options in /var/www/vulnero.com/dev/wp-content/themes/wpbootstrap/header.php on line 59
