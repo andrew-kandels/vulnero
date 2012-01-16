@@ -65,7 +65,9 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
         $frontController->setParam('bootstrap', $this);
 
         add_action('wp_enqueue_scripts', array($this, 'onWpEnqueueScripts'));
-        add_action('wp_footer', array($this, 'onWpFooter'));
+        add_filter('wp_title',           array($this, 'onWpTitle'), 2);
+        add_action('wp_footer',          array($this, 'onWpFooter'));
+        add_action('wp_head',            array($this, 'onWpHead'));
     }
 
     /**
@@ -287,7 +289,7 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
 
                 // Controller plugin injects content into the WordPress the_content() hook
                 $frontController->setParam('output', $output);
-                add_action('the_content', array($this, 'onTheContent'));
+                add_action('the_content', array($this, 'onTheContentRouted'));
 
                 $routeName = $frontController->getRouter()->getCurrentRouteName();
 
@@ -317,11 +319,6 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
                         'pagename' => $wpRoute
                     );
                     $wordpress->extra_query_vars = array();
-
-                    // Register some additional hooks for processing now that we control
-                    // the destination route
-                    add_filter('wp_title',  array($this, 'onWpTitle'), 2);
-                    add_action('wp_head',   array($this, 'onWpHead'));
                 } elseif (PHP_SAPI != 'cli') {
                     // Non-WordPress enabled route, end execution
                     echo $output;
@@ -330,6 +327,7 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
             } catch (Zend_Controller_Router_Exception $e) {
                 // our application didn't answer the route, so it passes control
                 // back to WordPress simply by doing nothing
+                add_action('the_content', array($this, 'onTheContent'));
             }
 
             return $frontController->getRequest();
@@ -337,16 +335,29 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
     }
 
     /**
-     * WordPress the_content hook
+     * WordPress the_content hook for routed routes.
      * The rendered view's content.
      *
-     * @return void
+     * @param   string      Current content
+     * @return  void
      */
-    public function onTheContent()
+    public function onTheContentRouted($content)
     {
         $frontController = $this->bootstrap('frontController')
                                 ->getResource('frontController');
-        echo $frontController->getParam('output');
+        return $content . $frontController->getParam('output');
+    }
+
+    /**
+     * WordPress the_content hook for non-routed WordPress routes.
+     * The rendered view's content.
+     *
+     * @param   string      Current content
+     * @return void
+     */
+    public function onTheContent($content)
+    {
+        return $content;
     }
 
     /**
@@ -390,12 +401,18 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
      *
      * @return  string
      */
-    public function onWpTitle()
+    public function onWpTitle($title)
     {
-        $view = $this->bootstrap('view')
-                     ->getResource('view');
-        // @todo use separator from the view
-        return strip_tags($view->headTitle()) . ' - ';
+        $frontController = $this->bootstrap('frontController')
+                                ->getResource('frontController');
+        // only set the title if we own the route
+        if ($frontController->getParam('output')) {
+            $view = $this->bootstrap('view')
+                         ->getResource('view');
+            return strip_tags($view->headTitle()) . ' - ';
+        } else {
+            return $title;
+        }
     }
 
     /**

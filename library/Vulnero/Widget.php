@@ -40,17 +40,29 @@
 abstract class Vulnero_Widget extends WP_Widget implements Vulnero_Widget_Interface
 {
     /**
-     * Widget name.
+     * Widget title (defined in the parent class).
      * @var string
      */
-    protected $_name;
+    protected $_title;
+
+    /**
+     * Widget description (optional).
+     * @var string
+     */
+    protected $_description = '';
 
     /**
      * Whether to print and filter the widget wrappers from WordPress such
      * as before_widget and such.
      * @var boolean
      */
-    protected $_wrappers = true;
+    protected $_drawWrappers = true;
+
+    /**
+     * Whether to print the title when rendering the widget.
+     * @var boolean
+     */
+    protected $_drawTitle = true;
 
     /**
      * Stores the Zend_Application bootstrap for retrieving views and
@@ -70,22 +82,42 @@ abstract class Vulnero_Widget extends WP_Widget implements Vulnero_Widget_Interf
     /**
      * Instantiates a new widget and registers it with WordPress.
      *
-     * @param   string          Name of the widget (e.g.: About Vulnero)
-     * @param   string          Description (shown in the administration panel to describe it)
      * @return  Vulnero_Widget
      */
-    public function __construct($name, $description = '')
+    public function __construct()
     {
         parent::WP_Widget(
             strtolower(get_class($this)),
-            $this->_name = $name,
-            array('description' => $description)
+            $this->_title,
+            array('description' => $this->_description)
         );
 
         $frontController  = Zend_Controller_Front::getInstance();
         $this->_bootstrap = $frontController->getParam('bootstrap');
-        $this->view = clone $this->_bootstrap->bootstrap('view')->getResource('view');
+        $this->view       = clone $this->_bootstrap->bootstrap('view')->getResource('view');
         $this->view->setScriptPath(APPLICATION_PATH . '/views/scripts/widgets');
+
+        $this->_init();
+    }
+
+    /**
+     * Returns the page request URI string.
+     *
+     * @return  string
+     */
+    protected function _getRequestUri()
+    {
+        return $_SERVER['REQUEST_URI'];
+    }
+
+    /**
+     * Called when the widget has been initialized with WordPress.
+     *
+     * @return  void
+     */
+    protected function _init()
+    {
+        // optionally implemented by parent class
     }
 
     /**
@@ -113,14 +145,15 @@ abstract class Vulnero_Widget extends WP_Widget implements Vulnero_Widget_Interf
     }
 
     /**
-     * Sets the widget's title, defaults to widget name.
+     * Sets whether the title is drawn above the widget. Wrappers must
+     * be drawn for this to occur.
      *
      * @param   string
      * @return  Vulnero_Widget
      */
-    public function setTitle($title)
+    public function setDrawTitle($b)
     {
-        $this->_name = $title;
+        $this->_drawTitle = $b;
         return $this;
     }
 
@@ -131,21 +164,10 @@ abstract class Vulnero_Widget extends WP_Widget implements Vulnero_Widget_Interf
      * @param   boolean         New value
      * @return  Vulnero_Widget
      */
-    public function setWrappers($b)
+    public function setDrawWrappers($b)
     {
-        $this->_wrappers = (boolean) $b;
+        $this->_drawWrappers = (boolean) $b;
         return $this;
-    }
-
-    /**
-     * Returns whether or not to print and filter the wrappers from WordPress such
-     * as before_widget or widget_title.
-     *
-     * @return  boolean
-     */
-    public function getWrappers()
-    {
-        return $this->_wrappers;
     }
 
     /**
@@ -156,15 +178,15 @@ abstract class Vulnero_Widget extends WP_Widget implements Vulnero_Widget_Interf
      * @param   array $instance The settings for the particular instance of the widget
      * @return  void
      */
-    public final function widget(array $args, array $instance)
+    public function widget(array $args, array $instance)
     {
-        if ($this->isShown()) {
+        if ($this->_isShown()) {
             $stack = array();
 
-            if ($this->_wrappers) {
+            if ($this->_drawWrappers) {
                 $stack[] = $args['before_widget'];
 
-                if ($title = apply_filters('widget_title', $this->_name)) {
+                if ($this->_drawTitle && $title = apply_filters('widget_title', $this->_title)) {
                     $stack[] = $args['before_title'];
                     $stack[] = $title;
                     $stack[] = $args['after_title'];
@@ -173,7 +195,7 @@ abstract class Vulnero_Widget extends WP_Widget implements Vulnero_Widget_Interf
 
             $stack[] = $this->_getContent();
 
-            if ($this->_wrappers) {
+            if ($this->_drawWrappers) {
                 $stack[] = $args['after_title'];
             }
 
@@ -208,6 +230,7 @@ abstract class Vulnero_Widget extends WP_Widget implements Vulnero_Widget_Interf
      */
     public function form(array $settings)
     {
+        // @todo
     }
 
     /**
@@ -216,7 +239,7 @@ abstract class Vulnero_Widget extends WP_Widget implements Vulnero_Widget_Interf
      *
      * @return  boolean
      */
-    public function isShown()
+    protected function _isShown()
     {
         return true;
     }
