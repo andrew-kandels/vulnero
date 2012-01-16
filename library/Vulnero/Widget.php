@@ -196,7 +196,7 @@ abstract class Vulnero_Widget extends WP_Widget implements Vulnero_Widget_Interf
             $stack[] = $this->_getContent();
 
             if ($this->_drawWrappers) {
-                $stack[] = $args['after_title'];
+                $stack[] = $args['after_widget'];
             }
 
             echo implode('', $stack);

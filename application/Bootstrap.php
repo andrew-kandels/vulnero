@@ -78,15 +78,6 @@ class Bootstrap extends Vulnero_Application_Bootstrap_Bootstrap
         $view->doctype('XHTML1_STRICT');
         $view->setEncoding('UTF-8');
 
-        $view->headLink()->headLink(array('rel'  => 'favicon',
-                                          'href' => '/favicon.ico',
-                                          'PREPEND'))
-//                         ->headLink(array('rel'  => 'stylesheet/less',
-//                                          'href' => PROJECT_BASE_URI . '/public/styles/bootstrap.less',
-//                                          'PREPEND'))
-                         ->appendStylesheet(PROJECT_BASE_URI . '/public/styles/main.css');
-        $view->headMeta()->appendHttpEquiv('Content-Type', 'text/html; charset=utf-8')
-                         ->appendHttpEquiv('Content-Language', 'en_US');
-//        $view->headScript()->appendScript(PROJECT_BASE_URI . '/public/scripts/less-1.2.0.min.js');
+        $view->headLink()->appendStylesheet(PROJECT_BASE_URI . '/public/styles/main.css');
     }
 }

@@ -369,7 +369,7 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
      */
     public function onWpFooter()
     {
-        echo '<p align="center">Powered by <a href="http://www.vulnero.com/" target="_blank">Vulnero</a> '
+        echo '<p>Powered by <a href="http://www.vulnero.com/" target="_blank">Vulnero</a> '
             . 'and the <a href="http://framework.zend.com" target="_blank">Zend Framework</a>.';
     }
 

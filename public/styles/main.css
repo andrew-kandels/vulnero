@@ -20,7 +20,7 @@ a:hover { color: #a66d00; }
 .page-header { border-bottom: 0; margin-bottom: 8px; }
 .well { margin-bottom: 10px; background-color: #ffcf73; }
 
-footer { background-color: #e4fcfa; border-top: 1px solid #4dc6cb; height: 100px; }
+footer { background-color: #e4fcfa; border-top: 1px solid #4dc6cb; height: 100px; text-align: center; }
 
 .highlight { background: #fff2d9; }
 
