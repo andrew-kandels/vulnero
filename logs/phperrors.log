@@ -114,3 +114,28 @@ Stack trace:
 [15-Jan-2012 07:34:46] PHP Notice:  Undefined offset: -1 in /var/www/vulnero.com/dev/wp-includes/post-template.php on line 199
 [16-Jan-2012 01:45:27] PHP Parse error:  syntax error, unexpected T_ENDIF in /var/www/vulnero.com/dev/wp-content/themes/wpbootstrap/loop.php on line 34
 [16-Jan-2012 02:34:08] PHP Parse error:  syntax error, unexpected T_OBJECT_OPERATOR in /var/www/vulnero.com/dev/wp-content/plugins/vulnero/application/Bootstrap.php on line 87
+[16-Jan-2012 03:45:11] PHP Notice:  Trying to get property of non-object in /var/www/vulnero.com/dev/wp-admin/admin-ajax.php on line 947
+[16-Jan-2012 03:45:11] PHP Notice:  Trying to get property of non-object in /var/www/vulnero.com/dev/wp-admin/admin-ajax.php on line 950
+[16-Jan-2012 03:45:11] PHP Notice:  Trying to get property of non-object in /var/www/vulnero.com/dev/wp-admin/admin-ajax.php on line 961
+[16-Jan-2012 03:45:11] PHP Notice:  Trying to get property of non-object in /var/www/vulnero.com/dev/wp-includes/capabilities.php on line 1005
+[16-Jan-2012 03:45:11] PHP Notice:  Trying to get property of non-object in /var/www/vulnero.com/dev/wp-includes/capabilities.php on line 1009
+[16-Jan-2012 03:45:11] PHP Notice:  Trying to get property of non-object in /var/www/vulnero.com/dev/wp-includes/capabilities.php on line 1011
+[16-Jan-2012 03:45:11] PHP Notice:  Trying to get property of non-object in /var/www/vulnero.com/dev/wp-includes/capabilities.php on line 1012
+[16-Jan-2012 03:45:11] PHP Notice:  Trying to get property of non-object in /var/www/vulnero.com/dev/wp-includes/capabilities.php on line 1012
+[16-Jan-2012 03:45:11] PHP Notice:  Trying to get property of non-object in /var/www/vulnero.com/dev/wp-includes/capabilities.php on line 1015
+[16-Jan-2012 03:45:11] PHP Notice:  Trying to get property of non-object in /var/www/vulnero.com/dev/wp-includes/capabilities.php on line 1015
+[16-Jan-2012 03:46:11] PHP Notice:  Trying to get property of non-object in /var/www/vulnero.com/dev/wp-admin/admin-ajax.php on line 947
+[16-Jan-2012 03:46:11] PHP Notice:  Trying to get property of non-object in /var/www/vulnero.com/dev/wp-admin/admin-ajax.php on line 950
+[16-Jan-2012 03:46:11] PHP Notice:  Trying to get property of non-object in /var/www/vulnero.com/dev/wp-admin/admin-ajax.php on line 961
+[16-Jan-2012 03:46:11] PHP Notice:  Trying to get property of non-object in /var/www/vulnero.com/dev/wp-includes/capabilities.php on line 1005
+[16-Jan-2012 03:46:11] PHP Notice:  Trying to get property of non-object in /var/www/vulnero.com/dev/wp-includes/capabilities.php on line 1009
+[16-Jan-2012 03:46:11] PHP Notice:  Trying to get property of non-object in /var/www/vulnero.com/dev/wp-includes/capabilities.php on line 1011
+[16-Jan-2012 03:46:11] PHP Notice:  Trying to get property of non-object in /var/www/vulnero.com/dev/wp-includes/capabilities.php on line 1012
+[16-Jan-2012 03:46:11] PHP Notice:  Trying to get property of non-object in /var/www/vulnero.com/dev/wp-includes/capabilities.php on line 1012
+[16-Jan-2012 03:46:11] PHP Notice:  Trying to get property of non-object in /var/www/vulnero.com/dev/wp-includes/capabilities.php on line 1015
+[16-Jan-2012 03:46:11] PHP Notice:  Trying to get property of non-object in /var/www/vulnero.com/dev/wp-includes/capabilities.php on line 1015
+[16-Jan-2012 04:26:46] PHP Fatal error:  Call to undefined method Widget_CloudBanner::init() in /var/www/vulnero.com/dev/wp-content/plugins/vulnero/library/Vulnero/Widget.php on line 100
+[16-Jan-2012 04:27:19] PHP Fatal error:  Call to undefined method Widget_CloudBanner::setTitle() in /var/www/vulnero.com/dev/wp-content/plugins/vulnero/application/widgets/Widget/CloudBanner.php on line 54
+[16-Jan-2012 04:29:44] PHP Fatal error:  Call to undefined method Widget_Download::isShown() in /var/www/vulnero.com/dev/wp-content/plugins/vulnero/library/Vulnero/Widget.php on line 183
+[16-Jan-2012 04:32:09] PHP Fatal error:  Call to undefined method Widget_Download::isShown() in /var/www/vulnero.com/dev/wp-content/plugins/vulnero/library/Vulnero/Widget.php on line 183
+[16-Jan-2012 04:32:27] PHP Notice:  Undefined property: Widget_Download::$_name in /var/www/vulnero.com/dev/wp-content/plugins/vulnero/library/Vulnero/Widget.php on line 189

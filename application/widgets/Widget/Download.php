@@ -39,19 +39,8 @@
  */
 class Widget_Download extends Vulnero_Widget
 {
-    /**
-     * Widget setup.
-     *
-     * @return  Widget_AboutVulnero
-     */
-    public function __construct()
-    {
-        parent::__construct(
-            'Download',
-            'Buttons for downloading the Vulnero plugin and for viewing it '
-            . 'on GitHub.'
-        );
-    }
+    protected $_title       = 'Download';
+    protected $_description = 'Buttons for downloading the Vulnero plugin and for viewing it on GitHub.';
 
     /**
      * Renders the contents of the widget in its view. The widget itself

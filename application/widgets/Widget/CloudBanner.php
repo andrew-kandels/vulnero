@@ -39,19 +39,15 @@
  */
 class Widget_CloudBanner extends Vulnero_Widget
 {
+    protected $_title       = 'Cloud Banner';
+    protected $_description = 'Banner widget with a rounded clouds background for text overlay.';
+
     /**
      * Widget setup.
-     *
-     * @return  Widget_AboutVulnero
      */
-    public function __construct()
+    protected function _init()
     {
-        parent::__construct(
-            'Cloud Banner',
-            'Banner widget with a rounded clouds background for text overlay.'
-        );
-
-        $this->setTitle(null);
+        $this->setDrawTitle(false);
     }
 
     /**
