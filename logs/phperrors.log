@@ -112,3 +112,5 @@ Stack trace:
 [15-Jan-2012 07:33:39] PHP Notice:  Undefined variable: wp_query in /var/www/vulnero.com/dev/wp-content/plugins/vulnero/library/Vulnero/Application/Bootstrap/Bootstrap.php on line 299
 [15-Jan-2012 07:33:39] PHP Fatal error:  Call to a member function get_queried_object() on a non-object in /var/www/vulnero.com/dev/wp-content/plugins/vulnero/library/Vulnero/Application/Bootstrap/Bootstrap.php on line 299
 [15-Jan-2012 07:34:46] PHP Notice:  Undefined offset: -1 in /var/www/vulnero.com/dev/wp-includes/post-template.php on line 199
+[16-Jan-2012 01:45:27] PHP Parse error:  syntax error, unexpected T_ENDIF in /var/www/vulnero.com/dev/wp-content/themes/wpbootstrap/loop.php on line 34
+[16-Jan-2012 02:34:08] PHP Parse error:  syntax error, unexpected T_OBJECT_OPERATOR in /var/www/vulnero.com/dev/wp-content/plugins/vulnero/application/Bootstrap.php on line 87

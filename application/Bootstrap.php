@@ -78,41 +78,15 @@ class Bootstrap extends Vulnero_Application_Bootstrap_Bootstrap
         $view->doctype('XHTML1_STRICT');
         $view->setEncoding('UTF-8');
 
-        $view->headTitle('My Project');
-
-        $view->headLink()->appendStylesheet(PROJECT_BASE_URI . '/public/styles/main.css');
-
+        $view->headLink()->headLink(array('rel'  => 'favicon',
+                                          'href' => '/favicon.ico',
+                                          'PREPEND'))
+//                         ->headLink(array('rel'  => 'stylesheet/less',
+//                                          'href' => PROJECT_BASE_URI . '/public/styles/bootstrap.less',
+//                                          'PREPEND'))
+                         ->appendStylesheet(PROJECT_BASE_URI . '/public/styles/main.css');
         $view->headMeta()->appendHttpEquiv('Content-Type', 'text/html; charset=utf-8')
                          ->appendHttpEquiv('Content-Language', 'en_US');
-    }
-
-    /**
-     * Registers and queues CSS stylesheets globally. If the stylesheet is
-     * used only by your Vulnero routes, it's recommended to use the
-     * headLink() view helper in your controller or viewSettings bootstrap.
-     *
-     * If no path information is provided they are assumed to be located in
-     * your plugin's public/styles directory.
-     *
-     * @return  array
-     */
-    protected function _initStylesheets()
-    {
-        return array('main.css');
-    }
-
-    /**
-     * Registers and queues JavaScript scripts globally. If the script is
-     * used only by your Vulnero routes, it's recommended to use the
-     * headScript() view helper in your controller or viewSettings bootstrap.
-     *
-     * If no path information is provided they are assumed to be located in
-     * your plugin's public/scripts directory.
-     *
-     * @return  array
-     */
-    protected function _initScripts()
-    {
-        return array();
+//        $view->headScript()->appendScript(PROJECT_BASE_URI . '/public/scripts/less-1.2.0.min.js');
     }
 }
