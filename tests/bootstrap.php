@@ -41,34 +41,11 @@
  * @link        http://www.vulnero.com
  */
 
-ini_set('display_errors', '1');
-ini_set('error_reporting', E_ALL);
+define('APPLICATION_ENV', 'test');
 
-if (!defined('APPLICATION_ENV')) {
-    define('APPLICATION_ENV', 'test');
-}
-
-if (!defined('PROJECT_BASE_PATH')) {
-    define('PROJECT_BASE_PATH', realpath(dirname(__FILE__) . '/..'));
-}
-
-if (!defined('APPLICATION_PATH')) {
-    define('APPLICATION_PATH', PROJECT_BASE_PATH . '/application');
-}
-
-set_include_path(implode(PATH_SEPARATOR, array(
-    PROJECT_BASE_PATH . '/library',
-    APPLICATION_PATH . '/models',
-    APPLICATION_PATH . '/forms',
-    get_include_path()
-)));
-
-require 'Zend/Loader/Autoloader.php';
-$autoLoader = Zend_Loader_Autoloader::getInstance();
-$autoLoader->setFallbackAutoloader(true);
-$autoLoader->suppressNotFoundWarnings(true);
+// Include the cli.php script which creates mock WordPress functions so the plugin
+// will bootstrap outside of WordPress plugin execution
+require_once dirname(__FILE__) . '/../cli.php';
 
 Zend_Session::$_unitTestEnabled = true;
 Zend_Session::start();
-
-require_once PROJECT_BASE_PATH . '/tests/mock.php';

@@ -1,9 +1,10 @@
 <?php
 /**
- * Vulerno
+ * Vulnero
  *
- * Fake WordPress methods to simulate an actual WordPress installation
- * for the purposes of unit testing.
+ * Alternative execution path to vulnero.php which avoids WordPress
+ * by mocking it's hooks and actions with dummies. Used for unit
+ * testing and command-line scripts that need the bootstrapping.
  *
  * Copyright (c) 2012, Andrew Kandels <me@andrewkandels.com>.
  * All rights reserved.
@@ -41,6 +42,13 @@
  * @link        http://www.vulnero.com
  */
 
+require_once dirname(__FILE__) . '/vulnero.php';
+
+// Begin WordPress mock functions
+function register_activation_hook($file, $callBack) {}
+function add_action($hook, array $callBack) {}
+function add_filter($filter, array $callBack) {}
+
 function get_bloginfo($name)
 {
     switch ($name) {
@@ -66,8 +74,6 @@ function get_bloginfo($name)
             throw new InvalidArgumentException($name . ' is not a valid argument to get_bloginfo.');
     }
 }
-
-function add_action($hook, array $callBack) {}
 
 function get_theme_root()
 {

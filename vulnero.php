@@ -59,7 +59,10 @@ if (!defined('PLUGIN_NAME')) {
 }
 
 if (!defined('PROJECT_BASE_URI')) {
-    define('PROJECT_BASE_URI', WP_PLUGIN_URL . '/' . PLUGIN_NAME);
+    $baseUrl = defined('WP_PLUGIN_URL')
+        ? WP_PLUGIN_URL
+        : '/wp-content/plugins';
+    define('PROJECT_BASE_URI', $baseUrl . '/' . PLUGIN_NAME);
 }
 
 if (!defined('APPLICATION_ENV')) {
@@ -82,12 +85,10 @@ set_include_path(implode(PATH_SEPARATOR, array(
     get_include_path()
 )));
 
-if (empty($autoLoader)) {
-    require 'Zend/Loader/Autoloader.php';
-    $autoLoader = Zend_Loader_Autoloader::getInstance();
-    $autoLoader->setFallbackAutoloader(true);
-    $autoLoader->suppressNotFoundWarnings(true);
-}
+require 'Zend/Loader/Autoloader.php';
+$autoLoader = Zend_Loader_Autoloader::getInstance();
+$autoLoader->setFallbackAutoloader(true);
+$autoLoader->suppressNotFoundWarnings(true);
 
 // Called upon first activating the plugin
 register_activation_hook(__FILE__, 'vulnero_activate');
@@ -97,11 +98,6 @@ $application = new Vulnero_Application(
     APPLICATION_PATH . '/config/config.ini'
 );
 $application->bootstrap();
-
-// Unit testing
-if (PHP_SAPI == 'cli') {
-    Zend_Registry::set('application', $application);
-}
 
 // End of Zend Framework bootstrapping
 

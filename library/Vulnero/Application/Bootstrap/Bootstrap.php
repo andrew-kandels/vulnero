@@ -285,6 +285,7 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
                 // WordPress the_content() hook so it's displayed in the correct
                 // position on the page
                 $frontController->returnResponse(true);
+
                 $output = $frontController->dispatch();
 
                 // Controller plugin injects content into the WordPress the_content() hook
