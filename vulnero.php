@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Vulnero
-Plugin URI: http://andrewkandels.com/vulnero/
+Plugin URI: http://www.vulnero.com/
 Description: Vulnero is a WordPress plugin that transforms WordPress into an object-oriented CMS by implementing a Zend Framework application that interfaces with its API.
 Version: 0.1.0
 Author: Andrew Kandels
@@ -13,7 +13,7 @@ Author URI: http://andrewkandels.com/
  *
  * WordPress entry-point file containing plug-in definition.
  *
- * Copyright (c) 2011, Andrew Kandels <me@andrewkandels.com>.
+ * Copyright (c) 2012, Andrew Kandels <me@andrewkandels.com>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,9 +44,9 @@ Author URI: http://andrewkandels.com/
  * @category    WordPress
  * @package     vulnero
  * @author      Andrew Kandels <me@andrewkandels.com>
- * @copyright   2011 Andrew Kandels <me@andrewkandels.com>
+ * @copyright   2012 Andrew Kandels <me@andrewkandels.com>
  * @license     http://www.opensource.org/licenses/bsd-license.php  BSD License
- * @link        http://andrewkandels.com/vulnero
+ * @link        http://www.vulnero.com
  */
 
 ini_set('display_errors', '1');
@@ -59,7 +59,10 @@ if (!defined('PLUGIN_NAME')) {
 }
 
 if (!defined('PROJECT_BASE_URI')) {
-    define('PROJECT_BASE_URI', WP_PLUGIN_URL . '/' . PLUGIN_NAME);
+    $baseUrl = defined('WP_PLUGIN_URL')
+        ? WP_PLUGIN_URL
+        : '/wp-content/plugins';
+    define('PROJECT_BASE_URI', $baseUrl . '/' . PLUGIN_NAME);
 }
 
 if (!defined('APPLICATION_ENV')) {
@@ -82,38 +85,13 @@ set_include_path(implode(PATH_SEPARATOR, array(
     get_include_path()
 )));
 
-if (empty($autoLoader)) {
-    require 'Zend/Loader/Autoloader.php';
-    $autoLoader = Zend_Loader_Autoloader::getInstance();
-    $autoLoader->setFallbackAutoloader(true);
-    $autoLoader->suppressNotFoundWarnings(true);
-}
-
-// Called upon first activating the plugin
-register_activation_hook(__FILE__, 'vulnero_activate');
+require 'Zend/Loader/Autoloader.php';
+$autoLoader = Zend_Loader_Autoloader::getInstance();
+$autoLoader->setFallbackAutoloader(true);
+$autoLoader->suppressNotFoundWarnings(true);
 
 $application = new Vulnero_Application(
     APPLICATION_ENV,
     APPLICATION_PATH . '/config/config.ini'
 );
 $application->bootstrap();
-
-// Unit testing
-if (PHP_SAPI == 'cli') {
-    Zend_Registry::set('application', $application);
-}
-
-// End of Zend Framework bootstrapping
-
-/**
- * WordPress activate_{plugin name} hook
- * Called when the Vulnero plugin is activated for the first time.
- * This can't be called from the bootstrap so we have to resort to
- * using a Zend_Registry key.
- *
- * @return  void
- */
-function vulnero_activate()
-{
-    Zend_Registry::set('plugin-activated', true);
-}

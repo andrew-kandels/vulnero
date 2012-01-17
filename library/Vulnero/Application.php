@@ -3,7 +3,7 @@
  * Vulnero extended Zend_Application class designed to cache the config
  * file either in APC (if available) or as a file.
  *
- * Copyright (c) 2011, Andrew Kandels <me@andrewkandels.com>.
+ * Copyright (c) 2012, Andrew Kandels <me@andrewkandels.com>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,9 +34,9 @@
  * @category    WordPress
  * @package     vulnero
  * @author      Andrew Kandels <me@andrewkandels.com>
- * @copyright   2011 Andrew Kandels <me@andrewkandels.com>
+ * @copyright   2012 Andrew Kandels <me@andrewkandels.com>
  * @license     http://www.opensource.org/licenses/bsd-license.php  BSD License
- * @link        http://andrewkandels.com/vulnero
+ * @link        http://www.vulnero.com
  */
 class Vulnero_Application extends Zend_Application
 {
@@ -53,7 +53,7 @@ class Vulnero_Application extends Zend_Application
         $frontendOptions = array(
             'automatic_serialization'   => true,
             'master_file'               => $file,
-            'cache_id_prefix'           => APPLICATION_ENV
+            'cache_id_prefix'           => APPLICATION_ENV,
         );
 
         if (extension_loaded('apc')) {
@@ -76,9 +76,6 @@ class Vulnero_Application extends Zend_Application
             }
         }
 
-        // Save for bootstrapping
-        Zend_Registry::set('config', $obj = new Zend_Config($config));
-
         return $config;
     }
 
@@ -91,43 +88,38 @@ class Vulnero_Application extends Zend_Application
      */
     protected function _initWordPress(array $config)
     {
-        if (!function_exists('get_bloginfo')) {
-            throw new RuntimeException('Vulnero must be installed and run through '
-                . 'WordPress as a plugin. WordPress get_bloginfo() global function '
-                . 'not detected.'
-            );
-        }
+        $wordPress = new Vulnero_WordPress();
 
         $config['wordpress'] = array(
-            'name'                  => get_bloginfo('name'),
-            'description'           => get_bloginfo('description'),
-            'wpurl'                 => get_bloginfo('wpurl'),
-            'siteurl'               => get_bloginfo('siteurl'),
-            'admin_email'           => get_bloginfo('admin_email'),
-            'charset'               => get_bloginfo('charset'),
-            'version'               => get_bloginfo('version'),
-            'html_type'             => get_bloginfo('html_type'),
-            'text_direction'        => get_bloginfo('text_direction'),
-            'language'              => get_bloginfo('language'),
-            'stylesheet_url'        => get_bloginfo('stylesheet_url'),
-            'stylesheet_directory'  => get_bloginfo('stylesheet_directory'),
-            'template_url'          => get_bloginfo('template_url'),
-            'pingback_url'          => get_bloginfo('pingback_url'),
+            'name'                  => $wordPress->getBlogInfo('name'),
+            'description'           => $wordPress->getBlogInfo('description'),
+            'wpurl'                 => $wordPress->getBlogInfo('wpurl'),
+            'siteurl'               => $wordPress->getBlogInfo('siteurl'),
+            'admin_email'           => $wordPress->getBlogInfo('admin_email'),
+            'charset'               => $wordPress->getBlogInfo('charset'),
+            'version'               => $wordPress->getBlogInfo('version'),
+            'html_type'             => $wordPress->getBlogInfo('html_type'),
+            'text_direction'        => $wordPress->getBlogInfo('text_direction'),
+            'language'              => $wordPress->getBlogInfo('language'),
+            'stylesheet_url'        => $wordPress->getBlogInfo('stylesheet_url'),
+            'stylesheet_directory'  => $wordPress->getBlogInfo('stylesheet_directory'),
+            'template_url'          => $wordPress->getBlogInfo('template_url'),
+            'pingback_url'          => $wordPress->getBlogInfo('pingback_url'),
             'tags'                  => array(),
             'categories'            => array(),
-            'template'              => get_template()
+            'template'              => $wordPress->getTemplate(),
         );
 
         // Store WordPress tags in a convenience array
-        $tags = get_tags();
+        $tags = $wordPress->getTags();
         foreach ($tags as $tag) {
             $config['wordpress']['tags'][] = $tag;
         }
 
         // Store WordPress categories in a convenience array
-        $categories = wp_get_post_categories();
+        $categories = $wordPress->getPostCategories();
         foreach ($categories as $category) {
-            $obj = get_category($category);
+            $obj = $wordPress->getCategory($category);
             $config['wordpress']['categories'] = $obj;
         }
 

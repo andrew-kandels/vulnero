@@ -3,7 +3,7 @@
  * Vulnero bootstrap which sets up the majority of the application's
  * functionality and convenience objects.
  *
- * Copyright (c) 2011, Andrew Kandels <me@andrewkandels.com>.
+ * Copyright (c) 2012, Andrew Kandels <me@andrewkandels.com>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,120 +34,36 @@
  * @category    WordPress
  * @package     vulnero
  * @author      Andrew Kandels <me@andrewkandels.com>
- * @copyright   2011 Andrew Kandels <me@andrewkandels.com>
+ * @copyright   2012 Andrew Kandels <me@andrewkandels.com>
  * @license     http://www.opensource.org/licenses/bsd-license.php  BSD License
- * @link        http://andrewkandels.com/vulnero
+ * @link        http://www.vulnero.com
  */
 abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap_Bootstrap
 {
     /**
-     * Initializes the basic hooks for core functionality such as
-     * the WordPress plugins_loaded hook for trapping when the
-     * plugin is loaded each request as well as dealing with calling the
-     * onPluginActivated method when the plugin is activated in the
-     * admin panel.
+     * Initialize Vulnero_WordPress, which is the single object for
+     * interfacing with the WordPress API either in mock mode for
+     * unit tests or cli scripts or against the actual API functions.
+     *
+     * Secondly, register some of the required actions, filters and
+     * hooks Vulnero needs for proper operation.
      *
      * @return void
      */
     protected function _initWordPress()
     {
-        // Setup WordPress hooks and filters we'll subscribe to
-        add_action('plugins_loaded', array($this, 'onPluginLoaded'));
-
-        $registry = Zend_Registry::getInstance();
-        if (isset($registry['plugin-activated'])) {
-            $this->onPluginActivated();
-        }
+        $wordPress = new Vulnero_WordPress($this);
+        $wordPress->addAction('plugins_loaded')
+                  ->addFilter('wp_title')
+                  ->addAction('wp_footer')
+                  ->addAction('wp_head', 2);
 
         // The view needs to be saved so that widgets can get ahold of it externally
-        $frontController = $this->bootstrap('frontController')
-                                ->getResource('frontController');
-        $frontController->setParam('bootstrap', $this);
+        $this->bootstrap('frontController')
+             ->getResource('frontController')
+             ->setParam('bootstrap', $this);
 
-        add_action('wp_enqueue_scripts', array($this, 'onWpEnqueueScripts'));
-        add_filter('wp_title',           array($this, 'onWpTitle'), 2);
-        add_action('wp_footer',          array($this, 'onWpFooter'));
-        add_action('wp_head',            array($this, 'onWpHead'));
-    }
-
-    /**
-     * Registers any bootstrapped stylesheets or scripts globally for
-     * WordPress as a whole.
-     *
-     * @return  void
-     */
-    public function onWpEnqueueScripts()
-    {
-        $stylesheets = $this->bootstrap('stylesheets')
-                            ->getResource('stylesheets');
-        if ($stylesheets) {
-            foreach ($stylesheets as $stylesheet) {
-                $id  = PLUGIN_NAME . '-' . basename($stylesheet);
-                if (basename($stylesheet) == $stylesheet) {
-                    $url = plugins_url(PLUGIN_NAME . '/public/styles/' . $stylesheet);
-                } else {
-                    $url = $stylesheet;
-                }
-                wp_register_style($id, $url, PROJECT_BASE_PATH);
-                wp_enqueue_style($id);
-            }
-        }
-
-        $scripts = $this->bootstrap('stylesheets')
-                        ->getResource('stylesheets');
-        if ($scripts) {
-            foreach ($scripts as $script) {
-                $id  = PLUGIN_NAME . '-' . basename($script);
-                if (basename($script) == $script) {
-                    $url = plugins_url(PLUGIN_NAME . '/public/scripts/' . $script);
-                } else {
-                    $url = $script;
-                }
-                wp_register_script($id, $url, PROJECT_BASE_PATH);
-                wp_enqueue_script($id);
-            }
-        }
-    }
-
-    /**
-     * Registers and queues CSS stylesheets globally.
-     *
-     * @return  array
-     */
-    protected function _initStylesheets()
-    {
-        return array();
-    }
-
-    /**
-     * Registers and queues JavaScript scripts globally.
-     *
-     * @return  array
-     */
-    protected function _initScripts()
-    {
-        return array();
-    }
-
-    /**
-     * WordPress activate_{plugin name} hook
-     * Called when the plugin is activated for the first time.
-     *
-     * @return void
-     */
-    public function onPluginActivated()
-    {
-    }
-
-    /**
-     * WordPress plugins_loaded hook
-     * Allows our application to inject sidebar widgets, scripts or stylesheets
-     * into WordPress (if our application doesn't handle the route).
-     *
-     * @return  void
-     */
-    public function onPluginLoaded()
-    {
+        return $wordPress;
     }
 
     /**
@@ -155,39 +71,11 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
      *
      * @return  void
      */
-    protected function _initWpWidgets()
+    protected function _initWidgets()
     {
-        add_action('widgets_init', array($this, 'onWpWidgetsInit'));
-    }
-
-    /**
-     * WordPress widgets_init hook
-     * Registers plugin widgets
-     *
-     * @return  void
-     */
-    public function onWpWidgetsInit()
-    {
-        $cache = $this->bootstrap('cache')
-                      ->getResource('cache');
-
-        if (!$widgets = $cache->load('widgets')) {
-            // Automatically detect and load any widget classes, caching the work
-            $widgets = array();
-
-            $di = new DirectoryIterator(APPLICATION_PATH . '/widgets/Widget');
-            foreach ($di as $item) {
-                if ($item->isFile() && substr($item->getFilename(), -4) == '.php') {
-                    $widgets[] = 'Widget_' . substr($item->getFilename(), 0, -4);
-                }
-            }
-
-            $cache->save($widgets, 'widgets');
-        }
-
-        foreach ($widgets as $widget) {
-            register_widget($widget);
-        }
+        $this->bootstrap('wordPress')
+             ->getResource('wordPress')
+             ->addAction('widgets_init');
     }
 
     /**
@@ -196,234 +84,13 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
      *
      * @return  void
      */
-    protected function _initWpTemplates()
+    protected function _initTemplates()
     {
-        add_filter('page_template', array($this, 'onWpPageTemplate'));
-        add_filter('home_template', array($this, 'onWpHomeTemplate'));
-        add_filter('single_template', array($this, 'onWpSingleTemplate'));
-    }
-
-    /**
-     * WordPress home_template filter
-     *
-     * @return  void
-     */
-    public function onWpHomeTemplate()
-    {
-        return $this->onWpTemplates('home');
-    }
-
-    /**
-     * WordPress page_template filter
-     *
-     * @return  void
-     */
-    public function onWpPageTemplate()
-    {
-        return $this->onWpTemplates('page');
-    }
-
-    /**
-     * WordPress single_template filter
-     *
-     * @return  void
-     */
-    public function onWpSingleTemplate()
-    {
-        return $this->onWpTemplates('single');
-    }
-
-    /**
-     * WordPress home_template filter
-     * Called when WordPress attempts to locate a template (e.g.: home.php) in the
-     * theme. If this is a valid WordPress request, we're going to override it and
-     * instead specify that the template is wordpress-template.php in the plugin's
-     * directory.
-     *
-     * @param   string          Template type (e.g.: home, page)
-     * @return  void
-     */
-    public function onWpTemplates($template)
-    {
-        $frontController = $this->bootstrap('frontController')
-                                ->getResource('frontController');
-        if ($frontController->getParam('output')) {
-            return PROJECT_BASE_PATH . '/wordpress-template.php';
-        } else {
-            return locate_template(array($template));
-        }
-    }
-
-    /**
-     * WordPress send_headers hook
-     * Note: Permalinks must be enabled in WordPress for Vulnero to extend routing.
-     * Create a new Zend_Controller_Request_Http object with the WordPress
-     * route. Upon failure, we assume the route isn't handled and let WordPress
-     * deal with it.
-     *
-     * @param   WordPress       WordPress object which contains the route
-     * @return  void
-     */
-    public function onSendHeaders($wordpress)
-    {
-        // Permalinks must be enabled in WordPress for request to be set
-        if (isset($wordpress->request) && ($wpRequest = $wordpress->request)) {
-            $frontController = $this->bootstrap('frontController')
-                                    ->getResource('frontController');
-            $routes          = $this->bootstrap('routes')
-                                    ->getResource('routes');
-
-            // Generate a new request object built from the WordPress route
-            $options         = $this->getOptions();
-            $uri             = $options['wordpress']['siteurl'] . '/' . $wpRequest;
-            $uriObj          = Zend_Uri::factory($uri);
-            $request         = new Zend_Controller_Request_Http($uriObj);
-            $frontController->setRequest($request);
-
-            try {
-                // We need to capture the output so as to insert it only via the
-                // WordPress the_content() hook so it's displayed in the correct
-                // position on the page
-                $frontController->returnResponse(true);
-                $output = $frontController->dispatch();
-
-                // Controller plugin injects content into the WordPress the_content() hook
-                $frontController->setParam('output', $output);
-                add_action('the_content', array($this, 'onTheContentRouted'));
-
-                $routeName = $frontController->getRouter()->getCurrentRouteName();
-
-                // Wrap in WordPress or render stand-alone?
-                $isWpRoute = isset($routes->$routeName->wordpress)
-                    ? (boolean) $routes->$routeName->wordpress
-                    : true;
-
-                // Application specified a WordPress route to wrap this request like a
-                // layout.
-                if ($isWpRoute) {
-                    // Processing will be passed to WordPress and our application
-                    // content will be inserted into the the_content() hook via
-                    // the router controller plugin
-                    $wpRoute = '';
-
-                    // get the id of the front page, we're going to pretend we're it
-                    $pageId = get_option('page_on_front');
-
-                    // trick WordPress into thinking the request is valid
-                    $wordpress->request = $wpRoute;
-                    $wordpress->query_string = '';
-                    $wordpress->matched_rule = '(' . preg_quote($wpRoute) . ')(/.*)$';
-                    $wordpress->matched_query = 'pagename=' . urlencode($wpRoute) . '&page=' . $pageId;
-                    $wordpress->query_vars = array(
-                        'page' => $pageId,
-                        'pagename' => $wpRoute
-                    );
-                    $wordpress->extra_query_vars = array();
-                } elseif (PHP_SAPI != 'cli') {
-                    // Non-WordPress enabled route, end execution
-                    echo $output;
-                    exit(0);
-                }
-            } catch (Zend_Controller_Router_Exception $e) {
-                // our application didn't answer the route, so it passes control
-                // back to WordPress simply by doing nothing
-                add_action('the_content', array($this, 'onTheContent'));
-            }
-
-            return $frontController->getRequest();
-        }
-    }
-
-    /**
-     * WordPress the_content hook for routed routes.
-     * The rendered view's content.
-     *
-     * @param   string      Current content
-     * @return  void
-     */
-    public function onTheContentRouted($content)
-    {
-        $frontController = $this->bootstrap('frontController')
-                                ->getResource('frontController');
-        return $content . $frontController->getParam('output');
-    }
-
-    /**
-     * WordPress the_content hook for non-routed WordPress routes.
-     * The rendered view's content.
-     *
-     * @param   string      Current content
-     * @return void
-     */
-    public function onTheContent($content)
-    {
-        return $content;
-    }
-
-    /**
-     * WordPress wp_footer hook
-     * Allows us to inject dynamic content into the WordPress footer
-     * (if supported by the theme).
-     *
-     * @return void
-     */
-    public function onWpFooter()
-    {
-        echo '<p align="center">Powered by <a href="http://www.vulnero.com/" target="_blank">Vulnero</a> '
-            . 'and the <a href="http://framework.zend.com" target="_blank">Zend Framework</a>.';
-    }
-
-    /**
-     * WordPress wp_head hook
-     * Allows us to inject dynamic content into the WordPress header
-     * (if supported by the theme).
-     *
-     * @return  void
-     */
-    public function onWpHead()
-    {
-        $view = $this->bootstrap('view')
-                     ->getResource('view');
-
-        $components = array(
-            $view->headMeta(),
-            $view->headStyle(),
-            $view->headLink(),
-            $view->headScript()
-        );
-
-        echo implode(PHP_EOL, $components);
-    }
-
-    /**
-     * WordPress wp_title hook
-     * Change or alter the page title (if supported by the theme).
-     *
-     * @return  string
-     */
-    public function onWpTitle($title)
-    {
-        $frontController = $this->bootstrap('frontController')
-                                ->getResource('frontController');
-        // only set the title if we own the route
-        if ($frontController->getParam('output')) {
-            $view = $this->bootstrap('view')
-                         ->getResource('view');
-            return strip_tags($view->headTitle()) . ' - ';
-        } else {
-            return $title;
-        }
-    }
-
-    /**
-     * Retrieves our initialized Zend_Config object and saves it in
-     * the registry for easy access.
-     *
-     * @return Zend_Config
-     */
-    protected function _initConfig()
-    {
-        return Zend_Registry::get('config');
+        $this->bootstrap('wordPress')
+             ->getResource('wordPress')
+             ->addFilter('page_template')
+             ->addFilter('home_template')
+             ->addFilter('single_template');
     }
 
     /**
@@ -463,13 +130,29 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
         $router = $this->bootstrap('frontController')
                        ->getResource('frontController')
                        ->getRouter();
-        $router->removeDefaultRoutes();
 
-        $router->addConfig($routes);
+        // setup the router to better work with our module-less setup
+        $router->removeDefaultRoutes()
+               ->setGlobalParam('module', 'default')
+               ->addConfig($routes);
 
-        add_action('send_headers', array($this, 'onSendHeaders'));
+        // this is where the routing takes place
+        $this->bootstrap('wordPress')
+             ->getResource('wordPress')
+             ->addAction('send_headers');
 
         return $router;
+    }
+
+    /**
+     * Retrieves our initialized Zend_Config object and saves it in
+     * the registry for easy access.
+     *
+     * @return Zend_Config
+     */
+    protected function _initConfig()
+    {
+        return new Zend_Config($this->getOptions());
     }
 
     /**
@@ -626,20 +309,301 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
      */
     protected function _initAdmin()
     {
-        add_action('admin_menu', array($this, 'onAdmin'));
+        $this->bootstrap('wordPress')
+             ->getResource('wordPress')
+             ->addAction('admin_menu');
 
         return null;
     }
 
     /**
-     * WordPress admin_menu hook
+     * Sets up global view parameters and defaults.
+     *
+     * @return  void
+     */
+    protected function _initViewSettings()
+    {
+        $view = $this->bootstrap('view')
+                     ->getResource('view');
+
+        $view->doctype('XHTML1_STRICT');
+        $view->setEncoding('UTF-8');
+
+        $view->headLink()->appendStylesheet(PROJECT_BASE_URI . '/public/styles/main.css');
+
+        $layout    = $this->bootstrap('layout');
+        $wordPress = $this->bootstrap('wordPress')
+                          ->getResource('wordPress');
+        $layout->wordPress = $view->wordPress = $wordPress;
+    }
+
+
+    /********************************************************************************/
+    //
+    //          Begin WordPress API Callback Methods
+    //
+    /********************************************************************************/
+
+    /**
+     * WordPress plugins_loaded hook
+     * Allows our application to inject sidebar widgets, scripts or stylesheets
+     * into WordPress (if our application doesn't handle the route).
+     *
+     * @return  void
+     */
+    public function onPluginsLoaded()
+    {
+    }
+
+    /**
+     * WordPress wp_title filter
+     * Change or alter the page title (if supported by the theme).
+     *
+     * @return  string
+     */
+    public function onWpTitle($title)
+    {
+        $frontController = $this->bootstrap('frontController')
+                                ->getResource('frontController');
+        // only set the title if we own the route
+        if ($frontController->getParam('output')) {
+            $view = $this->bootstrap('view')
+                         ->getResource('view');
+            return strip_tags($view->headTitle()) . ' - ';
+        } else {
+            return $title;
+        }
+    }
+
+    /**
+     * WordPress wp_footer action
+     * Allows us to inject dynamic content into the WordPress footer
+     * (if supported by the theme).
+     *
+     * @return void
+     */
+    public function onWpFooter()
+    {
+        echo '<p>Powered by <a href="http://www.vulnero.com/" target="_blank">Vulnero</a> '
+            . 'and the <a href="http://framework.zend.com" target="_blank">Zend Framework</a>.';
+    }
+
+    /**
+     * WordPress wp_head action
+     * Allows us to inject dynamic content into the WordPress header
+     * (if supported by the theme).
+     *
+     * @return  void
+     */
+    public function onWpHead()
+    {
+        $view = $this->bootstrap('view')
+                     ->getResource('view');
+
+        $components = array(
+            $view->headMeta(),
+            $view->headStyle(),
+            $view->headLink(),
+            $view->headScript()
+        );
+
+        echo implode(PHP_EOL, $components);
+    }
+
+    /**
+     * WordPress widgets_init action
+     * Registers plugin widgets
+     *
+     * @return  void
+     */
+    public function onWidgetsInit()
+    {
+        $cache     = $this->bootstrap('cache')
+                          ->getResource('cache');
+        $wordPress = $this->bootstrap('wordPress')
+                          ->getResource('wordPress');
+
+        if (!$widgets = $cache->load('widgets')) {
+            // Automatically detect and load any widget classes, caching the work
+            $widgets = array();
+
+            $di = new DirectoryIterator(APPLICATION_PATH . '/widgets/Widget');
+            foreach ($di as $item) {
+                if ($item->isFile() && substr($item->getFilename(), -4) == '.php') {
+                    $widgets[] = 'Widget_' . substr($item->getFilename(), 0, -4);
+                }
+            }
+
+            $cache->save($widgets, 'widgets');
+        }
+
+        foreach ($widgets as $widget) {
+            $wordPress->registerWidget($widget);
+        }
+    }
+
+    /**
+     * WordPress home_template filter
+     *
+     * @return  void
+     */
+    public function onHomeTemplate()
+    {
+        return $this->_onTemplate('home');
+    }
+
+    /**
+     * WordPress page_template filter
+     *
+     * @return  void
+     */
+    public function onPageTemplate()
+    {
+        return $this->_onTemplate('page');
+    }
+
+    /**
+     * WordPress single_template filter
+     *
+     * @return  void
+     */
+    public function onSingleTemplate()
+    {
+        return $this->_onTemplate('single');
+    }
+
+    /**
+     * WordPress *_template filter
+     * Called when WordPress attempts to locate a template (e.g.: home.php) in the
+     * theme. If this is a valid WordPress request, we're going to override it and
+     * instead specify that the template is wordpress-template.php in the plugin's
+     * directory.
+     *
+     * @param   string          Template type (e.g.: home, page)
+     * @return  void
+     */
+    protected function _onTemplate($template)
+    {
+        $frontController = $this->bootstrap('frontController')
+                                ->getResource('frontController');
+        if ($frontController->getParam('output')) {
+            return PROJECT_BASE_PATH . '/wordpress-template.php';
+        } else {
+            return locate_template(array($template));
+        }
+    }
+
+    /**
+     * WordPress send_headers action
+     * Create a new Zend_Controller_Request_Http object with the WordPress
+     * route. Upon failure, we assume the route isn't handled and let WordPress
+     * deal with it.
+     *
+     * @param   WordPress       WordPress object which contains the route
+     * @return  void
+     */
+    public function onSendHeaders($wp)
+    {
+        $wordPress = $this->bootstrap('wordPress')
+                          ->getResource('wordPress')
+                          ->addAction('the_content');
+
+        // Permalinks must be enabled in WordPress for request to be set
+        if (isset($wp->request) && ($wpRequest = $wp->request)) {
+            $frontController = $this->bootstrap('frontController')
+                                    ->getResource('frontController');
+            $routes          = $this->bootstrap('routes')
+                                    ->getResource('routes');
+
+            // Generate a new request object built from the WordPress route
+            $options         = $this->getOptions();
+            $uri             = $options['wordpress']['siteurl'] . '/' . $wpRequest;
+            $uriObj          = Zend_Uri::factory($uri);
+            $request         = new Zend_Controller_Request_Http($uriObj);
+            $frontController->setRequest($request);
+
+            try {
+                // We need to capture the output so as to insert it only via the
+                // WordPress the_content() hook so it's displayed in the correct
+                // position on the page
+                $frontController->returnResponse(true);
+
+                $output = $frontController->dispatch();
+
+                // Controller plugin injects content into the WordPress the_content() hook
+                $frontController->setParam('output', $output)
+                                ->setParam('isWordPressRoute', true);
+
+                $routeName = $frontController->getRouter()->getCurrentRouteName();
+
+                // Wrap in WordPress or render stand-alone?
+                $isWpRoute = isset($routes->$routeName->wordpress)
+                    ? (boolean) $routes->$routeName->wordpress
+                    : true;
+
+                // Application specified a WordPress route to wrap this request like a
+                // layout.
+                if ($isWpRoute) {
+                    // Processing will be passed to WordPress and our application
+                    // content will be inserted into the the_content() hook via
+                    // the router controller plugin
+                    $wpRoute = '';
+
+                    // get the id of the front page, we're going to pretend we're it
+                    $pageId = $wordPress->getOption('page_on_front');
+
+                    // trick WordPress into thinking the request is valid
+                    $wp->request = $wpRoute;
+                    $wp->query_string = '';
+                    $wp->matched_rule = '(' . preg_quote($wpRoute) . ')(/.*)$';
+                    $wp->matched_query = 'pagename=' . urlencode($wpRoute) . '&page=' . $pageId;
+                    $wp->query_vars = array(
+                        'page' => $pageId,
+                        'pagename' => $wpRoute
+                    );
+                    $wp->extra_query_vars = array();
+                } elseif (PHP_SAPI != 'cli') {
+                    // Non-WordPress enabled route, end execution
+                    echo $output;
+                    exit(0);
+                }
+            } catch (Zend_Controller_Router_Exception $e) {
+                // our application didn't answer the route, so it passes control
+                // back to WordPress simply by doing nothing
+                $frontController->setParam('isWordPressRoute', false);
+            }
+
+            return $frontController->getRequest();
+        }
+    }
+
+    /**
+     * WordPress the_content action
+     * Display our rendered view if we handled the route, otherwise
+     * just return the output as is.
+     *
+     * @param   string      Current content
+     * @return  void
+     */
+    public function onTheContent($content)
+    {
+        $frontController = $this->bootstrap('frontController')
+                                ->getResource('frontController');
+        if ($frontController->getParam('isWordPressRoute')) {
+            return $content . $frontController->getParam('output');
+        } else {
+            return $content;
+        }
+    }
+
+    /**
+     * WordPress admin_menu action
      * Initializes an admin panel from a Zend_Form object and injects it into
      * WordPress.
-     *
-     * @return  Zend
      */
-    public function onAdmin()
+    public function onAdminMenu()
     {
+        /*
         if (0) {
             $frontController = $this->bootstrap('frontController')
                                     ->getResource('frontController');
@@ -661,5 +625,6 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
                 array($view, 'renderWordPress')
             );
         }
+        */
     }
 }

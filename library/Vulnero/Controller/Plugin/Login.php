@@ -3,7 +3,7 @@
  * Vulnero controller plugin which checks if the current user is logged
  * into WordPress and updates the Zend_Auth identity if so.
  *
- * Copyright (c) 2011, Andrew Kandels <me@andrewkandels.com>.
+ * Copyright (c) 2012, Andrew Kandels <me@andrewkandels.com>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,9 +34,9 @@
  * @category    WordPress
  * @package     vulnero
  * @author      Andrew Kandels <me@andrewkandels.com>
- * @copyright   2011 Andrew Kandels <me@andrewkandels.com>
+ * @copyright   2012 Andrew Kandels <me@andrewkandels.com>
  * @license     http://www.opensource.org/licenses/bsd-license.php  BSD License
- * @link        http://andrewkandels.com/vulnero
+ * @link        http://www.vulnero.com
  */
 class Vulnero_Controller_Plugin_Login extends Zend_Controller_Plugin_Abstract
 {
