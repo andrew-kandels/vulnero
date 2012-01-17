@@ -43,9 +43,7 @@
 
 define('APPLICATION_ENV', 'test');
 
-// Include the cli.php script which creates mock WordPress functions so the plugin
-// will bootstrap outside of WordPress plugin execution
-require_once dirname(__FILE__) . '/../cli.php';
+require_once dirname(__FILE__) . '/../vulnero.php';
 
 Zend_Session::$_unitTestEnabled = true;
 Zend_Session::start();

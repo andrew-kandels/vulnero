@@ -72,12 +72,10 @@ class Bootstrap extends Vulnero_Application_Bootstrap_Bootstrap
      */
     protected function _initViewSettings()
     {
+        parent::_initViewSettings();
+
         $view = $this->bootstrap('view')
                      ->getResource('view');
-
-        $view->doctype('XHTML1_STRICT');
-        $view->setEncoding('UTF-8');
-
         $view->headLink()->appendStylesheet(PROJECT_BASE_URI . '/public/styles/main.css');
     }
 }

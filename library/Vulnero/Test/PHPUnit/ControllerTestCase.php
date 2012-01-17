@@ -48,56 +48,72 @@ class Vulnero_Test_PHPUnit_ControllerTestCase extends Zend_Test_PHPUnit_Controll
     protected $_bootstrap;
 
     /**
-     * Prepare to inject the bootstrap from the global by setting a
-     * callback.
+     * @var Vulnero_Application
+     */
+    protected $_application;
+
+    /**
+     * @var Zend_Controller_Front
+     */
+    protected $_frontController;
+
+    /**
+     * @var Vulnero_WordPress
+     */
+    protected $_wordPress;
+
+    /**
+     * Create a fresh application for every test.
      *
      * @return void
      */
     public function setUp()
     {
+        $this->_application = new Vulnero_Application(
+            APPLICATION_ENV,
+            APPLICATION_PATH . '/config/config.ini'
+        );
+
         $this->bootstrap = array($this, 'appBootstrap');
+
         parent::setUp();
     }
 
     /**
-     * Callback for injecting the global application for testing.
+     * Zend will call this method each test to bootstrap our application.
      *
      * @return void
      */
     public function appBootstrap()
     {
-        $this->_application = $GLOBALS['application'];
-        $this->_bootstrap = $this->_application->getBootstrap();
+        $this->_application->bootstrap();
+
+        // keep track of a few convenience properties
+        $this->_bootstrap       = $this->_application->getBootstrap();
         $this->_frontController = $this->_bootstrap->getResource('frontController');
-        $this->_frontController->setControllerDirectory(APPLICATION_PATH . '/controllers');
-    }
-
-    public function tearDown()
-    {
-        Zend_Controller_Front::getInstance()->resetInstance();
-        $this->resetRequest();
-        $this->resetResponse();
-
-        $this->request->setPost(array());
-        $this->request->setQuery(array());
+        $this->_wordPress       = $this->_bootstrap->getResource('wordPress');
     }
 
     /**
      * Dispatch the MVC
+     *
+     * Simulate a WordPress request.
      *
      * If a URL is provided, sets it as the request URI in the request object.
      * Then sets test case request and response objects in front controller,
      * disables throwing exceptions, and disables returning the response.
      * Finally, dispatches the front controller.
      *
-     * @param  string|null $url
-     * @return void
+     * @param  string|null              URL to route to
+     * @return stdclass                 WordPress simulating request
      */
     public function dispatch($url = null)
     {
         $wordpress = new stdclass();
         $wordpress->request = $url;
+
         $this->_request = $this->_bootstrap->onSendHeaders($wordpress);
+
         return $wordpress;
     }
 }
