@@ -76,6 +76,10 @@ class Vulnero_Test_PHPUnit_ControllerTestCase extends Zend_Test_PHPUnit_Controll
 
         $this->bootstrap = array($this, 'appBootstrap');
 
+        if (function_exists('apc_clear_cache')) {
+            apc_clear_cache();
+        }
+
         parent::setUp();
     }
 

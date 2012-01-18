@@ -38,7 +38,7 @@
  * @license     http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link        http://www.vulnero.com
  */
-abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap_Bootstrap
+class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap_Bootstrap
 {
     /**
      * Initialize Vulnero_WordPress, which is the single object for
@@ -110,7 +110,7 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
         // Cache the routes configuration file to speed up processing
         if (!$routes = $cache->load('routes')) {
             $routes = new Zend_Config_Ini(APPLICATION_PATH . '/config/routes.ini');
-            $cache->save($routes, 'routes');
+            $cache->save($routes);
         }
 
         return $routes;
@@ -121,7 +121,7 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
      * to fall back to WordPress) and to use the config/routes.ini config
      * file.
      *
-     * @return Zend_Router_Route
+     * @return Zend_Controller_Router_Rewrite
      */
     protected function _initRouter()
     {
@@ -169,28 +169,10 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
      */
     protected function _initDb()
     {
-        if (defined('DB_HOST') &&
-            defined('DB_USER') &&
-            defined('DB_PASSWORD') &&
-            defined('DB_NAME')) {
-            $db = Zend_Db::factory('Pdo_Mysql', array(
-                'host'      => DB_HOST,
-                'username'  => DB_USER,
-                'password'  => DB_PASSWORD,
-                'dbname'    => DB_NAME
-            ));
-        } else {
-            try {
-                $db = Zend_Db::factory('Pdo_Sqlite', array(
-                    'file' => PROJECT_BASE_PATH . '/sqlite.db'
-                ));
-            } catch (Exception $e) {
-                $db = null;
-            }
-        }
+        $wordPress = $this->bootstrap('wordPress')
+                          ->getResource('wordPress');
 
-        if ($db) {
-            Zend_Registry::set('db', $db);
+        if ($db = $wordPress->getDatabase()) {
             Zend_Db_Table_Abstract::setDefaultAdapter($db);
         }
 
@@ -252,7 +234,9 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
             $options = $config->cache->backend->memcache->toArray();
         } elseif (isset($config->cache->backend->apc)) {
             $adapterName = 'Apc';
-            $options = $config->cache->backend->apc->toArray();
+            $options = is_array($config->cache->backend->apc)
+                ? $config->cache->backend->apc->toArray()
+                : array();
         } elseif (isset($config->cache->backend->xcache)) {
             $adapterName = 'Xcache';
             $options = $config->cache->backend->xcache->toArray();
@@ -293,7 +277,6 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
 
         $cache = Zend_Cache::factory('Core', $adapterName, $frontendOptions, $options);
 
-        Zend_Registry::set('cache', $cache);
         Zend_Db_Table_Abstract::setDefaultMetadataCache($cache);
         Zend_Date::setOptions(array('cache' => $cache));
         Zend_Locale::setCache($cache);
@@ -326,15 +309,15 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
         $view = $this->bootstrap('view')
                      ->getResource('view');
 
-        $view->doctype('XHTML1_STRICT');
-        $view->setEncoding('UTF-8');
-
         $view->headLink()->appendStylesheet(PROJECT_BASE_URI . '/public/styles/main.css');
 
-        $layout    = $this->bootstrap('layout');
+        $layout    = $this->bootstrap('layout')
+                          ->getResource('layout');
         $wordPress = $this->bootstrap('wordPress')
                           ->getResource('wordPress');
         $layout->wordPress = $view->wordPress = $wordPress;
+
+        return $layout;
     }
 
 
@@ -366,7 +349,7 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
         $frontController = $this->bootstrap('frontController')
                                 ->getResource('frontController');
         // only set the title if we own the route
-        if ($frontController->getParam('output')) {
+        if ($frontController->getParam('isWordPressRoute')) {
             $view = $this->bootstrap('view')
                          ->getResource('view');
             return strip_tags($view->headTitle()) . ' - ';
@@ -384,8 +367,7 @@ abstract class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_
      */
     public function onWpFooter()
     {
-        echo '<p>Powered by <a href="http://www.vulnero.com/" target="_blank">Vulnero</a> '
-            . 'and the <a href="http://framework.zend.com" target="_blank">Zend Framework</a>.';
+        // generally implemented by parent
     }
 
     /**

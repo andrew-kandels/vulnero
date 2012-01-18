@@ -7,6 +7,7 @@
     <filter>
         <whitelist>
             <directory suffix=".php">../application</directory>
+            <directory suffix=".php">../library/Vulnero</directory>
         </whitelist>
     </filter>
     <!--

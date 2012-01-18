@@ -78,4 +78,17 @@ class Bootstrap extends Vulnero_Application_Bootstrap_Bootstrap
                      ->getResource('view');
         $view->headLink()->appendStylesheet(PROJECT_BASE_URI . '/public/styles/main.css');
     }
+
+    /**
+     * WordPress wp_footer action
+     * Allows us to inject dynamic content into the WordPress footer
+     * (if supported by the theme).
+     *
+     * @return void
+     */
+    public function onWpFooter()
+    {
+        echo '<p>Powered by <a href="http://www.vulnero.com/" target="_blank">Vulnero</a> '
+            . 'and the <a href="http://framework.zend.com" target="_blank">Zend Framework</a>.';
+    }
 }
