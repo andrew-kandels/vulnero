@@ -253,7 +253,7 @@ class Vulnero_WordPress
     public function registerWidget($widget)
     {
         if ($this->_isMock) {
-            $this->_widgets[] = new $widget();
+            $this->_widgets[] = $widget;
         } elseif (!function_exists('register_widget')) {
             throw new RuntimeException('WordPress register_widget() not detected, '
                 . 'cannot execute Vulnero outside of WordPress environment.'
@@ -458,6 +458,52 @@ class Vulnero_WordPress
             );
         } else {
             return wp_get_post_categories();
+        }
+    }
+
+    /**
+     * Returns the WordPress database connection. In mock mode, it creates a
+     * temporary Sqlite database.
+     *
+     * @return  Zend_Db_Adapter_Abstract
+     */
+    public function getDatabase()
+    {
+        if ($this->_isMock) {
+            return Zend_Db::factory('Pdo_Sqlite', array(
+                'file'  => tempnam('/tmp', 'sqlite'),
+                'dbname'=> 'mock'
+            ));
+        } elseif (!defined('DB_HOST')) {
+            throw new RuntimeException('WordPress DB_HOST not defined, '
+                . 'cannot execute Vulnero outside of WordPress environment.'
+            );
+        } else {
+            return Zend_Db::factory('Pdo_Mysql', array(
+                'host'      => DB_HOST,
+                'username'  => DB_USER,
+                'password'  => DB_PASSWORD,
+                'dbname'    => DB_NAME
+            ));
+        }
+    }
+
+    /**
+     * WordPress locate_template function.
+     *
+     * @param   string          Template name
+     * @return  string          Template path
+     */
+    public function locateTemplate($template)
+    {
+        if ($this->_isMock) {
+            return array(realpath(PROJECT_BASE_PATH . '/../../themes') . '/page.php');
+        } elseif (!function_exists('locate_template')) {
+            throw new RuntimeException('WordPress locate_template not defined, '
+                . 'cannot execute Vulnero outside of WordPress environment.'
+            );
+        } else {
+            return locate_template(array($template));
         }
     }
 }

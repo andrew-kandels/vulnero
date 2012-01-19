@@ -65,13 +65,15 @@ class Vulnero_Application extends Zend_Application
             ));
         }
 
+        // don't cache the config.ini on non-production environments so config
+        // changes are immediate
         if (APPLICATION_ENV != 'production' || (!$config = $cache->load('config'))) {
             $config = parent::_loadConfig($file);
 
             // Initialize WordPress configuration values
             $config = $this->_initWordPress($config);
 
-            if (APPLICATION_ENV == 'production') {
+            if (APPLICATION_ENV != 'test') {
                 $cache->save($config, 'config');
             }
         }
