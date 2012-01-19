@@ -169,4 +169,112 @@ STREND;
 
         $this->assertEquals($expected, $contents);
     }
+
+    public function testOnWidgetsInit()
+    {
+        $cache     = $this->_bootstrap->bootstrap('cache')
+                                      ->getResource('cache');
+        $wordPress = $this->_bootstrap->bootstrap('wordPress')
+                                      ->getResource('wordPress');
+        $this->_bootstrap->onWidgetsInit();
+        $widgets = $cache->load('widgets');
+        $this->assertTrue(is_array($widgets));
+        $wordPress->registerWidget('Widget_Test');
+        $widgets = $wordPress->getWidgets();
+        $this->assertContains('Widget_Test', $widgets);
+    }
+
+    public function testOnHomeTemplate()
+    {
+        $templates = $this->_bootstrap->onSingleTemplate();
+        $template  = $templates[0];
+        $this->assertNotEquals(PROJECT_BASE_PATH, substr($template, 0, strlen(PROJECT_BASE_PATH)));
+    }
+
+    public function testOnPageTemplate()
+    {
+        $templates = $this->_bootstrap->onSingleTemplate();
+        $template  = $templates[0];
+        $this->assertNotEquals(PROJECT_BASE_PATH, substr($template, 0, strlen(PROJECT_BASE_PATH)));
+    }
+
+    public function testOnSingleTemplate()
+    {
+        $templates = $this->_bootstrap->onSingleTemplate();
+        $template  = $templates[0];
+        $this->assertNotEquals(PROJECT_BASE_PATH, substr($template, 0, strlen(PROJECT_BASE_PATH)));
+    }
+
+    public function testOnSendHeaders()
+    {
+        $wordPress = $this->_bootstrap->bootstrap('wordPress')
+                                      ->getResource('wordPress');
+        $wp = new stdclass();
+        $wp->request = 'badtestroute';
+        $request = $this->_bootstrap->onSendHeaders($wp);
+        $this->assertContains('the_content', $wordPress->getActions());
+        $this->assertTrue($request instanceof Zend_Controller_Request_Http);
+        $this->assertEquals('/badtestroute', $request->getRequestUri());
+        $this->assertFalse($this->_frontController->getParam('isWordPressRoute'));
+
+        $router = $this->_bootstrap->bootstrap('router')->getResource('router');
+        $router->addRoute('unittest', new Zend_Controller_Router_Route(
+            'unittest/:param',
+            array(
+                'module'        => 'default',
+                'controller'    => 'default',
+                'action'        => 'unittest',
+            )
+        ));
+        $wp->request = 'unittest/first';
+        $request = $this->_bootstrap->onSendHeaders($wp);
+        $this->assertEquals('default', $request->getModuleName());
+        $this->assertEquals('default', $request->getControllerName());
+        $this->assertEquals('unittest', $request->getActionName());
+        $this->assertTrue($this->_frontController->getParam('isWordPressRoute'));
+        $response = $this->_frontController->getParam('response');
+        $this->assertTrue($response instanceof Zend_Controller_Response_Http);
+        $this->assertContains('This is used during unit testing.', $response->getBody());
+
+        $this->assertEquals(
+            array(
+                'request'           => '',
+                'query_string'      => '',
+                'matched_rule'      => '()(/.*)$',
+                'matched_query'     => 'pagename=&page=1',
+                'query_vars'        => array(
+                                           'page' => 1,
+                                           'pagename' => ''
+                                       ),
+                'extra_query_vars'  => array(),
+            ),
+            (array) $wp
+        );
+    }
+
+    public function testOnTheContent()
+    {
+        $wordPress = $this->_bootstrap->bootstrap('wordPress')
+                                      ->getResource('wordPress');
+        $wp = new stdclass();
+        $router = $this->_bootstrap->bootstrap('router')->getResource('router');
+        $router->addRoute('unittest', new Zend_Controller_Router_Route(
+            'unittest/:param',
+            array(
+                'module'        => 'default',
+                'controller'    => 'default',
+                'action'        => 'unittest',
+            )
+        ));
+        $wp->request = 'unittest/first';
+        $request = $this->_bootstrap->onSendHeaders($wp);
+
+        $content = $this->_bootstrap->onTheContent('test-1-2-3');
+        $this->assertContains('test-1-2-3', $content);
+        $this->assertContains('This is used during unit testing.', $content);
+        $this->_frontController->setParam('isWordPressRoute', false);
+        $content = $this->_bootstrap->onTheContent('test-1-2-3');
+        $this->assertContains('test-1-2-3', $content);
+        $this->assertNotContains('This is used during unit testing.', $content);
+    }
 }

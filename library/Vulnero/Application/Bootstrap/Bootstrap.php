@@ -466,12 +466,14 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
      */
     protected function _onTemplate($template)
     {
+        $wordPress = $this->bootstrap('wordPress')
+                          ->getResource('wordPress');
         $frontController = $this->bootstrap('frontController')
                                 ->getResource('frontController');
-        if ($frontController->getParam('output')) {
+        if ($frontController->getParam('isWordPressRoute')) {
             return PROJECT_BASE_PATH . '/wordpress-template.php';
         } else {
-            return locate_template(array($template));
+            return $wordPress->locateTemplate($template);
         }
     }
 
@@ -510,10 +512,10 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
                 // position on the page
                 $frontController->returnResponse(true);
 
-                $output = $frontController->dispatch();
+                $response = $frontController->dispatch();
 
                 // Controller plugin injects content into the WordPress the_content() hook
-                $frontController->setParam('output', $output)
+                $frontController->setParam('response', $response)
                                 ->setParam('isWordPressRoute', true);
 
                 $routeName = $frontController->getRouter()->getCurrentRouteName();
@@ -546,7 +548,7 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
                     $wp->extra_query_vars = array();
                 } elseif (PHP_SAPI != 'cli') {
                     // Non-WordPress enabled route, end execution
-                    echo $output;
+                    echo $response->getBody();
                     exit(0);
                 }
             } catch (Zend_Controller_Router_Exception $e) {
@@ -572,7 +574,7 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
         $frontController = $this->bootstrap('frontController')
                                 ->getResource('frontController');
         if ($frontController->getParam('isWordPressRoute')) {
-            return $content . $frontController->getParam('output');
+            return $content . $frontController->getParam('response')->getBody();
         } else {
             return $content;
         }

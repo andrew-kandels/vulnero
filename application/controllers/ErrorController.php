@@ -50,11 +50,9 @@ class ErrorController extends Zend_Controller_Action
         $this->getResponse()->appendBody('ERROR');
 
         $content = null;
-        $errors = $this->_getParam('error_handler') ;
+        $errors = $this->_getParam('error_handler');
         $exception = $errors->exception;
         $this->view->assign('exception', $exception);
-
-        die($exception);
 
         switch ($errors->type)
         {
