@@ -3,6 +3,17 @@ Vulnero 0.1
 
 This is the list of changes for the 0.1 release series.
 
+Vulnero 0.1.1
+------------------
+* Major routing improvements and better use of the request and response objects
+* Unit tests covering all present functionality in its entirety
+* Move all Vulnero logic to library/Vulnero, separating from the Application
+* New website with public source code serving as a sample application
+* Online documentation
+* API class separating WordPress API methods for better testability
+* Better control over layouts and WordPress templates
+* Simplifying installation
+
 Vulnero 0.1.0
 ------------------
 * First upload for the project.
