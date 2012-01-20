@@ -101,13 +101,35 @@ abstract class Vulnero_Widget extends WP_Widget implements Vulnero_Widget_Interf
     }
 
     /**
+     * Returns the widget's view object.
+     *
+     * @return  Zend_View
+     */
+    public function getView()
+    {
+        return $this->view;
+    }
+
+    /**
+     * Returns the bootstrap for requesting resources.
+     *
+     * @return Vulnero_Application_Bootstrap_Bootstrap
+     */
+    public function getBootstrap()
+    {
+        return $this->_bootstrap;
+    }
+
+    /**
      * Returns the page request URI string.
      *
-     * @return  string
+     * @return  string|boolean          False on failure, request uri on success
      */
     protected function _getRequestUri()
     {
-        return $_SERVER['REQUEST_URI'];
+        return isset($_SERVER['REQUEST_URI'])
+            ? $_SERVER['REQUEST_URI']
+            : false;
     }
 
     /**
@@ -125,7 +147,7 @@ abstract class Vulnero_Widget extends WP_Widget implements Vulnero_Widget_Interf
      *
      * @return  string              Content
      */
-    protected function _getContent()
+    public function getContent()
     {
         // Remove the prefixing widget text
         $name = str_replace('Widget_', '', get_class($this));
@@ -180,27 +202,32 @@ abstract class Vulnero_Widget extends WP_Widget implements Vulnero_Widget_Interf
      */
     public function widget(array $args, array $instance)
     {
-        if ($this->_isShown()) {
-            $stack = array();
-
-            if ($this->_drawWrappers) {
-                $stack[] = $args['before_widget'];
-
-                if ($this->_drawTitle && $title = apply_filters('widget_title', $this->_title)) {
-                    $stack[] = $args['before_title'];
-                    $stack[] = $title;
-                    $stack[] = $args['after_title'];
-                }
-            }
-
-            $stack[] = $this->_getContent();
-
-            if ($this->_drawWrappers) {
-                $stack[] = $args['after_widget'];
-            }
-
-            echo implode('', $stack);
+        if (!$this->_isShown()) {
+            return;
         }
+
+        $wordPress = $this->_bootstrap->bootstrap('wordPress')
+                                      ->getResource('wordPress');
+
+        $stack = array();
+
+        if ($this->_drawWrappers) {
+            $stack[] = $args['before_widget'];
+
+            if ($this->_drawTitle && $title = $wordPress->applyFilters('widget_title', $this->_title)) {
+                $stack[] = $args['before_title'];
+                $stack[] = $title;
+                $stack[] = $args['after_title'];
+            }
+        }
+
+        $stack[] = $this->getContent();
+
+        if ($this->_drawWrappers) {
+            $stack[] = $args['after_widget'];
+        }
+
+        echo implode('', $stack);
     }
 
     /**
