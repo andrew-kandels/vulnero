@@ -471,7 +471,7 @@ class Vulnero_WordPress
     {
         if ($this->_isMock) {
             return Zend_Db::factory('Pdo_Sqlite', array(
-                'file'  => tempnam('/tmp', 'sqlite'),
+                'file'  => '/tmp/vulnero-unit-test.db',
                 'dbname'=> 'mock'
             ));
         } elseif (!defined('DB_HOST')) {
@@ -504,6 +504,27 @@ class Vulnero_WordPress
             );
         } else {
             return locate_template(array($template));
+        }
+    }
+
+    /**
+     * WordPress apply_filters function.
+     *
+     * @param   string          Filter name
+     * @param   string          Text to filter
+     * @return  string
+     */
+    public function applyFilters($filter, $text)
+    {
+        if ($this->_isMock) {
+            $this->_filters[] = $filter;
+            return $text;
+        } elseif (!function_exists('apply_filters')) {
+            throw new RuntimeException('WordPress apply_filters not defined, '
+                . 'cannot execute Vulnero outside of WordPress environment.'
+            );
+        } else {
+            return apply_filters($filter, $text);
         }
     }
 }
