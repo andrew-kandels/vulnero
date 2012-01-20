@@ -77,6 +77,7 @@ if (!defined('APPLICATION_PATH')) {
 set_include_path(implode(PATH_SEPARATOR, array(
     PROJECT_BASE_PATH . '/library',
     APPLICATION_PATH . '/widgets',
+    APPLICATION_PATH . '/admin-pages',
     APPLICATION_PATH . '/forms',
     APPLICATION_PATH,
     get_include_path()

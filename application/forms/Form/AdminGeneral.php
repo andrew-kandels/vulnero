@@ -1,6 +1,6 @@
 <?php
 /**
- * Default admin view script.
+ * WordPress admin panel form for this application.
  *
  * Copyright (c) 2012, Andrew Kandels <me@andrewkandels.com>.
  * All rights reserved.
@@ -37,14 +37,34 @@
  * @license     http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link        http://www.vulnero.com
  */
-class Vulnero_Admin_View extends Zend_View
+class Form_AdminGeneral extends Zend_Form
 {
     /**
+     * Adds the default elements to the form.
      *
+     * @return void
      */
-    public function renderWordPress()
+    public function init()
     {
-        $this->setScriptPath(APPLICATION_PATH . '/views/scripts/default');
-        echo parent::render('admin.phtml');
+        parent::init();
+
+        $this->addElement('Select', 'environment', array(
+            'label' => 'Application Environment:',
+            'required' => true,
+            'multiOptions' => array(
+                'production' => 'Production',
+                'development' => 'Development',
+            ),
+            'value' => APPLICATION_ENV
+        ));
+
+        $this->addElement('Checkbox', 'attribution', array(
+            'label' => 'Display attribution in footer:',
+        ));
+
+        $this->addElement('Button', 'save', array(
+            'label' => 'Save Changes',
+            'attribs' => array('type' => 'submit')
+        ));
     }
 }

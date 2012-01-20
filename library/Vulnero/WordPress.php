@@ -123,6 +123,12 @@ class Vulnero_WordPress
     protected $_sidebars = array();
 
     /**
+     * Keeps track of injected admin pages.
+     * @var array
+     */
+    protected $_adminPages = array();
+
+    /**
      * Instantiate the class.
      *
      * @return  Vulnero_WordPress
@@ -167,7 +173,7 @@ class Vulnero_WordPress
      * Callback is generated based on the action name, wp_head becomes onWpHead.
      *
      * @param   string          Action name
-     * @param   mixed           Optional third parameter to add_action, such as priority
+     * @param   mixed           Optional third parameter to add_action
      * @return  Vulnero_WordPress
      */
     public function addAction($action, $param = null)
@@ -208,6 +214,18 @@ class Vulnero_WordPress
     }
 
     /**
+     * Sets the delegate object which should receive action/filter callbacks.
+     *
+     * @param   Object
+     * @return  Vulnero_AdminPage
+     */
+    public function setDelegate($obj)
+    {
+        $this->_delegate = $obj;
+        return $this;
+    }
+
+    /**
      * Converts a action/filter/hook from underscore notation
      * to a callback form.
      *
@@ -216,7 +234,7 @@ class Vulnero_WordPress
      */
     protected function _getCallback($name)
     {
-        $parts = explode('_', $name);
+        $parts = explode('_', preg_replace('/-.*/', '', $name));
         return array(
             $this->_delegate,
             'on' . implode('', array_map(create_function('$a', 'return ucfirst($a);'), $parts))
@@ -525,6 +543,69 @@ class Vulnero_WordPress
             );
         } else {
             return apply_filters($filter, $text);
+        }
+    }
+
+    /**
+     * WordPress add_menu_page function.
+     *
+     * @param   string              Page title
+     * @param   string              Menu title
+     * @param   string              Capability
+     * @param   string              Menu slug
+     * @param   string              Callback function
+     * @param   string              Icon URL
+     * @param   string              Position in the panel
+     * @return  Vulnero_WordPress
+     */
+    public function addMenuPage($pageTitle, $menuTitle, $capability, $menuSlug,
+        $callBack, $iconUrl, $position)
+    {
+        if ($this->_isMock) {
+            return ($this->_adminPages[] = $menuSlug);
+        } elseif (!function_exists('add_menu_page')) {
+            throw new RuntimeException('WordPress add_menu_page not defined, '
+                . 'cannot execute Vulnero outside of WordPress environment.'
+            );
+        } else {
+            return add_menu_page(
+                $pageTitle,
+                $menuTitle,
+                $capability,
+                $menuSlug,
+                $callBack,
+                $iconUrl,
+                $position
+            );
+        }
+    }
+
+    /**
+     * WordPress add_options_page function.
+     *
+     * @param   string              Page title
+     * @param   string              Menu title
+     * @param   string              Capability
+     * @param   string              Menu slug
+     * @param   string              Callback function
+     * @return  string              Hook
+     */
+    public function addOptionsPage($pageTitle, $menuTitle, $capability, $menuSlug, $callBack)
+    {
+        if ($this->_isMock) {
+            return ($this->_adminPages[] = $menuSlug);
+        } elseif (!function_exists('add_options_page')) {
+            throw new RuntimeException('WordPress add_options_page not defined, '
+                . 'cannot execute Vulnero outside of WordPress environment.'
+            );
+        } else {
+            return add_options_page(
+                $pageTitle,
+                $menuTitle,
+                $capability,
+                $menuSlug,
+                $callBack
+            );
         }
     }
 }
