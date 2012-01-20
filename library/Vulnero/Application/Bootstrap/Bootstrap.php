@@ -367,7 +367,12 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
      */
     public function onWpFooter()
     {
-        // generally implemented by parent
+        $wordPress = $this->bootstrap('wordPress')
+                          ->getResource('wordPress');
+        if ($wordPress->getCustomOption('attribution')) {
+            echo '<p>Powered by <a href="http://www.vulnero.com/" target="_blank">Vulnero</a> '
+                . 'and the <a href="http://framework.zend.com" target="_blank">Zend Framework</a>.';
+        }
     }
 
     /**
@@ -595,7 +600,7 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
         $wordPress = $this->bootstrap('wordPress')
                           ->getResource('wordPress');
 
-        if (!$pages = $cache->load('admin-pages')) {
+        if (!$pages = $cache->load('adminpages')) {
             // Automatically detect and load any admin page classes, caching the work
             $pages = array();
 
@@ -606,7 +611,7 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
                 }
             }
 
-            $cache->save($pages, 'pages');
+            $cache->save($pages, 'adminpages');
         }
 
         foreach ($pages as $page) {

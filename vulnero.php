@@ -63,7 +63,13 @@ if (!defined('PROJECT_BASE_URI')) {
 }
 
 if (!defined('APPLICATION_ENV')) {
-    define('APPLICATION_ENV', 'development');
+    if (function_exists('get_option') && ($env = get_option(PLUGIN_NAME . '_environment'))) {
+        define('APPLICATION_ENV', $env);
+    } elseif ($env = getenv('APPLICATION_ENV')) {
+        define('APPLICATION_ENV', $env);
+    } else {
+        define('APPLICATION_ENV', 'development');
+    }
 }
 
 if (!defined('PROJECT_BASE_PATH')) {

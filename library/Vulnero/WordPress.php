@@ -46,6 +46,12 @@
 class Vulnero_WordPress
 {
     /**
+     * Max length of the name column in wp_options.
+     * @var integer
+     */
+    const WP_OPTION_MAX_LENGTH = 64;
+
+    /**
      * Mock options for get_bloginfo()
      * @var array
      */
@@ -127,6 +133,12 @@ class Vulnero_WordPress
      * @var array
      */
     protected $_adminPages = array();
+
+    /**
+     * Keeps track of custom options registered in the wp_options table.
+     * @var array
+     */
+    protected $_customOptions = array();
 
     /**
      * Instantiate the class.
@@ -625,5 +637,102 @@ class Vulnero_WordPress
     public function getAdminPages()
     {
         return $this->_adminPages;
+    }
+
+    /**
+     * Returns custom options registered with WordPress' wp_options table.
+     *
+     * @return array
+     */
+    public function getCustomOptions()
+    {
+        return $this->_customOptions;
+    }
+
+    /**
+     * Prefix the name of the option with something plugin specific to sandbox
+     * our settings from other plugins and WordPress internals.
+     *
+     * @param   string              Option name
+     * @return  string              Sanitized name
+     */
+    protected function _getSanitizedOptionName($name)
+    {
+        if (strlen($name = PLUGIN_NAME . '_' . $name) > self::WP_OPTION_MAX_LENGTH) {
+            throw new UnexpectedValueException('WordPress option length is limited to '
+                . (self::WP_OPTION_MAX_LENGTH - strlen(PLUGIN_NAME) - 1) . ' characters (prefix '
+                . 'excluded).'
+            );
+        }
+
+        return $name;
+    }
+
+    /**
+     * WordPress get_option hook for retrieving
+     * custom project-level options in WordPress which are persisted
+     * to the WordPress database through its API.
+     *
+     * @param   string              Option name
+     * @return  mixed               Boolean false if not found
+     */
+    public function getCustomOption($name)
+    {
+        $name = $this->_getSanitizedOptionName($name);
+
+        if ($this->_isMock) {
+            $value = isset($this->_customOptions[$name])
+                ? $this->_customOptions[$name]
+                : false;
+        } elseif (!function_exists('get_option')) {
+            throw new RuntimeException('WordPress get_option not defined, '
+                . 'cannot execute Vulnero outside of WordPress environment.'
+            );
+        } else {
+            $value = get_option($name);
+        }
+
+        if (!$value) {
+            return false;
+        }
+
+        if (preg_match('/^php:(.*)/', $value, $matches)) {
+            return unserialize($matches[1]);
+        } else {
+            return $value;
+        }
+    }
+
+    /**
+     * WordPress add_option, update_option hook for adding or updating
+     * custom project-level options in WordPress which are persisted
+     * to the WordPress database through its API.
+     *
+     * @param   string              Option name
+     * @param   mixed               Option value, serialized if not a scalar
+     * @return  Vulnero_WordPress
+     */
+    public function setCustomOption($name, $value)
+    {
+        $name = $this->_getSanitizedOptionName($name);
+
+        // serialize non-scalar values
+        if (!is_scalar($value)) {
+            $value = 'php:' . serialize($value);
+        }
+
+        if ($this->_isMock) {
+            $this->_customOptions[$name] = $value;
+        } elseif (!function_exists('add_option')) {
+            throw new RuntimeException('WordPress add_option not defined, '
+                . 'cannot execute Vulnero outside of WordPress environment.'
+            );
+        } elseif (get_option($name) === false) {
+            add_option($name, $value);
+        } else {
+            update_option($name, $value);
+        }
+
+        return $this;
     }
 }

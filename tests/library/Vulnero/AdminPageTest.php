@@ -11,6 +11,7 @@ class Vulnero_AdminPageTest extends Vulnero_Test_PHPUnit_ControllerTestCase
         $this->assertContains('admin_head-' . $w->getHook(), $wordPress->getActions());
         $this->assertTrue($w->getRequest() instanceof Zend_Controller_Request_Http);
         $this->assertTrue($w->getView() instanceof Zend_View);
+        $this->assertEquals('stuff', $w->getView()->test);
         $this->assertEquals('Test_AdminPage', $w->getMenuSlug());
         $this->assertEquals(Vulnero_AdminPage::ADMIN_OPTIONS, $w->getType());
         $this->assertContains($w->getMenuSlug(), $wordPress->getAdminPages());

@@ -71,14 +71,21 @@ class AdminPage_General extends Vulnero_AdminPage
      */
     public function displayAction()
     {
-        $config = $this->_bootstrap->getOptions();
+        $wordPress = $this->_bootstrap->bootstrap('wordPress')
+                                      ->getResource('wordPress');
 
         $form = new Form_AdminGeneral();
 
         if ($this->_request->isPost() && $form->isValid($this->_request->getPost())) {
             $values = $form->getValues();
+            $wordPress->setCustomOption('attribution', $values['attribution'])
+                      ->setCustomOption('environment', $values['environment']);
         } else {
-            $form->populate($this->_request->getPost());
+            $defaults = array(
+                'attribution' => $wordPress->getCustomOption('attribution'),
+                'environment' => $wordPress->getCustomOption('environment'),
+            );
+            $form->populate($defaults);
         }
 
         $this->view->form = $form;

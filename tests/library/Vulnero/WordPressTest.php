@@ -123,4 +123,43 @@ class Vulnero_WordPressTest extends Vulnero_Test_PHPUnit_ControllerTestCase
         $w->applyFilters('test', 'text');
         $this->assertEquals(array('test'), $w->getFilters());
     }
+
+    public function testAddMenuPage()
+    {
+        $w = new Vulnero_WordPress($this->_bootstrap);
+        $w->addMenuPage(
+            'page title',
+            'menu title',
+            'manage_options',
+            'slug',
+            array($this, 'testAddMenuPage'),
+            '/test.png',
+            3
+        );
+        $this->assertContains('slug', $w->getAdminPages());
+    }
+
+    public function testAddOptionsPage()
+    {
+        $w = new Vulnero_WordPress($this->_bootstrap);
+        $w->addOptionsPage(
+            'page title',
+            'menu title',
+            'manage_options',
+            'slug',
+            array($this, 'testAddMenuPage'),
+            '/test.png',
+            3
+        );
+        $this->assertContains('slug', $w->getAdminPages());
+    }
+
+    public function testGettingAndSettingCustomOptions()
+    {
+        $w = new Vulnero_WordPress($this->_bootstrap);
+        $w->setCustomOption('scalar', $scalarValue = 'test');
+        $w->setCustomOption('nonscalar', $nonScalarValue = array('color' => 'red'));
+        $this->assertEquals($scalarValue, $w->getCustomOption('scalar'));
+        $this->assertEquals($nonScalarValue, $w->getCustomOption('nonscalar'));
+    }
 }
