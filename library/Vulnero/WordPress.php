@@ -185,7 +185,15 @@ class Vulnero_WordPress
                 . 'cannot execute Vulnero outside of WordPress environment.'
             );
         } else {
+            if (is_object($param)) {
+                $old = $param;
+                $this->_delegate = $param;
+                $param = null;
+            }
             add_action($action, $this->_getCallback($action), $param);
+            if (isset($old)) {
+                $this->_delegate = $old;
+            }
         }
 
         return $this;
@@ -607,5 +615,15 @@ class Vulnero_WordPress
                 $callBack
             );
         }
+    }
+
+    /**
+     * Returns all registered admin and option pages.
+     *
+     * @return array
+     */
+    public function getAdminPages()
+    {
+        return $this->_adminPages;
     }
 }

@@ -126,14 +126,21 @@ abstract class Vulnero_AdminPage implements Vulnero_AdminPage_Interface
     protected $_content;
 
     /**
+     * Unique id dynamically assigned to the page by WordPress.
+     * @var string
+     */
+    protected $_hook;
+
+    /**
      * Constructs the object.
      *
      * @param   Vulnero_Application_Bootstrap_Bootstrap
      * @return  Vulnero_AdminPage
      */
-    public function __construct(Vulnero_Application_Bootstrap_Bootstrap $bootstrap = null)
+    public function __construct(Vulnero_Application_Bootstrap_Bootstrap $bootstrap)
     {
         $this->_bootstrap = $bootstrap;
+
         $this->_request = new Zend_Controller_Request_Http();
 
         $this->view = clone $this->_bootstrap->bootstrap('view')
@@ -154,7 +161,7 @@ abstract class Vulnero_AdminPage implements Vulnero_AdminPage_Interface
 
         switch ($this->_type) {
             case self::ADMIN_MENU:
-                $hook = $wordPress->addMenuPage(
+                $this->_hook = $wordPress->addMenuPage(
                     $this->_pageTitle,
                     $this->_menuTitle,
                     $this->_capability,
@@ -167,7 +174,8 @@ abstract class Vulnero_AdminPage implements Vulnero_AdminPage_Interface
 
             case self::ADMIN_OPTIONS:
             default:
-                $hook = $wordPress->addOptionsPage(
+                $this->_type = self::ADMIN_OPTIONS;
+                $this->_hook = $wordPress->addOptionsPage(
                     $this->_pageTitle,
                     $this->_menuTitle,
                     $this->_capability,
@@ -179,9 +187,17 @@ abstract class Vulnero_AdminPage implements Vulnero_AdminPage_Interface
 
         $this->_content = $this->getContent();
 
-        $wordPress = clone $wordPress;
-        $wordPress->setDelegate($this);
-        $wordPress->addAction('admin_head-' . $hook);
+        $wordPress->addAction('admin_head-' . $this->_hook, $this);
+    }
+
+    /**
+     * Retrieves the WordPress assigned hook.
+     *
+     * @return string
+     */
+    public function getHook()
+    {
+        return $this->_hook;
     }
 
     /**
