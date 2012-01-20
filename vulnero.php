@@ -3,7 +3,7 @@
 Plugin Name: Vulnero
 Plugin URI: http://www.vulnero.com/
 Description: Vulnero is a WordPress plugin that transforms WordPress into an object-oriented CMS by implementing a Zend Framework application that interfaces with its API.
-Version: 0.1.0
+Version: 0.1.1
 Author: Andrew Kandels
 Author URI: http://andrewkandels.com/
 */
@@ -49,10 +49,7 @@ Author URI: http://andrewkandels.com/
  * @link        http://www.vulnero.com
  */
 
-ini_set('display_errors', '1');
-ini_set('error_reporting', E_ALL);
-
-define('VULNERO_VERSION', '0.1.0');
+define('VULNERO_VERSION', '0.1.1');
 
 if (!defined('PLUGIN_NAME')) {
     define('PLUGIN_NAME', basename(__DIR__));
