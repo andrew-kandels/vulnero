@@ -409,10 +409,13 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
             // Automatically detect and load any widget classes, caching the work
             $widgets = array();
 
-            $di = new DirectoryIterator(APPLICATION_PATH . '/widgets/Widget');
-            foreach ($di as $item) {
-                if ($item->isFile() && substr($item->getFilename(), -4) == '.php') {
-                    $widgets[] = 'Widget_' . substr($item->getFilename(), 0, -4);
+            $dir = APPLICATION_PATH . '/widgets/Widget';
+            if (is_dir($dir) || mkdir($dir, 0775, true)) {
+                $di = new DirectoryIterator(APPLICATION_PATH . '/widgets/Widget');
+                foreach ($di as $item) {
+                    if ($item->isFile() && substr($item->getFilename(), -4) == '.php') {
+                        $widgets[] = 'Widget_' . substr($item->getFilename(), 0, -4);
+                    }
                 }
             }
 
