@@ -1,6 +1,6 @@
 <?php
 /**
- * WordPress admin panel form for this application.
+ * Primary admin panel for the website.
  *
  * Copyright (c) 2012, Andrew Kandels <me@andrewkandels.com>.
  * All rights reserved.
@@ -37,29 +37,51 @@
  * @license     http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link        http://www.vulnero.com
  */
-class Form_Admin extends Zend_Form
+class AdminPage_General extends Vulnero_AdminPage
 {
     /**
-     * Adds the default elements to the form.
+     * Title displayed between the title tags
+     * @var string
+     */
+    protected $_pageTitle   = 'Setup';
+
+    /**
+     * Menu title displayed on the left bar
+     * @var string
+     */
+    protected $_menuTitle   = 'Vulnero';
+
+    /**
+     * Initializes certain object properties.
      *
      * @return void
      */
-    public function init()
+    protected function _init()
     {
-        parent::init();
+        $this->setIconUrl(PROJECT_BASE_URI . '/public/images/admin-icon.png')
+             ->setPosition(3)
+             ->setType(Vulnero_AdminPage::ADMIN_MENU);
+    }
 
-        $this->addElement('Text', 'sample', array(
-            'label' => 'Sample',
-            'required' => true,
-            'validators' => array(
-                'alnum'
-            ),
-            'filters' => array('StringToLower')
-        ));
+    /**
+     * Renders the contents of the widget in its view. The widget itself
+     * serves as a controller.
+     *
+     * @return  void
+     */
+    public function displayAction()
+    {
+        $config = $this->_bootstrap->getOptions();
 
-        $this->addElement('Button', 'save', array(
-            'label' => 'Save Changes',
-            'attribs' => array('type' => 'submit')
-        ));
+        $form = new Form_AdminGeneral();
+
+        if ($this->_request->isPost() && $form->isValid($this->_request->getPost())) {
+            $values = $form->getValues();
+        } else {
+            $form->populate($this->_request->getPost());
+        }
+
+        $this->view->form = $form;
+        $this->view->version = VULNERO_VERSION;
     }
 }

@@ -582,33 +582,35 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
 
     /**
      * WordPress admin_menu action
-     * Initializes an admin panel from a Zend_Form object and injects it into
-     * WordPress.
+     * Scans the application/admin-pages directory for objects extending
+     * Vulnero_AdminPage and registers them with WordPress by instantiating
+     * them.
+     *
+     * @return void
      */
     public function onAdminMenu()
     {
-        /*
-        if (0) {
-            $frontController = $this->bootstrap('frontController')
-                                    ->getResource('frontController');
+        $cache     = $this->bootstrap('cache')
+                          ->getResource('cache');
+        $wordPress = $this->bootstrap('wordPress')
+                          ->getResource('wordPress');
 
-            $request         = new Zend_Controller_Request_Http();
+        if (!$pages = $cache->load('admin-pages')) {
+            // Automatically detect and load any admin page classes, caching the work
+            $pages = array();
 
-            $view = new Vulnero_Admin_View();
-            $view->form = $form;
-
-            if ($request->isPost() && $form->isValid($request->getPost())) {
-                $view->success = true;
+            $di = new DirectoryIterator(APPLICATION_PATH . '/admin-pages/AdminPage');
+            foreach ($di as $item) {
+                if ($item->isFile() && substr($item->getFilename(), -4) == '.php') {
+                    $pages[] = 'AdminPage_' . substr($item->getFilename(), 0, -4);
+                }
             }
 
-            add_options_page(
-                'Vulnero Title',        // Title
-                'Vulnero Menu Title',   // Menu Title
-                'manage_options',       // WordPress Access Level
-                'vulnero',              // Plugin Name
-                array($view, 'renderWordPress')
-            );
+            $cache->save($pages, 'pages');
         }
-        */
+
+        foreach ($pages as $page) {
+            $obj = new $page($this);
+        }
     }
 }

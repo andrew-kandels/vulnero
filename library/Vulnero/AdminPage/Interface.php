@@ -1,6 +1,6 @@
 <?php
 /**
- * Sample widget form for configuring it in the administration panel.
+ * Interface for defining admin pages that are autoloaded into WordPress.
  *
  * Copyright (c) 2012, Andrew Kandels <me@andrewkandels.com>.
  * All rights reserved.
@@ -37,19 +37,9 @@
  * @license     http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link        http://www.vulnero.com
  */
-class Form_Widget_AboutVulnero extends Zend_Form
+interface Vulnero_AdminPage_Interface
 {
-    /**
-     * Adds the default elements to the form.
-     *
-     * @return void
-     */
-    public function init()
-    {
-        parent::init();
-
-        $this->addElement('Checkbox', 'sample', array(
-            'label' => 'Sample Setting'
-        ));
-    }
+    // Injects view variables, performs display logic
+    public function displayAction();
+    public function onRender();
 }
