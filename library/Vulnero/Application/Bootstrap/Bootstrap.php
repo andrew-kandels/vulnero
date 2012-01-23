@@ -181,34 +181,6 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
     }
 
     /**
-     * Initalizes a Zend_Auth_Adapter against the WordPress wp_users table
-     * the application can share the same authentication source.
-     *
-     * @return  Zend_Auth_Adapter_DbTable
-     */
-    protected function _initAuthAdapter()
-    {
-        $frontController = $this->bootstrap('frontController')
-                                ->getResource('frontController');
-        $frontController->registerPlugin(new Vulnero_Controller_Plugin_Login());
-
-        $config = $this->bootstrap('config')
-                       ->getResource('config');
-
-        if ($db = $this->bootstrap('db')->getResource('db')) {
-            $authAdapter = new Zend_Auth_Adapter_DbTable($db);
-            $authAdapter->setTableName($config->wordpress->tablePrefix . 'users')
-                        ->setIdentityColumn('user_login')
-                        ->setCredential('user_pass')
-                        ->setCredentialTreatment('MD5(?)');
-        } else {
-            $authAdapter = null;
-        }
-
-        return $authAdapter;
-    }
-
-    /**
      * Initializes a cache adapter in the following order of precedence:
      * 1) application/config/config.ini section if available:
      *    Example: cache.backend.* (see config for details)
@@ -330,13 +302,19 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
 
     /**
      * WordPress plugins_loaded hook
-     * Allows our application to inject sidebar widgets, scripts or stylesheets
-     * into WordPress (if our application doesn't handle the route).
+     * Called when the plugin is loaded as part of the WordPress initialization.
+     * We use this opportunity to load the wordpress user object into the
+     * Zend_Auth identity.
      *
      * @return  void
      */
     public function onPluginsLoaded()
     {
+        $wordPress = $this->bootstrap('wordPress')
+                          ->getResource('wordPress');
+        $adapter = new Vulnero_Auth_Adapter_WordPress($wordPress);
+        $auth = Zend_Auth::getInstance();
+        $result = $auth->authenticate($adapter);
     }
 
     /**

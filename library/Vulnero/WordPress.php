@@ -733,4 +733,117 @@ class Vulnero_WordPress
 
         return $this;
     }
+
+    /**
+     * WordPress wp_get_current_user function
+     * Returns the user record if logged in.
+     *
+     * @return  WP_User|boolean         User or FALSE if not logged in
+     */
+    public function getCurrentUser()
+    {
+        if ($this->_isMock) {
+            return (object) array(
+                'data'      => (object) array(
+                                   'ID' => '1',
+                                   'user_login'            => 'tester',
+                                   'user_pass'             => 'randomhash',
+                                   'user_nicename'         => 'tester',
+                                   'user_email'            => 'tester@vulnero.com',
+                                   'user_url'              => 'http://www.vulnero.com',
+                                   'user_registered'       => '1997-01-01 12:00:00',
+                                   'user_activation_key'   => null,
+                                   'user_status'           => 0,
+                                   'display_name'          => 'Mr. Tester',
+                               ),
+                'ID'        => 1,
+                'caps'      => array(
+                                   'administrator'         => 1
+                               ),
+                'cap_key'   => 'wp_capabilities',
+                'roles'     => array(
+                                   'administrator'
+                               ),
+                'allcaps'   => array(
+                                   'switch_themes' => 1,
+                                   'edit_themes' => 1,
+                                   'activate_plugins' => 1,
+                                   'edit_plugins' => 1,
+                                   'edit_users' => 1,
+                                   'edit_files' => 1,
+                                   'manage_options' => 1,
+                                   'moderate_comments' => 1,
+                                   'manage_categories' => 1,
+                                   'manage_links' => 1,
+                                   'upload_files' => 1,
+                                   'import' => 1,
+                                   'unfiltered_html' => 1,
+                                   'edit_posts' => 1,
+                                   'edit_others_posts' => 1,
+                                   'edit_published_posts' => 1,
+                                   'publish_posts' => 1,
+                                   'edit_pages' => 1,
+                                   'read' => 1,
+                                   'level_10' => 1,
+                                   'level_9' => 1,
+                                   'level_8' => 1,
+                                   'level_7' => 1,
+                                   'level_6' => 1,
+                                   'level_5' => 1,
+                                   'level_4' => 1,
+                                   'level_3' => 1,
+                                   'level_2' => 1,
+                                   'level_1' => 1,
+                                   'level_0' => 1,
+                                   'edit_others_pages' => 1,
+                                   'edit_published_pages' => 1,
+                                   'publish_pages' => 1,
+                                   'delete_pages' => 1,
+                                   'delete_others_pages' => 1,
+                                   'delete_published_pages' => 1,
+                                   'delete_posts' => 1,
+                                   'delete_others_posts' => 1,
+                                   'delete_published_posts' => 1,
+                                   'delete_private_posts' => 1,
+                                   'edit_private_posts' => 1,
+                                   'read_private_posts' => 1,
+                                   'delete_private_pages' => 1,
+                                   'edit_private_pages' => 1,
+                                   'read_private_pages' => 1,
+                                   'delete_users' => 1,
+                                   'create_users' => 1,
+                                   'unfiltered_upload' => 1,
+                                   'edit_dashboard' => 1,
+                                   'update_plugins' => 1,
+                                   'delete_plugins' => 1,
+                                   'install_plugins' => 1,
+                                   'update_themes' => 1,
+                                   'install_themes' => 1,
+                                   'update_core' => 1,
+                                   'list_users' => 1,
+                                   'remove_users' => 1,
+                                   'add_users' => 1,
+                                   'promote_users' => 1,
+                                   'edit_theme_options' => 1,
+                                   'delete_themes' => 1,
+                                   'export' => 1,
+                                   'administrator' => 1,
+                               ),
+                'filter'    => null
+            );
+        } elseif (!function_exists('wp_get_current_user')) {
+            throw new RuntimeException('WordPress wp_get_current_user not defined, '
+                . 'cannot execute Vulnero outside of WordPress environment.'
+            );
+        } else {
+            $user = wp_get_current_user();
+
+            // if not logged in we expect to see a false return
+            if (!$user->ID) {
+                return false;
+            }
+
+            return (object) $user;
+        }
+    }
 }
