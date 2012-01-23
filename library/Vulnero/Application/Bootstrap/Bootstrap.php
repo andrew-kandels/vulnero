@@ -56,7 +56,8 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
         $wordPress->addAction('plugins_loaded')
                   ->addFilter('wp_title')
                   ->addAction('wp_footer')
-                  ->addAction('wp_head', 2);
+                  ->addAction('wp_head', 2)
+                  ->registerActivationHook();
 
         // The view needs to be saved so that widgets can get ahold of it externally
         $this->bootstrap('frontController')
@@ -336,6 +337,19 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
      */
     public function onPluginsLoaded()
     {
+    }
+
+    /**
+     * WordPress plugin activated
+     * Called when the plugin is activated for the first time.
+     *
+     * @return  void
+     */
+    public function onPluginActivated()
+    {
+        $this->bootstrap('wordPress')
+             ->getResource('wordPress')
+             ->setCustomOption('attribution', true);
     }
 
     /**

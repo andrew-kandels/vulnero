@@ -99,10 +99,10 @@ class Vulnero_WordPress
     protected $_delegate;
 
     /**
-     * Keeps track of mock activation hook injections.
-     * @var array
+     * Tracks if the activation hook has been registered.
+     * @var boolean
      */
-    protected $_activationHooks = array();
+    protected $_activationHook = false;
 
     /**
      * Keeps track of mock filter injections.
@@ -158,23 +158,21 @@ class Vulnero_WordPress
     /**
      * WordPress register_activation_hook() function.
      *
-     * @param   string          File
-     * @param   string          Function in File
      * @return  Vulnero_WordPress
      */
-    public function registerActivationHook($file, $func)
+    public function registerActivationHook()
     {
         if ($this->_isMock) {
-            $this->_activationHooks[] = array(
-                'file' => $file,
-                'func' => $func
-            );
+            $this->_activationHook = true;
         } elseif (!function_exists('register_activation_hook')) {
             throw new RuntimeException('WordPress register_activation_hook() not detected, '
                 . 'cannot execute Vulnero outside of WordPress environment.'
             );
         } else {
-            register_activation_hook($file, $func);
+            register_activation_hook(
+                PROJECT_BASE_PATH . '/vulnero.php',
+                $this->_getCallback('plugin_activated')
+            );
         }
 
         return $this;
@@ -306,11 +304,11 @@ class Vulnero_WordPress
      * API is ignored as it likely doesn't exist. This returns a list of
      * the items in order of their registration.
      *
-     * @return  array
+     * @return  boolean
      */
-    public function getActivationHooks()
+    public function hasActivationHook()
     {
-        return $this->_activationHooks;
+        return $this->_activationHook;
     }
 
     /**
