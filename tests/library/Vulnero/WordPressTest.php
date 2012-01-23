@@ -5,7 +5,7 @@ class Vulnero_WordPressTest extends Vulnero_Test_PHPUnit_ControllerTestCase
     {
         $w = new Vulnero_WordPress($this->_bootstrap);
         $w->registerActivationHook('test', 'func');
-        $this->assertEquals(array(array('file' => 'test', 'func' => 'func')), $w->getActivationHooks());
+        $this->assertTrue($w->hasActivationHook());
     }
 
     public function testAddAction()
@@ -38,7 +38,7 @@ class Vulnero_WordPressTest extends Vulnero_Test_PHPUnit_ControllerTestCase
     public function testGetActivationHooks()
     {
         $w = new Vulnero_WordPress($this->_bootstrap);
-        $this->assertEquals(array(), $w->getActivationHooks());
+        $this->assertEquals(false, $w->hasActivationHook());
     }
 
     public function testGetFilters()
