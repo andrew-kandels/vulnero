@@ -9,7 +9,8 @@ class DefaultController extends Zend_Controller_Action
      */
     public function helloworldAction()
     {
-        // $this->_helper->layout()->setLayout('empty');
+        $this->_helper->acl->assertHasRole('administrator')
+                           ->assertHasCapability('manage_options');
     }
 
     /**
@@ -20,6 +21,8 @@ class DefaultController extends Zend_Controller_Action
      */
     public function hellostaticAction()
     {
+        $this->_helper->acl->assertHasRole('administrator')
+                           ->assertHasCapability('manage_options');
     }
 
     /**

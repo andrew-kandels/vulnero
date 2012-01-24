@@ -310,11 +310,15 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
      */
     public function onPluginsLoaded()
     {
+        // inject the WordPress identity into the Zend_Auth singleton
         $wordPress = $this->bootstrap('wordPress')
                           ->getResource('wordPress');
         $adapter = new Vulnero_Auth_Adapter_WordPress($wordPress);
         $auth = Zend_Auth::getInstance();
         $result = $auth->authenticate($adapter);
+
+        // register an action helper to enforce any Acl requirements
+        Zend_Controller_Action_HelperBroker::addHelper(new Vulnero_Controller_Action_Helper_Acl());
     }
 
     /**
