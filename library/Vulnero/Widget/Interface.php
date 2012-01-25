@@ -40,7 +40,7 @@
 interface Vulnero_Widget_Interface
 {
     // Injects view variables, performs display logic
-    public function displayAction();
+    public function displayAction(array $settings);
     public function form(array $settings);
     public function update(array $newSettings, array $oldSettings);
     public function widget(array $args, array $instance);

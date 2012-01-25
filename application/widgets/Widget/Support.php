@@ -41,14 +41,4 @@ class Widget_Support extends Vulnero_Widget
 {
     protected $_title       = 'Support';
     protected $_description = 'Displays support resources.';
-
-    /**
-     * Renders the contents of the widget in its view. The widget itself
-     * serves as a controller.
-     *
-     * @return  void
-     */
-    public function displayAction()
-    {
-    }
 }

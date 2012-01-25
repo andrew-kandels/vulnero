@@ -143,11 +143,13 @@ abstract class Vulnero_Widget extends WP_Widget implements Vulnero_Widget_Interf
     }
 
     /**
-     * Gets the rendered output content to be displayed.
+     * Returns the name of the widget's view script in the
+     * application/views/scripts/widgets directory.
      *
-     * @return  string              Content
+     * @param   string          Postfix to be appended to the file's non-extension base
+     * @return  string
      */
-    public function getContent()
+    protected function _getViewScriptName($postfix = '')
     {
         // Remove the prefixing widget text
         $name = str_replace('Widget_', '', get_class($this));
@@ -158,12 +160,24 @@ abstract class Vulnero_Widget extends WP_Widget implements Vulnero_Widget_Interf
         // Convert any nesting to hyphens for file naming
         $name = str_replace('_', '-', strtolower($name));
 
-        // Allow the parent to initialize the view like a controller
-        $this->displayAction();
-
         // Append the view extension
         $config = $this->_bootstrap->getOptions();
-        return $this->view->render($name . '.' . $config['resources']['layout']['viewSuffix']);
+
+        return $name . $postfix . '.' . $config['resources']['layout']['viewSuffix'];
+    }
+
+    /**
+     * Gets the rendered output content to be displayed.
+     *
+     * @param   array               Widget settings
+     * @return  string              Content
+     */
+    public function getContent(array $instance)
+    {
+        // Allow the parent to initialize the view like a controller
+        $this->displayAction($instance);
+
+        return $this->view->render($this->_getViewScriptName());
     }
 
     /**
@@ -209,6 +223,8 @@ abstract class Vulnero_Widget extends WP_Widget implements Vulnero_Widget_Interf
         $wordPress = $this->_bootstrap->bootstrap('wordPress')
                                       ->getResource('wordPress');
 
+        $content = $this->getContent($instance);
+
         $stack = array();
 
         if ($this->_drawWrappers) {
@@ -221,7 +237,7 @@ abstract class Vulnero_Widget extends WP_Widget implements Vulnero_Widget_Interf
             }
         }
 
-        $stack[] = $this->getContent();
+        $stack[] = $content;
 
         if ($this->_drawWrappers) {
             $stack[] = $args['after_widget'];
@@ -249,15 +265,43 @@ abstract class Vulnero_Widget extends WP_Widget implements Vulnero_Widget_Interf
     }
 
     /**
-     * If a Zend_Form object was given to the constructor then display
-     * it in the WordPress administration panel to configure our widget.
+     * If a setupAction() exists in the widget, we'll call that action and
+     * render the view script (with a -setup postfix) in the WordPress
+     * administration panel widgets setup area.
      *
      * @param   array       Current settings
      * @return  void
      */
     public function form(array $settings)
     {
-        // @todo
+        if (method_exists($this, 'setupAction')) {
+            $this->setupAction($settings);
+
+            $config = $this->_bootstrap->getOptions();
+            $content = $this->view->render($this->_getViewScriptName('-setup'));
+
+            // switch fors and ids by sanitizing them with the WordPress get_field_id method
+            $x = preg_match_all('/ (for|id)="([^"]*)"/', $content, $matches);
+            for ($i = 0; $i < $x; $i++) {
+                $content = str_replace(
+                    $matches[0][$i],
+                    sprintf(' %s="%s"', $matches[1][$i], $this->get_field_id($matches[2][$i])),
+                    $content
+                );
+            }
+
+            // switch names by sanitizing them with the WordPress get_field_name method
+            $x = preg_match_all('/ (name)="([^"]*)"/', $content, $matches);
+            for ($i = 0; $i < $x; $i++) {
+                $content = str_replace(
+                    $matches[0][$i],
+                    sprintf(' %s="%s"', $matches[1][$i], $this->get_field_name($matches[2][$i])),
+                    $content
+                );
+            }
+
+            echo $content;
+        }
     }
 
     /**
@@ -269,5 +313,17 @@ abstract class Vulnero_Widget extends WP_Widget implements Vulnero_Widget_Interf
     protected function _isShown()
     {
         return true;
+    }
+
+    /**
+     * Renders the contents of the widget in its view. The widget itself
+     * serves as a controller.
+     *
+     * @param   array           WordPress widget settings
+     * @return  void
+     */
+    public function displayAction(array $settings)
+    {
+        // do nothing, just renders the view script if not overridden by the parent class
     }
 }
