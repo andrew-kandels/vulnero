@@ -3,6 +3,7 @@ li.widget-container > h3.widget-title { background: #f0f0f0; border-bottom: 3px 
 dl > dd { padding-bottom: 0; margin-left: 0; }
 li { color: #444; }
 ol > li { padding-bottom: 10px; }
+ol.linenums { padding-bottom: 0; }
 ul, ol { margin: 0 0 10px 25px; }
 
 body { background: #006760 url(../images/top-bg.png) repeat-x; height: 300px; color: #444; }
