@@ -113,7 +113,7 @@ class Vulnero_Acl extends Zend_Acl
         for ($i1 = count(self::$_wpAcl) - 1; $i1 >= 0; $i1--) {
             $parents = array();
             for ($i2 = $i1 - 1; $i2 >= 0; $i2--) {
-                $parents[] = self::$_wpAcl[$i2][0]
+                $parents[] = self::$_wpAcl[$i2][0];
             }
             if (empty($parents)) {
                 $parents = null;

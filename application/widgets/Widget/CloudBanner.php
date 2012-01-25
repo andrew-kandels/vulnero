@@ -49,14 +49,4 @@ class Widget_CloudBanner extends Vulnero_Widget
     {
         $this->setDrawTitle(false);
     }
-
-    /**
-     * Renders the contents of the widget in its view. The widget itself
-     * serves as a controller.
-     *
-     * @return  void
-     */
-    public function displayAction()
-    {
-    }
 }

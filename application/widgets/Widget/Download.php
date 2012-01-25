@@ -39,21 +39,46 @@
  */
 class Widget_Download extends Vulnero_Widget
 {
+    /**
+     * @var string
+     */
     protected $_title       = 'Download';
+
+    /**
+     * @var string
+     */
     protected $_description = 'Buttons for downloading the Vulnero plugin and for viewing it on GitHub.';
 
     /**
      * Renders the contents of the widget in its view. The widget itself
      * serves as a controller.
      *
+     * @param   array               WordPress widget settings
      * @return  void
      */
-    public function displayAction()
+    public function displayAction(array $settings)
     {
         $config = $this->_bootstrap->getOptions();
+
+        if (isset($settings['title'])) {
+            $this->_title = $settings['title'];
+        }
 
         $this->view->githubUrl = $config['github']['url'];
         $this->view->zipFile = $config['github']['zip']['url'];
         $this->view->version = VULNERO_VERSION;
+    }
+
+    /**
+     * Renders the setup form which appears under the widget title when
+     * drug onto a sidebar in the WordPress administration panel's widget
+     * setup area.
+     *
+     * @param   array           Existing setting values
+     * @return  void
+     */
+    public function setupAction(array $settings)
+    {
+        $this->view->settings = $settings;
     }
 }

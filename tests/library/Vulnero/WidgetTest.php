@@ -33,7 +33,7 @@ class Vulnero_WidgetTest extends Vulnero_Test_PHPUnit_ControllerTestCase
     public function testGetContent()
     {
         $w = new Test_Widget();
-        $this->assertEquals('Test widget, used in unit tests.' . PHP_EOL, $w->getContent());
+        $this->assertEquals('Test widget, used in unit tests.' . PHP_EOL, $w->getContent(array()));
     }
 
     public function testWidget()
@@ -121,7 +121,7 @@ class Test_Widget extends Vulnero_Widget
     protected $_requestUri = null;
     protected $_isShown = true;
 
-    public function displayAction()
+    public function displayAction(array $settings)
     {
         $this->view->test = 'value';
     }
