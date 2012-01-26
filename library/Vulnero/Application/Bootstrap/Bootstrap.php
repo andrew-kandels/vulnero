@@ -410,9 +410,14 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
             // Automatically detect and load any widget classes, caching the work
             $widgets = array();
 
+<<<<<<< HEAD
             $dir = APPLICATION_PATH . '/widgets/Widget';
             if (is_dir($dir) || mkdir($dir, 0775, true)) {
                 $di = new DirectoryIterator(APPLICATION_PATH . '/widgets/Widget');
+=======
+            if (is_dir($path = APPLICATION_PATH . '/widgets/Widget')) {
+                $di = new DirectoryIterator($path);
+>>>>>>> website
                 foreach ($di as $item) {
                     if ($item->isFile() && substr($item->getFilename(), -4) == '.php') {
                         $widgets[] = 'Widget_' . substr($item->getFilename(), 0, -4);
@@ -603,10 +608,12 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
             // Automatically detect and load any admin page classes, caching the work
             $pages = array();
 
-            $di = new DirectoryIterator(APPLICATION_PATH . '/admin-pages/AdminPage');
-            foreach ($di as $item) {
-                if ($item->isFile() && substr($item->getFilename(), -4) == '.php') {
-                    $pages[] = 'AdminPage_' . substr($item->getFilename(), 0, -4);
+            if (is_dir($path = APPLICATION_PATH . '/admin-pages/AdminPage')) {
+                $di = new DirectoryIterator($path);
+                foreach ($di as $item) {
+                    if ($item->isFile() && substr($item->getFilename(), -4) == '.php') {
+                        $pages[] = 'AdminPage_' . substr($item->getFilename(), 0, -4);
+                    }
                 }
             }
 
