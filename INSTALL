@@ -1,0 +1,11 @@
+To install this Vulnero WordPress plugin, copy this folder in its
+entirety to your WordPress installation's wp_content/plugins
+directory and install it from the WordPress administration panel's
+widget setup area.
+
+You'll need to make sure that the Zend Framework is available
+in PHP's include_path, or you can download and install the Zend
+Framework in this directory's library/Zend sub-directory.
+
+For more complete instructions and documentation on how to get
+started, visit http://www.vulnero.com/.

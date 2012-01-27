@@ -156,6 +156,19 @@ class Vulnero_WordPress
     }
 
     /**
+     * Sets mock mode, which emulates the WordPress API responses for
+     * testing and CLI scripts.
+     *
+     * @param   boolean             Enabled
+     * @return  Vulnero_WordPress
+     */
+    public function setIsMock($mock)
+    {
+        $this->_isMock = (bool) $mock;
+        return $this;
+    }
+
+    /**
      * WordPress register_activation_hook() function.
      *
      * @return  Vulnero_WordPress
@@ -188,22 +201,25 @@ class Vulnero_WordPress
      */
     public function addAction($action, $param = null)
     {
+        if (is_object($param)) {
+            $old = $this->getDelegate();
+            $this->setDelegate($param);
+            $param = null;
+        }
+
         if ($this->_isMock) {
-            $this->_actions[] = $action;
+            $callBack = $this->_getCallback($action);
+            $this->_actions[] = $callBack[1];
         } elseif (!function_exists('add_action')) {
             throw new RuntimeException('WordPress add_action() not detected, '
                 . 'cannot execute Vulnero outside of WordPress environment.'
             );
         } else {
-            if (is_object($param)) {
-                $old = $param;
-                $this->_delegate = $param;
-                $param = null;
-            }
             add_action($action, $this->_getCallback($action), $param);
-            if (isset($old)) {
-                $this->_delegate = $old;
-            }
+        }
+
+        if (isset($old)) {
+            $this->_delegate = $old;
         }
 
         return $this;
@@ -219,7 +235,8 @@ class Vulnero_WordPress
     public function addFilter($filter)
     {
         if ($this->_isMock) {
-            $this->_filters[] = $filter;
+            $callBack = $this->_getCallback($filter);
+            $this->_filters[] = $callBack[1];
         } elseif (!function_exists('add_filter')) {
             throw new RuntimeException('WordPress add_filter() not detected, '
                 . 'cannot execute Vulnero outside of WordPress environment.'
@@ -241,6 +258,16 @@ class Vulnero_WordPress
     {
         $this->_delegate = $obj;
         return $this;
+    }
+
+    /**
+     * Gets the delegate object which should receive action/filter callbacks.
+     *
+     * @return  Object
+     */
+    public function getDelegate()
+    {
+        return $this->_delegate;
     }
 
     /**
@@ -268,7 +295,7 @@ class Vulnero_WordPress
     public function getSidebar()
     {
         if ($this->_isMock) {
-            return '';
+            // do nothing
         } elseif (!function_exists('get_sidebar')) {
             throw new RuntimeException('WordPress get_sidebar() not detected, '
                 . 'cannot execute Vulnero outside of WordPress environment.'

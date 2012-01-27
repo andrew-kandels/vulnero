@@ -6,26 +6,62 @@ class Vulnero_WordPressTest extends Vulnero_Test_PHPUnit_ControllerTestCase
         $w = new Vulnero_WordPress($this->_bootstrap);
         $w->registerActivationHook('test', 'func');
         $this->assertTrue($w->hasActivationHook());
+
+        $w->setIsMock(false);
+        try {
+            $w->registerActivationHook('test', 'func');
+        } catch (RuntimeException $e) {
+            $thrown = true;
+        }
+        $this->assertTrue(isset($thrown));
     }
 
     public function testAddAction()
     {
         $w = new Vulnero_WordPress($this->_bootstrap);
         $w->addAction('test', 3);
-        $this->assertEquals(array('test'), $w->getActions());
+        $this->assertEquals(array('onTest'), $w->getActions());
+
+        $w->addAction('test', $this->_frontController);
+        $this->assertContains('onTest', $w->getActions());
+        $this->assertEquals($this->_bootstrap, $w->getDelegate());
+
+        $w->setIsMock(false);
+        try {
+            $w->addAction('test', 3);
+        } catch (RuntimeException $e) {
+            $thrown = true;
+        }
+        $this->assertTrue(isset($thrown));
     }
 
     public function testAddFilter()
     {
         $w = new Vulnero_WordPress($this->_bootstrap);
         $w->addFilter('test');
-        $this->assertEquals(array('test'), $w->getFilters());
+        $this->assertEquals(array('onTest'), $w->getFilters());
+
+        $w->setIsMock(false);
+        try {
+            $w->addFilter('test');
+        } catch (RuntimeException $e) {
+            $thrown = true;
+        }
+        $this->assertTrue(isset($thrown));
     }
 
     public function testGetSidebar()
     {
         $w = new Vulnero_WordPress($this->_bootstrap);
-        $this->assertEquals('', $w->getSidebar());
+        $this->assertEquals($w, $w->getSidebar());
+
+        $w->setIsMock(false);
+        try {
+            $w->getSidebar();
+        } catch (RuntimeException $e) {
+            $thrown = true;
+        }
+        $this->assertTrue(isset($thrown));
     }
 
     public function testRegisterWidget()
@@ -33,6 +69,14 @@ class Vulnero_WordPressTest extends Vulnero_Test_PHPUnit_ControllerTestCase
         $w = new Vulnero_WordPress($this->_bootstrap);
         $w->registerWidget('test');
         $this->assertEquals(array('test'), $w->getWidgets());
+
+        $w->setIsMock(false);
+        try {
+            $w->registerWidget('test');
+        } catch (RuntimeException $e) {
+            $thrown = true;
+        }
+        $this->assertTrue(isset($thrown));
     }
 
     public function testGetActivationHooks()
@@ -47,13 +91,13 @@ class Vulnero_WordPressTest extends Vulnero_Test_PHPUnit_ControllerTestCase
         $this->assertEquals(array(), $w->getFilters());
     }
 
-    public function testWidgets()
+    public function testGetWidgets()
     {
         $w = new Vulnero_WordPress($this->_bootstrap);
         $this->assertEquals(array(), $w->getWidgets());
     }
 
-    public function testActions()
+    public function testGetActions()
     {
         $w = new Vulnero_WordPress($this->_bootstrap);
         $this->assertEquals(array(), $w->getActions());
@@ -70,42 +114,104 @@ class Vulnero_WordPressTest extends Vulnero_Test_PHPUnit_ControllerTestCase
         $w = new Vulnero_WordPress($this->_bootstrap);
         $this->assertEquals('Test', $w->getBlogInfo('name'));
         $this->assertEquals(null, $w->getBlogInfo('bad key'));
+
+        $w->setIsMock(false);
+        try {
+            $w->getBlogInfo('name');
+        } catch (RuntimeException $e) {
+            $thrown = true;
+        }
+        $this->assertTrue(isset($thrown));
     }
 
     public function testGetThemeRoot()
     {
         $w = new Vulnero_WordPress($this->_bootstrap);
         $this->assertEquals(PROJECT_BASE_PATH, $w->getThemeRoot());
+
+        $w->setIsMock(false);
+        try {
+            $w->getThemeRoot();
+        } catch (RuntimeException $e) {
+            $thrown = true;
+        }
+        $this->assertTrue(isset($thrown));
     }
 
     public function testGetTemplate()
     {
         $w = new Vulnero_WordPress($this->_bootstrap);
         $this->assertEquals(array(), $w->getTemplate());
+
+        $w->setIsMock(false);
+        try {
+            $w->getTemplate();
+        } catch (RuntimeException $e) {
+            $thrown = true;
+        }
+        $this->assertTrue(isset($thrown));
     }
 
     public function testGetTags()
     {
         $w = new Vulnero_WordPress($this->_bootstrap);
         $this->assertEquals(array(), $w->getTags());
+
+        $w->setIsMock(false);
+        try {
+            $w->getTags();
+        } catch (RuntimeException $e) {
+            $thrown = true;
+        }
+        $this->assertTrue(isset($thrown));
     }
 
     public function testGetCategory()
     {
         $w = new Vulnero_WordPress($this->_bootstrap);
         $this->assertTrue($w->getCategory('test') instanceof stdclass);
+
+        $w->setIsMock(false);
+        try {
+            $w->getCategory('test');
+        } catch (RuntimeException $e) {
+            $thrown = true;
+        }
+        $this->assertTrue(isset($thrown));
     }
 
     public function testGetPostCateories()
     {
         $w = new Vulnero_WordPress($this->_bootstrap);
         $this->assertEquals(array(), $w->getPostCategories());
+
+        $w->setIsMock(false);
+        try {
+            $w->getPostCategories();
+        } catch (RuntimeException $e) {
+            $thrown = true;
+        }
+        $this->assertTrue(isset($thrown));
     }
 
     public function testGetDatabase()
     {
         $w = new Vulnero_WordPress($this->_bootstrap);
         $this->assertTrue($w->getDatabase() instanceof Zend_Db_Adapter_Pdo_Sqlite);
+
+        $w->setIsMock(false);
+        try {
+            $w->getDatabase();
+        } catch (RuntimeException $e) {
+            $thrown = true;
+        }
+        $this->assertTrue(isset($thrown));
+
+        define('DB_HOST', 'localhost');
+        define('DB_USER', 'test');
+        define('DB_PASSWORD', 'test');
+        define('DB_NAME', 'nonexistent');
+        $this->assertTrue($w->getDatabase() instanceof Zend_Db_Adapter_Pdo_Mysql);
     }
 
     public function testLocateTemplate()
@@ -115,6 +221,14 @@ class Vulnero_WordPressTest extends Vulnero_Test_PHPUnit_ControllerTestCase
             array(realpath(PROJECT_BASE_PATH . '/../../themes') . '/page.php'),
             $w->locateTemplate('test')
         );
+
+        $w->setIsMock(false);
+        try {
+            $w->locateTemplate('test');
+        } catch (RuntimeException $e) {
+            $thrown = true;
+        }
+        $this->assertTrue(isset($thrown));
     }
 
     public function testApplyFilters()
@@ -122,6 +236,14 @@ class Vulnero_WordPressTest extends Vulnero_Test_PHPUnit_ControllerTestCase
         $w = new Vulnero_WordPress($this->_bootstrap);
         $w->applyFilters('test', 'text');
         $this->assertEquals(array('test'), $w->getFilters());
+
+        $w->setIsMock(false);
+        try {
+            $w->applyFilters('test', 'text');
+        } catch (RuntimeException $e) {
+            $thrown = true;
+        }
+        $this->assertTrue(isset($thrown));
     }
 
     public function testAddMenuPage()
@@ -137,6 +259,22 @@ class Vulnero_WordPressTest extends Vulnero_Test_PHPUnit_ControllerTestCase
             3
         );
         $this->assertContains('slug', $w->getAdminPages());
+
+        $w->setIsMock(false);
+        try {
+            $w->addMenuPage(
+                'page title',
+                'menu title',
+                'manage_options',
+                'slug',
+                array($this, 'testAddMenuPage'),
+                '/test.png',
+                3
+            );
+        } catch (RuntimeException $e) {
+            $thrown = true;
+        }
+        $this->assertTrue(isset($thrown));
     }
 
     public function testAddOptionsPage()
@@ -152,6 +290,22 @@ class Vulnero_WordPressTest extends Vulnero_Test_PHPUnit_ControllerTestCase
             3
         );
         $this->assertContains('slug', $w->getAdminPages());
+
+        $w->setIsMock(false);
+        try {
+            $w->addOptionsPage(
+                'page title',
+                'menu title',
+                'manage_options',
+                'slug',
+                array($this, 'testAddMenuPage'),
+                '/test.png',
+                3
+            );
+        } catch (RuntimeException $e) {
+            $thrown = true;
+        }
+        $this->assertTrue(isset($thrown));
     }
 
     public function testGettingAndSettingCustomOptions()
@@ -161,5 +315,57 @@ class Vulnero_WordPressTest extends Vulnero_Test_PHPUnit_ControllerTestCase
         $w->setCustomOption('nonscalar', $nonScalarValue = array('color' => 'red'));
         $this->assertEquals($scalarValue, $w->getCustomOption('scalar'));
         $this->assertEquals($nonScalarValue, $w->getCustomOption('nonscalar'));
+        $this->assertContains($scalarValue, $w->getCustomOptions());
+
+        $this->assertFalse($w->getCustomOption('non-existent'));
+
+        $w->setIsMock(false);
+        try {
+            $w->setCustomOption('scalar', $scalarValue = 'test');
+        } catch (RuntimeException $e) {
+            $thrown = true;
+        }
+        $this->assertTrue(isset($thrown));
+
+        $w->setIsMock(false);
+        try {
+            $w->getCustomOption('nonscalar');
+        } catch (RuntimeException $e) {
+            $thrown = true;
+        }
+        $this->assertTrue(isset($thrown));
+
+        try {
+            $w->setCustomOption(str_repeat('x', 70), 'test');
+        } catch (UnexpectedValueException $e) {
+            $thrown = true;
+        }
+        $this->assertTrue(isset($thrown));
+    }
+
+    public function testGetOption()
+    {
+        $w = new Vulnero_WordPress($this->_bootstrap);
+        $this->assertTrue(is_null($w->getOption('non-existent')));
+
+        $w->setIsMock(false);
+        try {
+            $w->getOption('non-existent');
+        } catch (RuntimeException $e) {
+            $thrown = true;
+        }
+        $this->assertTrue(isset($thrown));
+    }
+
+    public function testGetCurrentUser()
+    {
+        $w = new Vulnero_WordPress($this->_bootstrap);
+        $w->setIsMock(false);
+        try {
+            $w->getCurrentUser();
+        } catch (RuntimeException $e) {
+            $thrown = true;
+        }
+        $this->assertTrue(isset($thrown));
     }
 }
