@@ -15,7 +15,6 @@ class BootstrapTest extends Vulnero_Test_PHPUnit_ControllerTestCase
         $this->assertContains('onAdminMenu', $wordPress->getActions());
 
         $this->assertContains('onWpTitle', $wordPress->getFilters());
-        $this->assertContains('onPageTemplate', $wordPress->getFilters());
 
         $this->assertTrue($this->_frontController->getParam('bootstrap') instanceof
             Vulnero_Application_Bootstrap_Bootstrap
@@ -27,13 +26,6 @@ class BootstrapTest extends Vulnero_Test_PHPUnit_ControllerTestCase
         $wordPress = $this->_bootstrap->bootstrap('wordPress')
                                       ->getResource('wordPress');
         $this->assertContains('onWidgetsInit', $wordPress->getActions());
-    }
-
-    public function testInitTemplates()
-    {
-        $wordPress = $this->_bootstrap->bootstrap('wordPress')
-                                      ->getResource('wordPress');
-        $this->assertContains('onPageTemplate', $wordPress->getFilters());
     }
 
     public function testInitRoutes()
@@ -219,6 +211,7 @@ STREND;
         $this->assertContains('onPingsOpen', $wordPress->getFilters());
         $this->assertContains('onCommentsTemplate', $wordPress->getFilters());
         $this->assertContains('onWpLinkPagesArgs', $wordPress->getFilters());
+        $this->assertContains('onPageTemplate', $wordPress->getFilters());
 
         $response = $this->_frontController->getParam('response');
         $this->assertTrue($response instanceof Zend_Controller_Response_Http);
