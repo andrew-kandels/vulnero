@@ -87,24 +87,6 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
     }
 
     /**
-     * If this is a Vulerno route, go on to check if we will render with
-     * the current theme's page.php template, or a page.php template in
-     * the Vulnero plugin directory.
-     *
-     * @return  void
-     */
-    protected function _initTemplates()
-    {
-        $frontController = $this->bootstrap('frontController')
-                                ->getResource('frontController');
-        if ($frontController->getParam('isVulneroRoute')) {
-            $this->bootstrap('wordPress')
-                 ->getResource('wordPress')
-                 ->addFilter('page_template');
-        }
-    }
-
-    /**
      * Initializes and caches the application/config/routes.ini routes
      * configuration file, which are routes that are answered by your
      * application and not by WordPress. Also initializes the send_headers
@@ -465,10 +447,8 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
         $wordPress = $this->bootstrap('wordPress')
                           ->getResource('wordPress');
         if (file_exists(PROJECT_BASE_PATH . '/' . self::WORDPRESS_PAGE_TEMPLATE)) {
-        die('fuck1');
             return PROJECT_BASE_PATH . '/' . self::WORDPRESS_PAGE_TEMPLATE;
         } else {
-        die('fuck2');
             return $wordPress->locateTemplate($template);
         }
     }
@@ -566,7 +546,8 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
                 $wordPress->addFilter('comments_open')
                           ->addFilter('pings_open')
                           ->addFilter('comments_template')
-                          ->addFilter('wp_link_pages_args');
+                          ->addFilter('wp_link_pages_args')
+                          ->addFilter('page_template');
 
                 $routeName = $frontController->getRouter()->getCurrentRouteName();
 
