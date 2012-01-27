@@ -96,6 +96,8 @@ class Vulnero_Test_PHPUnit_ControllerTestCase extends Zend_Test_PHPUnit_Controll
         $this->_bootstrap       = $this->_application->getBootstrap();
         $this->_frontController = $this->_bootstrap->getResource('frontController');
         $this->_wordPress       = $this->_bootstrap->getResource('wordPress');
+
+        $this->_bootstrap->onPluginsLoaded();
     }
 
     /**
