@@ -121,15 +121,27 @@ class Test_Widget extends Vulnero_Widget
     protected $_requestUri = null;
     protected $_isShown = true;
 
+    public function setupAction(array $settings)
+    {
+
+    }
+
     public function displayAction(array $settings)
     {
+        parent::displayAction($settings);
         $this->view->test = 'value';
     }
 
     protected function _init()
     {
+        parent::_init();
         $this->_requestUri = $this->_getRequestUri();
         $this->_lastAction = 'init';
+
+        ob_start();
+        $this->form(array('color' => 'red'));
+        $output = ob_get_contents();
+        ob_end_clean();
     }
 
     public function getRequestUri()
@@ -149,7 +161,21 @@ class Test_Widget extends Vulnero_Widget
 
     protected function _isShown()
     {
-        return $this->_isShown;
+        if ($this->_isShown) {
+            return parent::_isShown();
+        } else {
+            return $this->_isShown;
+        }
+    }
+
+    public function get_field_id($id)
+    {
+        return $id;
+    }
+
+    public function get_field_name($name)
+    {
+        return $name;
     }
 }
 

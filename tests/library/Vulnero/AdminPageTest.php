@@ -8,7 +8,7 @@ class Vulnero_AdminPageTest extends Vulnero_Test_PHPUnit_ControllerTestCase
 
         $wordPress = $this->_bootstrap->bootstrap('wordPress')
                                       ->getResource('wordPress');
-        $this->assertContains('admin_head-' . $w->getHook(), $wordPress->getActions());
+        $this->assertContains('onAdminHead', $wordPress->getActions());
         $this->assertTrue($w->getRequest() instanceof Zend_Controller_Request_Http);
         $this->assertTrue($w->getView() instanceof Zend_View);
         $this->assertEquals('stuff', $w->getView()->test);

@@ -41,6 +41,13 @@
 class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap_Bootstrap
 {
     /**
+     * The name of the default page template file that may optionally
+     * exist in the plugin directory to overwrite the WordPress default.
+     * @var string
+     */
+    const WORDPRESS_PAGE_TEMPLATE = 'page.php';
+
+    /**
      * Initialize Vulnero_WordPress, which is the single object for
      * interfacing with the WordPress API either in mock mode for
      * unit tests or cli scripts or against the actual API functions.
@@ -89,9 +96,7 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
     {
         $this->bootstrap('wordPress')
              ->getResource('wordPress')
-             ->addFilter('page_template')
-             ->addFilter('home_template')
-             ->addFilter('single_template');
+             ->addFilter('page_template');
     }
 
     /**
@@ -345,7 +350,7 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
         $frontController = $this->bootstrap('frontController')
                                 ->getResource('frontController');
         // only set the title if we own the route
-        if ($frontController->getParam('isWordPressRoute')) {
+        if ($frontController->getParam('isVulneroRoute')) {
             $view = $this->bootstrap('view')
                          ->getResource('view');
             return strip_tags($view->headTitle()) . ' - ';
@@ -428,33 +433,15 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
     }
 
     /**
-     * WordPress home_template filter
-     *
-     * @return  void
-     */
-    public function onHomeTemplate()
-    {
-        return $this->_onTemplate('home');
-    }
-
-    /**
      * WordPress page_template filter
+     * We override the current template's page.php implementation only
+     * if there's a page.php file present in the plugin directory.
      *
      * @return  void
      */
     public function onPageTemplate()
     {
-        return $this->_onTemplate('page');
-    }
-
-    /**
-     * WordPress single_template filter
-     *
-     * @return  void
-     */
-    public function onSingleTemplate()
-    {
-        return $this->_onTemplate('single');
+        return $this->_onTemplate('page.php');
     }
 
     /**
@@ -473,11 +460,60 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
                           ->getResource('wordPress');
         $frontController = $this->bootstrap('frontController')
                                 ->getResource('frontController');
-        if ($frontController->getParam('isWordPressRoute')) {
-            return PROJECT_BASE_PATH . '/wordpress-template.php';
+        if (file_exists(PROJECT_BASE_PATH . '/' . self::WORDPRESS_PAGE_TEMPLATE) &&
+            $frontController->getParam('isVulneroRoute')) {
+            return PROJECT_BASE_PATH . '/' . self::WORDPRESS_PAGE_TEMPLATE;
         } else {
             return $wordPress->locateTemplate($template);
         }
+    }
+
+    /**
+     * Returns TRUE if comments are open for the current post. We disable comments
+     * for all Vulnero routes.
+     *
+     * @param   boolean     Open?
+     * @return  boolean
+     */
+    public function onCommentsOpen($open)
+    {
+        return false;
+    }
+
+    /**
+     * Returns TRUE if pings are open for the current post. We disable pings
+     * for all Vulnero routes.
+     *
+     * @param   boolean     Open?
+     * @return  boolean
+     */
+    public function onPingsOpen($open)
+    {
+        return false;
+    }
+
+    /**
+     * WordPress expects a page to render the comments area. For Vulnero
+     * routes, we override this to an empty file. Tacky, but it works.
+     *
+     * @return  string          File path
+     */
+    public function onCommentsTemplate()
+    {
+        return PROJECT_BASE_PATH . '/empty-page.php';
+    }
+
+    /**
+     * Disables the printing of next/previous page links on Vulnero
+     * routes.
+     *
+     * @param   array               WordPress before/after, etc. strings
+     * @return  array
+     */
+    public function onWpLinkPagesArgs(array $args)
+    {
+        $args['echo'] = 0;
+        return $args;
     }
 
     /**
@@ -519,7 +555,13 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
 
                 // Controller plugin injects content into the WordPress the_content() hook
                 $frontController->setParam('response', $response)
-                                ->setParam('isWordPressRoute', true);
+                                ->setParam('isVulneroRoute', true);
+
+                // Disable comments, links, pings and other display oddities for our own routes
+                $wordPress->addFilter('comments_open')
+                          ->addFilter('pings_open')
+                          ->addFilter('comments_template')
+                          ->addFilter('wp_link_pages_args');
 
                 $routeName = $frontController->getRouter()->getCurrentRouteName();
 
@@ -557,7 +599,7 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
             } catch (Zend_Controller_Router_Exception $e) {
                 // our application didn't answer the route, so it passes control
                 // back to WordPress simply by doing nothing
-                $frontController->setParam('isWordPressRoute', false);
+                $frontController->setParam('isVulneroRoute', false);
             }
 
             return $frontController->getRequest();
@@ -576,8 +618,8 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
     {
         $frontController = $this->bootstrap('frontController')
                                 ->getResource('frontController');
-        if ($frontController->getParam('isWordPressRoute')) {
-            return $content . $frontController->getParam('response')->getBody();
+        if ($frontController->getParam('isVulneroRoute')) {
+            return $frontController->getParam('response')->getBody();
         } else {
             return $content;
         }
