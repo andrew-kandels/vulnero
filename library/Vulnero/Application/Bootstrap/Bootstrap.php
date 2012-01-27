@@ -87,16 +87,21 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
     }
 
     /**
-     * Overrides your theme's home and page template files with the wordpress-page.php
-     * file in the plugin directory for all routes handled by Vulnero.
+     * If this is a Vulerno route, go on to check if we will render with
+     * the current theme's page.php template, or a page.php template in
+     * the Vulnero plugin directory.
      *
      * @return  void
      */
     protected function _initTemplates()
     {
-        $this->bootstrap('wordPress')
-             ->getResource('wordPress')
-             ->addFilter('page_template');
+        $frontController = $this->bootstrap('frontController')
+                                ->getResource('frontController');
+        if ($frontController->getParam('isVulneroRoute')) {
+            $this->bootstrap('wordPress')
+                 ->getResource('wordPress')
+                 ->addFilter('page_template');
+        }
     }
 
     /**
@@ -435,7 +440,8 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
     /**
      * WordPress page_template filter
      * We override the current template's page.php implementation only
-     * if there's a page.php file present in the plugin directory.
+     * if there's a page.php file present in the plugin directory and
+     * we're rendering a Vulnero route.
      *
      * @return  void
      */
@@ -458,12 +464,11 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
     {
         $wordPress = $this->bootstrap('wordPress')
                           ->getResource('wordPress');
-        $frontController = $this->bootstrap('frontController')
-                                ->getResource('frontController');
-        if (file_exists(PROJECT_BASE_PATH . '/' . self::WORDPRESS_PAGE_TEMPLATE) &&
-            $frontController->getParam('isVulneroRoute')) {
+        if (file_exists(PROJECT_BASE_PATH . '/' . self::WORDPRESS_PAGE_TEMPLATE)) {
+        die('fuck1');
             return PROJECT_BASE_PATH . '/' . self::WORDPRESS_PAGE_TEMPLATE;
         } else {
+        die('fuck2');
             return $wordPress->locateTemplate($template);
         }
     }
