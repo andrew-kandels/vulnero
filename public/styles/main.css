@@ -5,6 +5,12 @@ li { color: #444; }
 ol > li { padding-bottom: 10px; }
 ul, ol { margin: 0 0 10px 25px; }
 
+dd.padded { padding-bottom: 12px; }
+
+dl.git-issues dd { padding-bottom: 10px; }
+dl.git-issues dd .label { font-weight: bold; font-size: 0.9em; letter-spacing: -1px; background: #666; color: white; padding: 1px 4px; }
+dl.git-issues dd .new-feature { background: blue; }
+
 ol.linenums li { padding-bottom: 0; }
 
 body { background: #006760 url(../images/top-bg.png) repeat-x; height: 300px; color: #444; }

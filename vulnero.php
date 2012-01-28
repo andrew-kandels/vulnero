@@ -82,6 +82,7 @@ if (!defined('APPLICATION_PATH')) {
 
 set_include_path(implode(PATH_SEPARATOR, array(
     PROJECT_BASE_PATH . '/library',
+    PROJECT_BASE_PATH . '/library/php-github-api/lib',
     APPLICATION_PATH . '/widgets',
     APPLICATION_PATH . '/admin-pages',
     APPLICATION_PATH . '/forms',

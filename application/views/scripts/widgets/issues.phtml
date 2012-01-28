@@ -1,0 +1,29 @@
+<dl class="git-issues">
+<?php foreach ($this->issues as $issue): ?>
+    <dt>
+        <a href="<?php echo $issue['html_url']; ?>" title="<?php echo $this->escape($issue['title']); ?>">
+            <?php echo $this->escape($issue['title']); ?>
+        </a>
+        <?php if ($issue['comments'] > 0): ?>
+            (<?php echo number_format($issue['comments'], 0); ?>)
+        <?php endif; ?>
+    </dt>
+    <dd>
+        <?php $d = new Zend_Date($issue['updated_at']); ?>
+        Updated <strong><?php echo strtolower($d->toString('yyyy-MM-dd h:mma')); ?></strong>
+        <?php if ($issue['user']): ?>
+            - <a href="https://github.com/<?php echo $this->escape($issue['user']); ?>"><?php echo $this->escape($issue['user']); ?></a>
+        <?php endif; ?>
+        <?php if ($issue['labels']): ?>
+            <br />
+            <?php foreach ($issue['labels'] as $label): ?>
+                <span class="label <?php echo preg_replace('/\s+/', '-', strtolower($label)); ?>"><?php echo $this->escape($label); ?></span>
+            <?php endforeach; ?>
+        <?php endif; ?>
+    </dd>
+<?php endforeach; ?>
+</dl>
+<p>Find a bug? Have an idea?</p>
+<p> 
+    <a href="https://github.com/andrew-kandels/vulnero/issues/new" title="Report Issue" class="btn">New Issue</a>
+</p>
