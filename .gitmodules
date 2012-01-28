@@ -1,3 +1,3 @@
 [submodule "library/Zend"]
 	path = library/Zend
-	url = git://github.com/Enrise/Zend.git
+	url = https://github.com/Enrise/Zend.git
