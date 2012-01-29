@@ -70,7 +70,7 @@ class Widget_Issues extends Vulnero_Widget
 
         $cache = $this->_bootstrap->bootstrap('cache')
                                   ->getResource('cache');
-        if (!$this->view->issues = $cache->load('issues') && class_exists('Github_Client')) {
+        if (!($this->view->issues = $cache->load('issues')) && class_exists('Github_Client')) {
             $github = new Github_Client();
             $this->view->issues = $github->getIssueApi()->getList($user, $project, 'open');
             $cache->save($this->view->issues, 'issues');
