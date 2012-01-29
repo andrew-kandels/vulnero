@@ -1,6 +1,7 @@
 <?php
 /**
- * Cloud banner widget for a variety of text overlay.
+ * Documentation widget which displays the table of contents from the
+ * documentation page.
  *
  * Copyright (c) 2012, Andrew Kandels <me@andrewkandels.com>.
  * All rights reserved.
@@ -37,16 +38,47 @@
  * @license     http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link        http://www.vulnero.com
  */
-class Widget_CloudBanner extends Vulnero_Widget
+class Widget_Documentation extends Vulnero_Widget
 {
-    protected $_title       = 'Cloud Banner';
-    protected $_description = 'Banner widget with a rounded clouds background for text overlay.';
+    /**
+     * @var string
+     */
+    protected $_title       = 'Documentation';
+
+    /**
+     * @var string
+     */
+    protected $_description = 'Displays the table of contents for Vulerno\'s documentation.';
 
     /**
      * Widget setup.
      */
     protected function _init()
     {
-        $this->setDrawTitle(false);
+        if (isset($settings['title'])) {
+            $this->_title = $settings['title'];
+        }
+
+        if ($page = get_page_by_path('documentation')) {
+            $start = strpos($page->post_content, '<dl>');
+            $end = strpos($page->post_content, '</dl>');
+            $this->view->doc = substr($page->post_content, $start, $end - $start + 5);
+        } else {
+            $this->view->doc = '';
+        }
     }
+
+    /**
+     * Renders the setup form which appears under the widget title when
+     * drug onto a sidebar in the WordPress administration panel's widget
+     * setup area.
+     *
+     * @param   array           Existing setting values
+     * @return  void
+     */
+    public function setupAction(array $settings)
+    {
+        $this->view->settings = $settings;
+    }
+
 }
