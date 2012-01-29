@@ -62,10 +62,43 @@ class Widget_Documentation extends Vulnero_Widget
         if ($page = get_page_by_path('documentation')) {
             $start = strpos($page->post_content, '<dl>');
             $end = strpos($page->post_content, '</dl>');
-            $this->view->doc = substr($page->post_content, $start, $end - $start + 5);
+            $this->view->doc = '<dl class="doc-widget">' . substr($page->post_content, $start + 4, $end - $start + 5);
         } else {
             $this->view->doc = '';
         }
+
+        $request = $this->_getRequestUri();
+        $this->view->doc = str_replace(
+            '<a href="' . $request . '">', 
+            '<a href="' . $request . '" class="active">',
+            $this->view->doc
+        );
+    }
+
+    /**
+     * Gets the request URI.
+     *
+     * @return string
+     */
+    protected function _getRequestUri()
+    {
+        // kill trailing slash
+        $request = preg_replace('!/$!', '', parent::_getRequestUri());
+
+        // most pages prefix with the category which can be stripped
+        $request = str_replace('/documentation', '', $request);
+
+        return $request;
+    }
+
+    /**
+     * Don't show the documentation widget on the actual documentation page.
+     *
+     * @return boolean
+     */
+    protected function _isShown()
+    {
+        return preg_match('!^/documentation/.!', parent::_getRequestUri());
     }
 
     /**

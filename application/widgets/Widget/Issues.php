@@ -75,6 +75,20 @@ class Widget_Issues extends Vulnero_Widget
             $this->view->issues = $github->getIssueApi()->getList($user, $project, 'open');
             $cache->save($this->view->issues, 'issues');
         }
+
+        if (empty($this->view->issues)) {
+            $this->view->issues = array();
+        }
+    }
+
+    /**
+     * Not shown on the documentation pages.
+     *
+     * @return  boolean
+     */
+    protected function _isShown()
+    {
+        return !preg_match('!^/documentation/.!', $this->_getRequestUri());
     }
 
     /**

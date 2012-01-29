@@ -42,6 +42,9 @@ footer { background-color: #e4fcfa; border-top: 1px solid #4dc6cb; height: 100px
 .breadcrumb .divider{padding:0 5px;color:#bfbfbf;}
 .breadcrumb .active a{color:#404040;}
 
+dl.doc-widget dd { padding-bottom: 12px; }
+dl.doc-widget a.active { color: #999; font-style: italic; }
+
 ul.doc-navigation { list-style: none; margin: 0; overflow: hidden; border-top: 1px solid #c0c0c0; padding-top: 15px; margin-top: 25px; }
 ul.doc-navigation > li { display: inline; font-weight: bold; }
 ul.doc-navigation > li.next { float: right; }
