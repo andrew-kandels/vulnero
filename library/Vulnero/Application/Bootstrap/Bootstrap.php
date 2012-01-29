@@ -67,9 +67,16 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
                   ->registerActivationHook();
 
         // The view needs to be saved so that widgets can get ahold of it externally
-        $this->bootstrap('frontController')
-             ->getResource('frontController')
-             ->setParam('bootstrap', $this);
+        $frontController = $this->bootstrap('frontController')
+                                ->getResource('frontController')
+                                ->setParam('bootstrap', $this);
+
+        $frontController->registerPlugin(new Zend_Controller_Plugin_ErrorHandler(array(
+            'module' => 'default',
+            'controller' => 'error',
+            'action' => 'error'
+        )));
+        $frontController->throwExceptions(true);
 
         return $wordPress;
     }
@@ -507,8 +514,7 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
     public function onSendHeaders($wp)
     {
         $wordPress = $this->bootstrap('wordPress')
-                          ->getResource('wordPress')
-                          ->addAction('the_content');
+                          ->getResource('wordPress');
 
         // Permalinks must be enabled in WordPress for request to be set
         if (isset($wp->request) && ($wpRequest = $wp->request)) {
@@ -530,12 +536,29 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
                 // position on the page
                 $frontController->returnResponse(true);
 
-                $response = $frontController->dispatch();
+                try {
+                    $response = $frontController->dispatch();
+                } catch (Zend_Controller_Router_Exception $e) {
+                    // route not found, pass to WordPress to handle
+                    throw $e;
+                } catch (Exception $e) {
+                    // Route found, exception thrown:
+                    // We can't forward because the frontController has already dispatched the route, 
+                    // so we have to forcibly load the error controller and route it outside of the
+                    // regular dispatching.
+                    $plugin = $frontController->getPlugin('Zend_Controller_Plugin_ErrorHandler');
+                    $response = $plugin->getResponse();
+                    $response->setException($e);
+                    $plugin->postDispatch($request);
+
+                    include_once(APPLICATION_PATH . '/controllers/ErrorController.php');
+                    $controller = new ErrorController($request, $response, array());
+                    $controller->run();
+                }
 
                 // Controller plugin injects content into the WordPress the_content() hook
                 $frontController->setParam('response', $response)
                                 ->setParam('isVulneroRoute', true);
-
 
                 // Our layout is the WordPress page template
                 $layout = $this->bootstrap('layout')
@@ -547,7 +570,8 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
                           ->addFilter('pings_open')
                           ->addFilter('comments_template')
                           ->addFilter('wp_link_pages_args')
-                          ->addFilter('page_template');
+                          ->addFilter('page_template')
+                          ->addAction('the_content');
 
                 $routeName = $frontController->getRouter()->getCurrentRouteName();
 

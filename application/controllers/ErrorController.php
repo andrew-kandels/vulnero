@@ -47,8 +47,6 @@ class ErrorController extends Zend_Controller_Action
      */
     public function errorAction()
     {
-        $this->getResponse()->appendBody('ERROR');
-
         $content = null;
         $errors = $this->_getParam('error_handler');
         $exception = $errors->exception;
@@ -82,6 +80,8 @@ EOH;
         $this->getResponse()->clearBody();
         $this->view->content = $content;
         $this->view->formattedException = $this->view->exception;
+
+        $this->view->showDetails = $this->_helper->acl->hasRole('manage_options');
     }
 
     /**

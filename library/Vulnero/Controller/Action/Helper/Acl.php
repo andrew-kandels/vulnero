@@ -138,4 +138,62 @@ class Vulnero_Controller_Action_Helper_Acl extends Zend_Controller_Action_Helper
         $this->_pluginAcl->setDenyAction($action);
         return $this;
     }
+
+    /**
+     * Check whether or not the current logged in WordPress user
+     * has the required role.
+     *
+     * See: http://codex.wordpress.org/Roles_and_Capabilities
+     *
+     * @param   string                  WordPress role
+     * @return  boolean
+     */
+    public function hasRole($role)
+    {
+        $auth = Zend_Auth::getInstance();
+        if (!$auth->hasIdentity()) {
+            return false;
+        }
+        $identity = $auth->getIdentity();
+
+        return in_array($role, $identity->roles);
+    }
+
+
+    /**
+     * Check whether or not the current logged in WordPress user
+     * has all of a list of capabilities.
+     *
+     * See: http://codex.wordpress.org/Roles_and_Capabilities
+     *
+     * @param   array                   WordPress capabilities
+     * @return  boolean
+     */
+    public function hasCapabilities(array $capabilities)
+    {
+        $auth = Zend_Auth::getInstance();
+        if (!$auth->hasIdentity()) {
+            return false;
+        }
+        $identity = $auth->getIdentity();
+
+        foreach ($identity->allcaps as $item => $index) {
+            if (false !== ($key = array_search($item, $capabilities))) {
+                unset($capabilities[$key]);
+                if (empty($capabilities)) {
+                    break;
+                }
+            }
+        }
+
+        foreach ($identity->caps as $item => $index) {
+            if (false !== ($key = array_search($item, $capabilities))) {
+                unset($capabilities[$key]);
+                if (empty($capabilities)) {
+                    break;
+                }
+            }
+        }
+        return empty($capabilities);
+    }
 }

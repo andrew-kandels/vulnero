@@ -53,12 +53,12 @@ class Vulnero_Controller_Plugin_Acl extends Zend_Controller_Plugin_Abstract
     /**
      * @var string
      */
-    protected $_denyController = 'index';
+    protected $_denyController = 'error';
 
     /**
      * @var string
      */
-    protected $_denyAction = 'index';
+    protected $_denyAction = 'error';
 
     /**
      * @var array
@@ -80,11 +80,35 @@ class Vulnero_Controller_Plugin_Acl extends Zend_Controller_Plugin_Abstract
      */
     public function postDispatch(Zend_Controller_Request_Abstract $request)
     {
-        if (!$this->_hasRole() || !$this->_hasCapabilities()) {
-            $request->setDispatched(false)
-                    ->setModuleName($this->_denyModule)
+        $hasPermission = $this->_hasRole() && $this->_hasCapabilities();
+
+        $route = array(
+            $request->getModuleName($this->_denyModule),
+            $request->getControllerName($this->_denyController),
+            $request->getActionName($this->_denyAction)
+        );
+        
+        $target = array(
+             $this->_denyModule,
+             $this->_denyController,
+             $this->_denyAction
+        );
+
+        // prevent infinite looping
+        $isOwnRoute = ($route == $target);
+
+        if (!$isOwnRoute && !$hasPermission) {
+            $request->setDispatched(false);
+
+            $request->setModuleName($this->_denyModule)
                     ->setControllerName($this->_denyController)
                     ->setActionName($this->_denyAction);
+
+            $error = new Zend_Controller_Plugin_ErrorHandler();
+            $error->type = Zend_Controller_Plugin_ErrorHandler::EXCEPTION_OTHER;
+            $error->request = clone($request);
+            $error->exception = new Zend_Acl_Exception('Access Denied');
+            $request->setParam('error_handler', $error);
         }
     }
 
