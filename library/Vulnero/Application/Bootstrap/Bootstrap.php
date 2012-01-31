@@ -286,7 +286,6 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
         return $view;
     }
 
-
     /********************************************************************************/
     //
     //          Begin WordPress API Callback Methods
