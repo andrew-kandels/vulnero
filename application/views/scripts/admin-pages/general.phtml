@@ -1,6 +1,7 @@
 <?php
     // "Vulnero" tab in the admin panel
-    $this->headLink()->appendStylesheet(PROJECT_BASE_URI . '/public/styles/admin.css');
+    $this->headLink()->appendStylesheet(PROJECT_BASE_URI . '/public/styles/admin-general.css');
+    $this->headScript()->appendFile(PROJECT_BASE_URI . '/public/scripts/admin-general.js');
 ?>
 <div id="vulnero-admin">
     <img src="<?php echo PROJECT_BASE_URI; ?>/public/images/logo.png" alt="" />

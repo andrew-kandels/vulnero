@@ -195,65 +195,99 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
      */
     protected function _initCache()
     {
-        $config = $this->bootstrap('config')
-                       ->getResource('config');
+        $wordPress = $this->bootstrap('wordPress')
+                          ->getResource('wordPress');
 
-        if (isset($config->cache->backend->memcached)) {
-            $adapterName = 'Libmemcached';
-            $options = $config->cache->backend->memcached->toArray();
-        } elseif (isset($config->cache->backend->memcache)) {
-            $adapterName = 'Memcached';
-            $options = $config->cache->backend->memcache->toArray();
-        } elseif (isset($config->cache->backend->apc)) {
-            $adapterName = 'Apc';
-            $options = is_array($config->cache->backend->apc)
-                ? $config->cache->backend->apc->toArray()
-                : array();
-        } elseif (isset($config->cache->backend->xcache)) {
-            $adapterName = 'Xcache';
-            $options = $config->cache->backend->xcache->toArray();
-        } elseif (isset($config->cache->backend->sqlite)) {
-            $adapterName = 'Sqlite';
-            $options = $config->cache->backend->sqlite->toArray();
-        } elseif (isset($config->cache->backend->file)) {
-            $adapterName = 'File';
-            $options = $config->cache->backend->file->toArray();
-        } else {
-            // Auto-detect best available option
-            if (extension_loaded('apc')) {
-                $adapterName = 'Apc';
+        switch($adapter = $wordPress->getCustomOption('cacheBackend', $this->_getBestCacheAdapter())) {
+            case 'Zend_Cache_Backend_Xcache':
                 $options = array();
-            } elseif (extension_loaded('sqlite')) {
-                $adapterName = 'Sqlite';
-                $options = array(
-                    'cache_db_complete_path' => PROJECT_BASE_PATH . '/cache/cache.sqlite.db'
+                if ($user = $wordPress->getCustomOption('cacheXcacheUser')) {
+                    $options['user'] = $user;
+                }
+                if ($password = $wordPress->getCustomOption('cacheXcachePassword')) {
+                    $options['password'] = $password;
+                }
+                break;
+
+            case 'Zend_Cache_Backend_Memcache':
+            case 'Zend_Cache_Backend_Libmemcached':
+                $options = array('servers' => array(array(
+                    'host' => $wordPress->getCustomOption('cacheMemcacheHost', '127.0.0.1'),
+                    'port' => $wordPress->getCustomOption('cacheMemcacheHost', '11211'),
+                )));
+                break;
+
+            case 'Zend_Cache_Backend_Apc':
+                $options = array();
+                break;
+
+            case 'Zend_Cache_Backend_Sqlite':
+                $file = $wordPress->getCustomOption(
+                    'cacheFile', 
+                    tempnam(sys_get_temp_dir(), 'vulnero')
                 );
-            } else {
-                $adapterName = 'File';
+
                 $options = array(
-                    'cache_dir'     => PROJECT_BASE_PATH . '/cache',
-                    'file_locking'  => true
+                    'cache_db_complete_path' => $file
                 );
-            }
+                break;
+
+            case 'Zend_Cache_Backend_File':
+            default:
+                $dir = $wordPress->getCustomOption(
+                    'cacheFile', 
+                    tempnam(sys_get_temp_dir(), 'vulnero')
+                );
+
+                if (!is_dir($dir)) {
+                    mkdir($dir, 0775);
+                }
+
+                $adapter = 'Zend_Cache_Backend_File';
+                $options = array(
+                    'file_locking' => false,
+                    'cache_dir'    => $dir 
+                );
+                break;
         }
 
-        if (isset($config->cache->frontend)) {
-            $frontendOptions = $config->cache->frontend->toArray();
-        } else {
-            $frontendOptions = array(
-                'lifetime' => 3600,
-                'logging' => false,
-                'automatic_serialization' => true
-            );
-        }
+        $frontendOptions = array(
+            'lifetime' => $wordPress->getCustomOption('cacheTtl', 3600),
+            'logging' => false,
+            'automatic_serialization' => true,
+        );
 
-        $cache = Zend_Cache::factory('Core', $adapterName, $frontendOptions, $options);
+        $adapter = str_replace('Zend_Cache_Backend_', '', $adapter);
+        $cache = Zend_Cache::factory('Core', $adapter, $frontendOptions, $options);
 
         Zend_Db_Table_Abstract::setDefaultMetadataCache($cache);
         Zend_Date::setOptions(array('cache' => $cache));
         Zend_Locale::setCache($cache);
 
         return $cache;
+    }
+
+    /**
+     * Attempts to identify the best caching option if none is yet 
+     * set in the admin page.
+     *
+     * @return  string          Zend_Cache_Backend class name
+     */
+    protected function _getBestCacheAdapter()
+    {
+        if (extension_loaded('apc')) {
+            return 'Zend_Cache_Backend_Apc';
+        } elseif (extension_loaded('xcache')) {
+            return 'Zend_Cache_Backend_Xcache';
+        } elseif (extension_loaded('memcached')) {
+            return 'Zend_Cache_Backend_Libmemcached';
+        } elseif (extension_loaded('memcache')) {
+            return 'Zend_Cache_Backend_Memcached';
+        } elseif (extension_loaded('sqlite3')) {
+            return 'Zend_Cache_Backend_Sqlite';
+        } else {
+            return 'Zend_Cache_Backend_File';
+        }
     }
 
     /**
