@@ -88,9 +88,13 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
      */
     protected function _initWidgets()
     {
-        $this->bootstrap('wordPress')
-             ->getResource('wordPress')
-             ->addAction('widgets_init');
+        $wordPress = $this->bootstrap('wordPress')
+                          ->getResource('wordPress');
+        if ('Yes' == $wordPress->getCustomOption('bootstrapWidgets', 'Yes')) {
+            $this->bootstrap('wordPress')
+                 ->getResource('wordPress')
+                 ->addAction('widgets_init');
+        }
     }
 
     /**
@@ -104,16 +108,20 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
      */
     protected function _initRoutes()
     {
-        $cache = $this->bootstrap('cache')
-                      ->getResource('cache');
+        $wordPress = $this->bootstrap('wordPress')
+                          ->getResource('wordPress');
+        if ('Yes' == $wordPress->getCustomOption('bootstrapRouting', 'Yes')) {
+            $cache = $this->bootstrap('cache')
+                          ->getResource('cache');
 
-        // Cache the routes configuration file to speed up processing
-        if (!$routes = $cache->load('routes')) {
-            $routes = new Zend_Config_Ini(APPLICATION_PATH . '/config/routes.ini');
-            $cache->save($routes);
+            // Cache the routes configuration file to speed up processing
+            if (!$routes = $cache->load('routes')) {
+                $routes = new Zend_Config_Ini(APPLICATION_PATH . '/config/routes.ini');
+                $cache->save($routes);
+            }
+
+            return $routes;
         }
-
-        return $routes;
     }
 
     /**
@@ -125,23 +133,27 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
      */
     protected function _initRouter()
     {
-        $routes = $this->bootstrap('routes')
-                       ->getResource('routes');
-        $router = $this->bootstrap('frontController')
-                       ->getResource('frontController')
-                       ->getRouter();
+        $wordPress = $this->bootstrap('wordPress')
+                          ->getResource('wordPress');
+        if ('Yes' == $wordPress->getCustomOption('bootstrapRouting', 'Yes')) {
+            $routes = $this->bootstrap('routes')
+                           ->getResource('routes');
+            $router = $this->bootstrap('frontController')
+                           ->getResource('frontController')
+                           ->getRouter();
 
-        // setup the router to better work with our module-less setup
-        $router->removeDefaultRoutes()
-               ->setGlobalParam('module', 'default')
-               ->addConfig($routes);
+            // setup the router to better work with our module-less setup
+            $router->removeDefaultRoutes()
+                   ->setGlobalParam('module', 'default')
+                   ->addConfig($routes);
 
-        // this is where the routing takes place
-        $this->bootstrap('wordPress')
-             ->getResource('wordPress')
-             ->addAction('send_headers');
+            // this is where the routing takes place
+            $this->bootstrap('wordPress')
+                 ->getResource('wordPress')
+                 ->addAction('send_headers');
 
-        return $router;
+            return $router;
+        }
     }
 
     /**
@@ -171,12 +183,16 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
     {
         $wordPress = $this->bootstrap('wordPress')
                           ->getResource('wordPress');
+        if ('Yes' == $wordPress->getCustomOption('bootstrapDatabase', 'Yes')) {
+            $wordPress = $this->bootstrap('wordPress')
+                              ->getResource('wordPress');
 
-        if ($db = $wordPress->getDatabase()) {
-            Zend_Db_Table_Abstract::setDefaultAdapter($db);
+            if ($db = $wordPress->getDatabase()) {
+                Zend_Db_Table_Abstract::setDefaultAdapter($db);
+            }
+
+            return $db;
         }
-
-        return $db;
     }
 
     /**
@@ -209,11 +225,21 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
                 }
                 break;
 
-            case 'Zend_Cache_Backend_Memcache':
+            case 'Zend_Cache_Backend_Memcached':
+                $options = array(
+                    'servers' => array(array(
+                        'host' => $wordPress->getCustomOption('cacheMemcacheHost', '127.0.0.1'),
+                        'port' => $wordPress->getCustomOption('cacheMemcachePort', '11211'),
+                    )),
+                    'compression' => false,
+                    'compatibility' => true,
+                );
+                break;
+
             case 'Zend_Cache_Backend_Libmemcached':
                 $options = array('servers' => array(array(
                     'host' => $wordPress->getCustomOption('cacheMemcacheHost', '127.0.0.1'),
-                    'port' => $wordPress->getCustomOption('cacheMemcacheHost', '11211'),
+                    'port' => $wordPress->getCustomOption('cacheMemcachePort', '11211'),
                 )));
                 break;
 
@@ -239,6 +265,10 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
                     tempnam(sys_get_temp_dir(), 'vulnero')
                 );
 
+                if (is_file($dir)) {
+                    unlink($dir);
+                }
+                
                 if (!is_dir($dir)) {
                     mkdir($dir, 0775);
                 }
@@ -339,12 +369,14 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
         // inject the WordPress identity into the Zend_Auth singleton
         $wordPress = $this->bootstrap('wordPress')
                           ->getResource('wordPress');
-        $adapter = new Vulnero_Auth_Adapter_WordPress($wordPress);
-        $auth = Zend_Auth::getInstance();
-        $result = $auth->authenticate($adapter);
+        if ('Yes' == $wordPress->getCustomOption('bootstrapAuth', 'Yes')) {
+            $adapter = new Vulnero_Auth_Adapter_WordPress($wordPress);
+            $auth = Zend_Auth::getInstance();
+            $result = $auth->authenticate($adapter);
 
-        // register an action helper to enforce any Acl requirements
-        Zend_Controller_Action_HelperBroker::addHelper(new Vulnero_Controller_Action_Helper_Acl());
+            // register an action helper to enforce any Acl requirements
+            Zend_Controller_Action_HelperBroker::addHelper(new Vulnero_Controller_Action_Helper_Acl());
+        }
     }
 
     /**

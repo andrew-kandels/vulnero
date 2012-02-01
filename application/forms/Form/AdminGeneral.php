@@ -124,16 +124,6 @@ class Form_AdminGeneral extends Zend_Form
             ),
         ));
 
-        $this->addDisplayGroup(array(
-            'cacheBackend',
-            'cacheMemcacheHost',
-            'cacheMemcachePort',
-            'cacheXcacheUser',
-            'cacheXcachePassword',
-            'cacheFile',
-            'cacheTtl'
-        ), 'cache');
-
         $this->addElement('Checkbox', 'bootstrapWidgets', array(
             'label' => 'Bootstrap widgets',
         ));
@@ -149,13 +139,6 @@ class Form_AdminGeneral extends Zend_Form
         $this->addElement('Checkbox', 'bootstrapAuth', array(
             'label' => 'Bootstrap authentication / access control',
         ));
-
-        $this->addDisplayGroup(array(
-            'bootstrapWidgets',
-            'bootstrapRouting',
-            'bootstrapDatabase',
-            'bootstrapAuth',
-        ), 'bootstrap');
 
         $this->addElement('Checkbox', 'attribution', array(
             'label' => 'Display attribution in footer:',
@@ -223,7 +206,7 @@ class Form_AdminGeneral extends Zend_Form
      */
     public function setDefaultValues(Vulnero_WordPress $wordPress)
     {
-        $this->getElement('environment')->setValue(APPLICATION_ENV);
+        $this->getElement('environment')->setValue($wordPress->getCustomOption('environment'));
 
         if ($backend = $wordPress->getCustomOption($opt = 'cacheBackend')) {
             $this->getElement($opt)->setValue($backend);
