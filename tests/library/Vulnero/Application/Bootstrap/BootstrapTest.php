@@ -97,12 +97,10 @@ class BootstrapTest extends Vulnero_Test_PHPUnit_ControllerTestCase
     {
         $wordPress = $this->_bootstrap->bootstrap('wordPress')
                                       ->getResource('wordPress');
-        $layout = $this->_bootstrap->bootstrap('viewSettings')
-                                   ->getResource('viewSettings');
-        $this->assertEquals($this->_bootstrap->bootstrap('layout')->getResource('layout'), $layout);
-        $this->assertEquals($this->_bootstrap->bootstrap('view')->getResource('view'), $layout->getView());
-        $this->assertEquals($wordPress, $layout->wordPress);
-        $this->assertEquals($wordPress, $layout->getView()->wordPress);
+        $view = $this->_bootstrap->bootstrap('viewSettings')
+                                 ->getResource('viewSettings');
+        $this->assertEquals($this->_bootstrap->bootstrap('view')->getResource('view'), $view);
+        $this->assertEquals($wordPress, $view->wordPress);
     }
 
     public function testOnPluginsLoaded()
@@ -186,7 +184,6 @@ STREND;
         $wp = new stdclass();
         $wp->request = 'badtestroute';
         $request = $this->_bootstrap->onSendHeaders($wp);
-        $this->assertContains('onTheContent', $wordPress->getActions());
         $this->assertTrue($request instanceof Zend_Controller_Request_Http);
         $this->assertEquals('/badtestroute', $request->getRequestUri());
         $this->assertFalse($this->_frontController->getParam('isVulneroRoute'));
