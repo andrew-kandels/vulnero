@@ -699,9 +699,10 @@ class Vulnero_WordPress
      * to the WordPress database through its API.
      *
      * @param   string              Option name
+     * @param   mixed               Value to return if no option is found, defaults to false
      * @return  mixed               Boolean false if not found
      */
-    public function getCustomOption($name)
+    public function getCustomOption($name, $defaultValue = false)
     {
         $name = $this->_getSanitizedOptionName($name);
 
@@ -718,7 +719,7 @@ class Vulnero_WordPress
         }
 
         if (!$value) {
-            return false;
+            return $defaultValue;
         }
 
         if (preg_match('/^php:(.*)/', $value, $matches)) {

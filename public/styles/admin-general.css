@@ -1,0 +1,20 @@
+/* Vulnero theme-specific header styling section */
+body { background: transparent url(../images/top-bg.png) repeat-x; }
+#vulnero-admin > img { float: left; padding-right: 10px; }
+#vulnero-admin > h1 { padding: 0; margin: 40px 0 5px 30px; color: white; font-size: 60px;
+    letter-spacing: -1px; line-height: 1; }
+#vulnero-admin > p.sub-title { padding: 0; margin: 0 0 60px 30px; color: #444;
+    font-size: 18px; line-height: 27px; font-weight: 200;  }
+pre.license { border: 1px solid #c0c0c0; background: #f0f0f0; padding: 15px;
+    height: 10em; overflow: auto; width: 60em; }
+
+#cacheTtl, #cacheMemcachePort { width: 60px; }
+
+/* Form styling */
+dl.zend_form { margin: 0 0 3em 0; width: 60em; }
+dl.zend_form dt { float: left; width: 24em; clear: both; }
+dl.zend_form dt, dl.zend_form > dd { padding-bottom: 0.3em; }
+dl.zend_form dt > label.required { font-weight: bold; }
+dl.zend_form dd p.description { margin-left: 250px; }
+dt#save-label { display: none; }
+dd#save-element { margin: 30px 0 0 0; }
