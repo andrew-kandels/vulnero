@@ -7,5 +7,8 @@ You'll need to make sure that the Zend Framework is available
 in PHP's include_path, or you can download and install the Zend
 Framework in this directory's library/Zend sub-directory.
 
+Edit wordpress-plugin.php to customize the name, version and 
+description to best describe your plugin.
+
 For more complete instructions and documentation on how to get
 started, visit http://www.vulnero.com/.
