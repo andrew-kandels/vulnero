@@ -368,4 +368,37 @@ class Vulnero_WordPressTest extends Vulnero_Test_PHPUnit_ControllerTestCase
         }
         $this->assertTrue(isset($thrown));
     }
+
+    public function testGetPluginData()
+    {
+        $lines = file(PROJECT_BASE_PATH . '/wordpress-plugin.php');
+        $version = 'unknown';
+        foreach ($lines as $line) {
+            if (preg_match('/^Version: (.*)/', $line, $matches)) {
+                $version = trim($matches[1]);
+            }
+        }
+
+        $w = new Vulnero_WordPress($this->_bootstrap);
+        $this->assertEquals($w->getPluginData(), array(
+            'Name' => 'vulnero',
+            'PluginURI' => 'http://www.vulnero.com/',
+            'Version' => $version,
+            'Description' => 'WordPress Plugin',
+            'Author' => 'Andrew P. Kandels',
+            'AuthorURI' => 'http://andrewkandels.com/',
+            'TextDomain' => 'Text Domain',
+            'DomainPath' => 'Domain Path',
+            'Network' => 'Network',
+            '_siteWide' => 'Site Wide Only',
+        ));
+
+        $w->setIsMock(false);
+        try {
+            $w->getCurrentUser();
+        } catch (RuntimeException $e) {
+            $thrown = true;
+        }
+        $this->assertTrue(isset($thrown));
+    }
 }

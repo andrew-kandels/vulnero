@@ -66,7 +66,10 @@ class Widget_Download extends Vulnero_Widget
 
         $this->view->githubUrl = $config['github']['url'];
         $this->view->zipFile = $config['github']['zip']['url'];
-        $this->view->version = VULNERO_VERSION;
+        $data = $this->_bootstrap->bootstrap('wordPress')
+                                 ->getResource('wordPress')
+                                 ->getPluginData();
+        $this->view->version = $data['Version'];
     }
 
     /**

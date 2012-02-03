@@ -49,12 +49,6 @@ Author URI: http://andrewkandels.com/
  * @link        http://www.vulnero.com
  */
 
-define('VULNERO_VERSION', '0.1.1');
-
-if (!defined('PLUGIN_NAME')) {
-    define('PLUGIN_NAME', basename(__DIR__));
-}
-
 if (!defined('PROJECT_BASE_URI')) {
     $baseUrl = defined('WP_PLUGIN_URL')
         ? WP_PLUGIN_URL

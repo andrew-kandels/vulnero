@@ -82,7 +82,8 @@ class AdminPage_General extends Vulnero_AdminPage
         $form->setDefaultValues($wordPress);
 
         $this->view->form = $form;
-        $this->view->version = VULNERO_VERSION;
+        $data = $wordPress->getPluginData();
+        $this->view->version = $data['Version'];
     }
 
     /**

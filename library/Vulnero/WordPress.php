@@ -46,10 +46,14 @@
 class Vulnero_WordPress
 {
     /**
-     * Max length of the name column in wp_options.
      * @var integer
      */
     const WP_OPTION_MAX_LENGTH = 64;
+
+    /**
+     * @var array
+     */
+    protected $_pluginData;
 
     /**
      * Mock options for get_bloginfo()
@@ -683,9 +687,11 @@ class Vulnero_WordPress
      */
     protected function _getSanitizedOptionName($name)
     {
-        if (strlen($name = PLUGIN_NAME . '_' . $name) > self::WP_OPTION_MAX_LENGTH) {
+        $pluginData = $this->getPluginData();
+
+        if (strlen($pluginData['Name'] . '_' . $name) > self::WP_OPTION_MAX_LENGTH) {
             throw new UnexpectedValueException('WordPress option length is limited to '
-                . (self::WP_OPTION_MAX_LENGTH - strlen(PLUGIN_NAME) - 1) . ' characters (prefix '
+                . (self::WP_OPTION_MAX_LENGTH - strlen($pluginData['Name']) - 1) . ' characters (prefix '
                 . 'excluded).'
             );
         }
@@ -873,5 +879,62 @@ class Vulnero_WordPress
 
             return (object) $user;
         }
+    }
+
+    /**
+     * Returns plugin data as it's registered with WordPress, which 
+     * includes the version, name, author and so on
+     *
+     * @see     http://core.trac.wordpress.org/browser/tags/3.3.1//wp-admin/includes/plugin.php
+     * @return  string      Version
+     */
+    public function getPluginData()
+    {
+        if ($this->_pluginData === null) {
+            return $this->_pluginData;
+        }
+
+        if ($this->_isMock) {
+            $lines = file(PROJECT_BASE_PATH . '/wordpress-plugin.php');
+            $version = 'unknown';
+            foreach ($lines as $line) {
+                if (preg_match('/^Version: (.*)/', $line, $matches)) {
+                    $version = trim($matches[1]);
+                }
+            }
+
+            $this->_pluginData = array(
+                'Name' => 'vulnero',
+                'PluginURI' => 'http://www.vulnero.com/',
+                'Version' => $version,
+                'Description' => 'WordPress Plugin',
+                'Author' => 'Andrew P. Kandels',
+                'AuthorURI' => 'http://andrewkandels.com/',
+                'TextDomain' => 'Text Domain',
+                'DomainPath' => 'Domain Path',
+                'Network' => 'Network',
+                // deprecated
+                '_siteWide' => 'Site Wide Only',
+            );
+        } elseif (!function_exists('get_plugins')) {
+            throw new RuntimeException('WordPress get_plugins not defined, '
+                . 'cannot execute Vulnero outside of WordPress environment.'
+            );
+        } else {
+            $lines = file(PROJECT_BASE_PATH . '/wordpress-plugin.php');
+            $name = 'unknown';
+            foreach ($lines as $line) {
+                if (preg_match('/^Plugin Name: (.*)/', $line, $matches)) {
+                    $name = trim($matches[1]);
+                }
+            }
+
+            $plugins = get_plugins(PROJECT_BASE_PATH . '/..');
+            if (isset($plugins[$name])) {
+                $this->_pluginData = $plugins[$name];
+            }
+        }
+
+        return $this->_pluginData;
     }
 }
