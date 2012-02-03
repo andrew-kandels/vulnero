@@ -570,7 +570,12 @@ class Vulnero_WordPress
                 . 'cannot execute Vulnero outside of WordPress environment.'
             );
         } else {
-            return locate_template(array($template));
+            // allow templates to exist in the plugin folder
+            if (file_exists(PLUGIN_BASE_PATH . '/' . $template)) {
+                return PLUGIN_BASE_PATH . '/' . $template;
+            } else {
+                return locate_template(array($template));
+            }
         }
     }
 
