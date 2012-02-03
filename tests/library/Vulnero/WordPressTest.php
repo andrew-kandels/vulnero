@@ -380,18 +380,21 @@ class Vulnero_WordPressTest extends Vulnero_Test_PHPUnit_ControllerTestCase
         }
 
         $w = new Vulnero_WordPress($this->_bootstrap);
-        $this->assertEquals($w->getPluginData(), array(
-            'Name' => 'vulnero',
-            'PluginURI' => 'http://www.vulnero.com/',
-            'Version' => $version,
-            'Description' => 'WordPress Plugin',
-            'Author' => 'Andrew P. Kandels',
-            'AuthorURI' => 'http://andrewkandels.com/',
-            'TextDomain' => 'Text Domain',
-            'DomainPath' => 'Domain Path',
-            'Network' => 'Network',
-            '_siteWide' => 'Site Wide Only',
-        ));
+        $this->assertEquals(
+            array(
+                'Name' => 'vulnero',
+                'PluginURI' => 'http://www.vulnero.com/',
+                'Version' => $version,
+                'Description' => 'WordPress Plugin',
+                'Author' => 'Andrew P. Kandels',
+                'AuthorURI' => 'http://andrewkandels.com/',
+                'TextDomain' => 'Text Domain',
+                'DomainPath' => 'Domain Path',
+                'Network' => 'Network',
+                '_siteWide' => 'Site Wide Only',
+            ),
+            $w->getPluginData()
+        );
 
         $w->setIsMock(false);
         try {

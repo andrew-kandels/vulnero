@@ -687,11 +687,11 @@ class Vulnero_WordPress
      */
     protected function _getSanitizedOptionName($name)
     {
-        $pluginData = $this->getPluginData();
+        $pluginDir = basename(realpath(dirname(__FILE__) . '/../..'));
 
-        if (strlen($pluginData['Name'] . '_' . $name) > self::WP_OPTION_MAX_LENGTH) {
+        if (strlen($pluginDir . '_' . $name) > self::WP_OPTION_MAX_LENGTH) {
             throw new UnexpectedValueException('WordPress option length is limited to '
-                . (self::WP_OPTION_MAX_LENGTH - strlen($pluginData['Name']) - 1) . ' characters (prefix '
+                . (self::WP_OPTION_MAX_LENGTH - strlen($pluginDir) - 1) . ' characters (prefix '
                 . 'excluded).'
             );
         }
@@ -890,9 +890,7 @@ class Vulnero_WordPress
      */
     public function getPluginData()
     {
-        if ($this->_pluginData === null) {
-            return $this->_pluginData;
-        }
+        $pluginData = array();
 
         if ($this->_isMock) {
             $lines = file(PROJECT_BASE_PATH . '/wordpress-plugin.php');
@@ -903,7 +901,7 @@ class Vulnero_WordPress
                 }
             }
 
-            $this->_pluginData = array(
+            $pluginData = array(
                 'Name' => 'vulnero',
                 'PluginURI' => 'http://www.vulnero.com/',
                 'Version' => $version,
@@ -931,10 +929,10 @@ class Vulnero_WordPress
 
             $plugins = get_plugins(PROJECT_BASE_PATH . '/..');
             if (isset($plugins[$name])) {
-                $this->_pluginData = $plugins[$name];
+                $pluginData = $plugins[$name];
             }
         }
 
-        return $this->_pluginData;
+        return $pluginData;
     }
 }

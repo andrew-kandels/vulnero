@@ -53,13 +53,14 @@ if (!defined('PROJECT_BASE_URI')) {
     $baseUrl = defined('WP_PLUGIN_URL')
         ? WP_PLUGIN_URL
         : '/wp-content/plugins';
-    define('PROJECT_BASE_URI', $baseUrl . '/' . PLUGIN_NAME);
+    define('PROJECT_BASE_URI', $baseUrl . '/' . basename(dirname(__FILE__)));
 }
 
 if (!defined('APPLICATION_ENV')) {
     if ($env = getenv('APPLICATION_ENV')) {
         define('APPLICATION_ENV', $env);
-    } elseif (function_exists('get_option') && ($env = get_option(PLUGIN_NAME . '_environment'))) {
+    } elseif (function_exists('get_option') && 
+             ($env = get_option(basename(dirname(__FILE__)) . '_environment'))) {
         define('APPLICATION_ENV', $env);
     } else {
         define('APPLICATION_ENV', 'development');
