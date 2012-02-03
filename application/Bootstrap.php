@@ -65,6 +65,6 @@ class Bootstrap extends Vulnero_Application_Bootstrap_Bootstrap
 
         $view = $this->bootstrap('view')
                      ->getResource('view');
-        $view->headLink()->appendStylesheet(PROJECT_BASE_URI . '/public/styles/main.css');
+        $view->headLink()->appendStylesheet(PLUGIN_BASE_URI . '/public/styles/main.css');
     }
 }

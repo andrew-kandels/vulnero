@@ -46,10 +46,14 @@
 class Vulnero_WordPress
 {
     /**
-     * Max length of the name column in wp_options.
      * @var integer
      */
     const WP_OPTION_MAX_LENGTH = 64;
+
+    /**
+     * @var array
+     */
+    protected $_pluginData;
 
     /**
      * Mock options for get_bloginfo()
@@ -183,7 +187,7 @@ class Vulnero_WordPress
             );
         } else {
             register_activation_hook(
-                PROJECT_BASE_PATH . '/vulnero.php',
+                PLUGIN_BASE_PATH . '/vulnero.php',
                 $this->_getCallback('plugin_activated')
             );
         }
@@ -440,7 +444,7 @@ class Vulnero_WordPress
     public function getThemeRoot()
     {
         if ($this->_isMock) {
-            return PROJECT_BASE_PATH;
+            return PLUGIN_BASE_PATH;
         } elseif (!function_exists('wp_get_post_categories')) {
             throw new RuntimeException('WordPress wp_get_post_categories() not detected, '
                 . 'cannot execute Vulnero outside of WordPress environment.'
@@ -560,7 +564,7 @@ class Vulnero_WordPress
     public function locateTemplate($template)
     {
         if ($this->_isMock) {
-            return array(realpath(PROJECT_BASE_PATH . '/../../themes') . '/page.php');
+            return array(realpath(PLUGIN_BASE_PATH . '/../../themes') . '/page.php');
         } elseif (!function_exists('locate_template')) {
             throw new RuntimeException('WordPress locate_template not defined, '
                 . 'cannot execute Vulnero outside of WordPress environment.'
@@ -683,9 +687,11 @@ class Vulnero_WordPress
      */
     protected function _getSanitizedOptionName($name)
     {
-        if (strlen($name = PLUGIN_NAME . '_' . $name) > self::WP_OPTION_MAX_LENGTH) {
+        $pluginDir = basename(realpath(dirname(__FILE__) . '/../..'));
+
+        if (strlen($pluginDir . '_' . $name) > self::WP_OPTION_MAX_LENGTH) {
             throw new UnexpectedValueException('WordPress option length is limited to '
-                . (self::WP_OPTION_MAX_LENGTH - strlen(PLUGIN_NAME) - 1) . ' characters (prefix '
+                . (self::WP_OPTION_MAX_LENGTH - strlen($pluginDir) - 1) . ' characters (prefix '
                 . 'excluded).'
             );
         }
@@ -874,4 +880,55 @@ class Vulnero_WordPress
             return (object) $user;
         }
     }
+
+    /**
+     * Returns plugin data as it's registered with WordPress, which 
+     * includes the version, name, author and so on
+     *
+     * @see     http://core.trac.wordpress.org/browser/tags/3.3.1//wp-admin/includes/plugin.php
+     * @return  string      Version
+     */
+    public function getPluginData()
+    {
+        $pluginData = array();
+
+        if ($this->_isMock) {
+            $lines = file(PLUGIN_BASE_PATH . '/wordpress-plugin.php');
+            $version = 'unknown';
+            foreach ($lines as $line) {
+                if (preg_match('/^Version: (.*)/', $line, $matches)) {
+                    $version = trim($matches[1]);
+                }
+            }
+
+            $pluginData = array(
+                'Name' => 'vulnero',
+                'PluginURI' => 'http://www.vulnero.com/',
+                'Version' => $version,
+                'Description' => 'WordPress Plugin',
+                'Author' => 'Andrew P. Kandels',
+                'AuthorURI' => 'http://andrewkandels.com/',
+                'TextDomain' => 'Text Domain',
+                'DomainPath' => 'Domain Path',
+                'Network' => 'Network',
+                // deprecated
+                '_siteWide' => 'Site Wide Only',
+            );
+        } else {
+            require_once(ABSPATH . 'wp-admin/includes/plugin.php');
+            if (!function_exists('get_plugins')) {
+                throw new RuntimeException('WordPress get_plugins not defined, '
+                    . 'cannot execute Vulnero outside of WordPress environment.'
+                );
+            }
+
+            $plugins = get_plugins('/' . plugin_basename(dirname(__FILE__) . '/../..'));
+            if (isset($plugins['wordpress-plugin.php'])) {
+                $pluginData = $plugins['wordpress-plugin.php'];
+            }
+        }
+
+        return $pluginData;
+    }
 }
+

@@ -174,7 +174,7 @@ STREND;
     {
         $templates = $this->_bootstrap->onPageTemplate();
         $template  = $templates[0];
-        $this->assertNotEquals(PROJECT_BASE_PATH, substr($template, 0, strlen(PROJECT_BASE_PATH)));
+        $this->assertNotEquals(PLUGIN_BASE_PATH, substr($template, 0, strlen(PLUGIN_BASE_PATH)));
     }
 
     public function testOnSendHeaders()

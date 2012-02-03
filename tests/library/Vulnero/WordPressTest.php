@@ -127,7 +127,7 @@ class Vulnero_WordPressTest extends Vulnero_Test_PHPUnit_ControllerTestCase
     public function testGetThemeRoot()
     {
         $w = new Vulnero_WordPress($this->_bootstrap);
-        $this->assertEquals(PROJECT_BASE_PATH, $w->getThemeRoot());
+        $this->assertEquals(PLUGIN_BASE_PATH, $w->getThemeRoot());
 
         $w->setIsMock(false);
         try {
@@ -218,7 +218,7 @@ class Vulnero_WordPressTest extends Vulnero_Test_PHPUnit_ControllerTestCase
     {
         $w = new Vulnero_WordPress($this->_bootstrap);
         $this->assertEquals(
-            array(realpath(PROJECT_BASE_PATH . '/../../themes') . '/page.php'),
+            array(realpath(PLUGIN_BASE_PATH . '/../../themes') . '/page.php'),
             $w->locateTemplate('test')
         );
 
@@ -360,6 +360,42 @@ class Vulnero_WordPressTest extends Vulnero_Test_PHPUnit_ControllerTestCase
     public function testGetCurrentUser()
     {
         $w = new Vulnero_WordPress($this->_bootstrap);
+        $w->setIsMock(false);
+        try {
+            $w->getCurrentUser();
+        } catch (RuntimeException $e) {
+            $thrown = true;
+        }
+        $this->assertTrue(isset($thrown));
+    }
+
+    public function testGetPluginData()
+    {
+        $lines = file(PLUGIN_BASE_PATH . '/wordpress-plugin.php');
+        $version = 'unknown';
+        foreach ($lines as $line) {
+            if (preg_match('/^Version: (.*)/', $line, $matches)) {
+                $version = trim($matches[1]);
+            }
+        }
+
+        $w = new Vulnero_WordPress($this->_bootstrap);
+        $this->assertEquals(
+            array(
+                'Name' => 'vulnero',
+                'PluginURI' => 'http://www.vulnero.com/',
+                'Version' => $version,
+                'Description' => 'WordPress Plugin',
+                'Author' => 'Andrew P. Kandels',
+                'AuthorURI' => 'http://andrewkandels.com/',
+                'TextDomain' => 'Text Domain',
+                'DomainPath' => 'Domain Path',
+                'Network' => 'Network',
+                '_siteWide' => 'Site Wide Only',
+            ),
+            $w->getPluginData()
+        );
+
         $w->setIsMock(false);
         try {
             $w->getCurrentUser();

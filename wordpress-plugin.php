@@ -49,39 +49,34 @@ Author URI: http://andrewkandels.com/
  * @link        http://www.vulnero.com
  */
 
-define('VULNERO_VERSION', '0.1.1');
-
-if (!defined('PLUGIN_NAME')) {
-    define('PLUGIN_NAME', basename(__DIR__));
-}
-
-if (!defined('PROJECT_BASE_URI')) {
+if (!defined('PLUGIN_BASE_URI')) {
     $baseUrl = defined('WP_PLUGIN_URL')
         ? WP_PLUGIN_URL
         : '/wp-content/plugins';
-    define('PROJECT_BASE_URI', $baseUrl . '/' . PLUGIN_NAME);
+    define('PLUGIN_BASE_URI', $baseUrl . '/' . basename(dirname(__FILE__)));
 }
 
 if (!defined('APPLICATION_ENV')) {
     if ($env = getenv('APPLICATION_ENV')) {
         define('APPLICATION_ENV', $env);
-    } elseif (function_exists('get_option') && ($env = get_option(PLUGIN_NAME . '_environment'))) {
+    } elseif (function_exists('get_option') && 
+             ($env = get_option(basename(dirname(__FILE__)) . '_environment'))) {
         define('APPLICATION_ENV', $env);
     } else {
         define('APPLICATION_ENV', 'development');
     }
 }
 
-if (!defined('PROJECT_BASE_PATH')) {
-    define('PROJECT_BASE_PATH', realpath(dirname(__FILE__)));
+if (!defined('PLUGIN_BASE_PATH')) {
+    define('PLUGIN_BASE_PATH', realpath(dirname(__FILE__)));
 }
 
 if (!defined('APPLICATION_PATH')) {
-    define('APPLICATION_PATH', PROJECT_BASE_PATH . '/application');
+    define('APPLICATION_PATH', PLUGIN_BASE_PATH . '/application');
 }
 
 set_include_path(implode(PATH_SEPARATOR, array(
-    PROJECT_BASE_PATH . '/library',
+    PLUGIN_BASE_PATH . '/library',
     APPLICATION_PATH . '/widgets',
     APPLICATION_PATH . '/admin-pages',
     APPLICATION_PATH . '/forms',
