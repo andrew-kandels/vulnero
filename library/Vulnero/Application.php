@@ -60,7 +60,7 @@ class Vulnero_Application extends Zend_Application
             $cache = Zend_Cache::factory('File', 'Apc', $frontendOptions);
         } else {
             $cache = Zend_Cache::factory('File', 'File', $frontendOptions, array(
-                'cache_dir'     => PROJECT_BASE_PATH . '/cache',
+                'cache_dir'     => PLUGIN_BASE_PATH . '/cache',
                 'file_locking'  => true
             ));
         }

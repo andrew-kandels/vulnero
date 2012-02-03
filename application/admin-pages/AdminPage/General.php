@@ -58,7 +58,7 @@ class AdminPage_General extends Vulnero_AdminPage
      */
     protected function _init()
     {
-        $this->setIconUrl(PROJECT_BASE_URI . '/public/images/admin-icon.png')
+        $this->setIconUrl(PLUGIN_BASE_URI . '/public/images/admin-icon.png')
              ->setPosition(3)
              ->setType(Vulnero_AdminPage::ADMIN_MENU);
     }

@@ -187,7 +187,7 @@ class Vulnero_WordPress
             );
         } else {
             register_activation_hook(
-                PROJECT_BASE_PATH . '/vulnero.php',
+                PLUGIN_BASE_PATH . '/vulnero.php',
                 $this->_getCallback('plugin_activated')
             );
         }
@@ -444,7 +444,7 @@ class Vulnero_WordPress
     public function getThemeRoot()
     {
         if ($this->_isMock) {
-            return PROJECT_BASE_PATH;
+            return PLUGIN_BASE_PATH;
         } elseif (!function_exists('wp_get_post_categories')) {
             throw new RuntimeException('WordPress wp_get_post_categories() not detected, '
                 . 'cannot execute Vulnero outside of WordPress environment.'
@@ -564,7 +564,7 @@ class Vulnero_WordPress
     public function locateTemplate($template)
     {
         if ($this->_isMock) {
-            return array(realpath(PROJECT_BASE_PATH . '/../../themes') . '/page.php');
+            return array(realpath(PLUGIN_BASE_PATH . '/../../themes') . '/page.php');
         } elseif (!function_exists('locate_template')) {
             throw new RuntimeException('WordPress locate_template not defined, '
                 . 'cannot execute Vulnero outside of WordPress environment.'
@@ -893,7 +893,7 @@ class Vulnero_WordPress
         $pluginData = array();
 
         if ($this->_isMock) {
-            $lines = file(PROJECT_BASE_PATH . '/wordpress-plugin.php');
+            $lines = file(PLUGIN_BASE_PATH . '/wordpress-plugin.php');
             $version = 'unknown';
             foreach ($lines as $line) {
                 if (preg_match('/^Version: (.*)/', $line, $matches)) {
@@ -914,25 +914,21 @@ class Vulnero_WordPress
                 // deprecated
                 '_siteWide' => 'Site Wide Only',
             );
-        } elseif (!function_exists('get_plugins')) {
-            throw new RuntimeException('WordPress get_plugins not defined, '
-                . 'cannot execute Vulnero outside of WordPress environment.'
-            );
         } else {
-            $lines = file(PROJECT_BASE_PATH . '/wordpress-plugin.php');
-            $name = 'unknown';
-            foreach ($lines as $line) {
-                if (preg_match('/^Plugin Name: (.*)/', $line, $matches)) {
-                    $name = trim($matches[1]);
-                }
+            require_once(ABSPATH . 'wp-admin/includes/plugin.php');
+            if (!function_exists('get_plugins')) {
+                throw new RuntimeException('WordPress get_plugins not defined, '
+                    . 'cannot execute Vulnero outside of WordPress environment.'
+                );
             }
 
-            $plugins = get_plugins(PROJECT_BASE_PATH . '/..');
-            if (isset($plugins[$name])) {
-                $pluginData = $plugins[$name];
+            $plugins = get_plugins('/' . plugin_basename(dirname(__FILE__) . '/../..'));
+            if (isset($plugins['wordpress-plugin.php'])) {
+                $pluginData = $plugins['wordpress-plugin.php'];
             }
         }
 
         return $pluginData;
     }
 }
+

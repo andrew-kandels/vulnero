@@ -3,7 +3,7 @@ class WordPressPluginTest extends Vulnero_Test_PHPUnit_ControllerTestCase
 {
     public function testVersionNumber()
     {
-        $lines = file(PROJECT_BASE_PATH . '/wordpress-plugin.php');
+        $lines = file(PLUGIN_BASE_PATH . '/wordpress-plugin.php');
         $version = 'unknown';
         foreach ($lines as $line) {
             if (preg_match('/^Version: (.*)/', $line, $matches)) {

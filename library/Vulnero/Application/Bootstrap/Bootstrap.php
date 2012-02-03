@@ -345,7 +345,7 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
         $view = $this->bootstrap('view')
                      ->getResource('view');
 
-        $view->headLink()->appendStylesheet(PROJECT_BASE_URI . '/public/styles/main.css');
+        $view->headLink()->appendStylesheet(PLUGIN_BASE_URI . '/public/styles/main.css');
         $view->wordPress = $this->bootstrap('wordPress')
                                 ->getResource('wordPress');
 
@@ -514,8 +514,8 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
     {
         $wordPress = $this->bootstrap('wordPress')
                           ->getResource('wordPress');
-        if (file_exists(PROJECT_BASE_PATH . '/' . self::WORDPRESS_PAGE_TEMPLATE)) {
-            return PROJECT_BASE_PATH . '/' . self::WORDPRESS_PAGE_TEMPLATE;
+        if (file_exists(PLUGIN_BASE_PATH . '/' . self::WORDPRESS_PAGE_TEMPLATE)) {
+            return PLUGIN_BASE_PATH . '/' . self::WORDPRESS_PAGE_TEMPLATE;
         } else {
             return $wordPress->locateTemplate($template);
         }
@@ -553,7 +553,7 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
      */
     public function onCommentsTemplate()
     {
-        return PROJECT_BASE_PATH . '/empty-page.php';
+        return PLUGIN_BASE_PATH . '/empty-page.php';
     }
 
     /**

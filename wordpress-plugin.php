@@ -49,11 +49,11 @@ Author URI: http://andrewkandels.com/
  * @link        http://www.vulnero.com
  */
 
-if (!defined('PROJECT_BASE_URI')) {
+if (!defined('PLUGIN_BASE_URI')) {
     $baseUrl = defined('WP_PLUGIN_URL')
         ? WP_PLUGIN_URL
         : '/wp-content/plugins';
-    define('PROJECT_BASE_URI', $baseUrl . '/' . basename(dirname(__FILE__)));
+    define('PLUGIN_BASE_URI', $baseUrl . '/' . basename(dirname(__FILE__)));
 }
 
 if (!defined('APPLICATION_ENV')) {
@@ -67,17 +67,17 @@ if (!defined('APPLICATION_ENV')) {
     }
 }
 
-if (!defined('PROJECT_BASE_PATH')) {
-    define('PROJECT_BASE_PATH', realpath(dirname(__FILE__)));
+if (!defined('PLUGIN_BASE_PATH')) {
+    define('PLUGIN_BASE_PATH', realpath(dirname(__FILE__)));
 }
 
 if (!defined('APPLICATION_PATH')) {
-    define('APPLICATION_PATH', PROJECT_BASE_PATH . '/application');
+    define('APPLICATION_PATH', PLUGIN_BASE_PATH . '/application');
 }
 
 set_include_path(implode(PATH_SEPARATOR, array(
-    PROJECT_BASE_PATH . '/library',
-    PROJECT_BASE_PATH . '/library/php-github-api/lib',
+    PLUGIN_BASE_PATH . '/library',
+    PLUGIN_BASE_PATH . '/library/php-github-api/lib',
     APPLICATION_PATH . '/widgets',
     APPLICATION_PATH . '/admin-pages',
     APPLICATION_PATH . '/forms',
