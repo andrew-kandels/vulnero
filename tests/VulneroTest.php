@@ -4,7 +4,7 @@ class VulneroTest extends Vulnero_Test_PHPUnit_ControllerTestCase
     public function testVersionNumber()
     {
         $this->assertContains(VULNERO_VERSION, file_get_contents(dirname(__FILE__) . '/../README.markdown'));
-        $this->assertContains(VULNERO_VERSION, file_get_contents(dirname(__FILE__) . '/../vulnero.php'));
+        $this->assertContains(VULNERO_VERSION, file_get_contents(dirname(__FILE__) . '/../wordpress-plugin.php'));
     }
 
     public function testApplication()

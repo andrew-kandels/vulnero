@@ -43,7 +43,7 @@
 
 define('APPLICATION_ENV', 'test');
 
-require_once dirname(__FILE__) . '/../vulnero.php';
+require_once dirname(__FILE__) . '/../wordpress-plugin.php';
 
 Zend_Session::$_unitTestEnabled = true;
 Zend_Session::start();
