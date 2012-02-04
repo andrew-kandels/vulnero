@@ -40,31 +40,4 @@
  */
 class Bootstrap extends Vulnero_Application_Bootstrap_Bootstrap
 {
-    /**
-     * Called each request when the plugin is loaded.
-     *
-     * @return  void
-     */
-    public function onPluginLoaded()
-    {
-        parent::onPluginLoaded();
-    }
-
-    /**
-     * Sets up global view parameters and defaults.
-     *
-     * Note: Adding scripts or stylesheets to the head*() variety of methods
-     * will only be rendered on Vulnero routes. To globally add stylesheets,
-     * using the
-     *
-     * @return  void
-     */
-    protected function _initViewSettings()
-    {
-        parent::_initViewSettings();
-
-        $view = $this->bootstrap('view')
-                     ->getResource('view');
-        $view->headLink()->appendStylesheet(PLUGIN_BASE_URI . '/public/styles/main.css');
-    }
 }
