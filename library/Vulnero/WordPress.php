@@ -678,7 +678,7 @@ class Vulnero_WordPress
      */
     protected function _getSanitizedOptionName($name)
     {
-        $pluginDir = basename(dirname(dirname(dirname(__FILE__))));
+        $pluginDir = basename(dirname(dirname(dirname(dirname(dirname(__FILE__))))));
         $name = $pluginDir . '_' . $name;
 
         if (strlen($name) > self::WP_OPTION_MAX_LENGTH) {
