@@ -81,7 +81,8 @@ EOH;
         $this->view->content = $content;
         $this->view->formattedException = $this->view->exception;
 
-        $this->view->showDetails = $this->_helper->acl->hasRole('manage_options');
+        $this->view->showDetails = $this->_helper->acl->hasRole('manage_options') ||
+            APPLICATION_ENV != 'production';
     }
 
     /**
