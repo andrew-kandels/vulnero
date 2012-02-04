@@ -679,8 +679,9 @@ class Vulnero_WordPress
     protected function _getSanitizedOptionName($name)
     {
         $pluginDir = basename(dirname(dirname(dirname(__FILE__))));
+        $name = $pluginDir . '_' . $name;
 
-        if (strlen($pluginDir . '_' . $name) > self::WP_OPTION_MAX_LENGTH) {
+        if (strlen($name) > self::WP_OPTION_MAX_LENGTH) {
             throw new UnexpectedValueException('WordPress option length is limited to '
                 . (self::WP_OPTION_MAX_LENGTH - strlen($pluginDir) - 1) . ' characters (prefix '
                 . 'excluded).'
