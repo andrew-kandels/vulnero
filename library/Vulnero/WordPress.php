@@ -744,6 +744,7 @@ class Vulnero_WordPress
      */
     public function setCustomOption($name, $value)
     {
+        $orig = $name;
         $name = $this->_getSanitizedOptionName($name);
 
         // serialize non-scalar values
@@ -754,7 +755,7 @@ class Vulnero_WordPress
         if ($this->_isMock) {
             $db = $this->getDatabase()->getConnection();
 
-            if ($cur = $this->getCustomOption($name)) {
+            if ($cur = $this->getCustomOption($orig)) {
                 $stmt = $db->prepare('UPDATE wp_options SET option_value = ? WHERE option_name = ?');
             } else {
                 $stmt = $db->prepare('INSERT INTO wp_options (option_value, option_name) VALUES (?, ?)');
