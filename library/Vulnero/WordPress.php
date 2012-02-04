@@ -678,7 +678,7 @@ class Vulnero_WordPress
      */
     protected function _getSanitizedOptionName($name)
     {
-        $pluginDir = basename(dirname(dirname(dirname(dirname(dirname(__FILE__))))));
+        $pluginDir = basename(PLUGIN_BASE_PATH);
         $name = $pluginDir . '_' . $name;
 
         if (strlen($name) > self::WP_OPTION_MAX_LENGTH) {
@@ -744,7 +744,6 @@ class Vulnero_WordPress
      */
     public function setCustomOption($name, $value)
     {
-        $orig = $name;
         $name = $this->_getSanitizedOptionName($name);
 
         // serialize non-scalar values
@@ -755,13 +754,18 @@ class Vulnero_WordPress
         if ($this->_isMock) {
             $db = $this->getDatabase()->getConnection();
 
-            if ($cur = $this->getCustomOption($orig)) {
-                $stmt = $db->prepare('UPDATE wp_options SET option_value = ? WHERE option_name = ?');
-            } else {
+            try {
                 $stmt = $db->prepare('INSERT INTO wp_options (option_value, option_name) VALUES (?, ?)');
+                $stmt->execute(array($value, $name));
+            } catch (PDOException $e) {
+                // duplicate key, update instead
+                if ($e->getCode() == 23000) {
+                    $stmt = $db->prepare('UPDATE wp_options SET option_value = ? WHERE option_name = ?');
+                    $stmt->execute(array($value, $name));
+                } else {
+                    throw $e;
+                }
             }
-
-            $stmt->execute(array($value, $name));
         } elseif (!function_exists('add_option')) {
             throw new RuntimeException('WordPress add_option not defined, '
                 . 'cannot execute Vulnero outside of WordPress environment.'
