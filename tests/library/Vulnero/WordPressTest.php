@@ -197,20 +197,6 @@ class Vulnero_WordPressTest extends Vulnero_Test_PHPUnit_ControllerTestCase
     public function testGetDatabase()
     {
         $w = new Vulnero_WordPress($this->_bootstrap);
-        $this->assertTrue($w->getDatabase() instanceof Zend_Db_Adapter_Pdo_Sqlite);
-
-        $w->setIsMock(false);
-        try {
-            $w->getDatabase();
-        } catch (RuntimeException $e) {
-            $thrown = true;
-        }
-        $this->assertTrue(isset($thrown));
-
-        define('DB_HOST', 'localhost');
-        define('DB_USER', 'test');
-        define('DB_PASSWORD', 'test');
-        define('DB_NAME', 'nonexistent');
         $this->assertTrue($w->getDatabase() instanceof Zend_Db_Adapter_Pdo_Mysql);
     }
 
@@ -315,7 +301,6 @@ class Vulnero_WordPressTest extends Vulnero_Test_PHPUnit_ControllerTestCase
         $w->setCustomOption('nonscalar', $nonScalarValue = array('color' => 'red'));
         $this->assertEquals($scalarValue, $w->getCustomOption('scalar'));
         $this->assertEquals($nonScalarValue, $w->getCustomOption('nonscalar'));
-        $this->assertContains($scalarValue, $w->getCustomOptions());
 
         $this->assertFalse($w->getCustomOption('non-existent'));
 

@@ -65,7 +65,7 @@ class BootstrapTest extends Vulnero_Test_PHPUnit_ControllerTestCase
     {
         $db = $this->_bootstrap->bootstrap('db')
                                ->getResource('db');
-        $this->assertTrue($db instanceof Zend_Db_Adapter_Pdo_Sqlite);
+        $this->assertTrue($db instanceof Zend_Db_Adapter_Pdo_Mysql);
         $this->assertEquals(Zend_Db_Table_Abstract::getDefaultAdapter(), $db);
         $this->assertTrue($db->query('SELECT 1') instanceof Zend_Db_Statement_Pdo);
     }

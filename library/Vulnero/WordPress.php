@@ -139,12 +139,6 @@ class Vulnero_WordPress
     protected $_adminPages = array();
 
     /**
-     * Keeps track of custom options registered in the wp_options table.
-     * @var array
-     */
-    protected $_customOptions = array();
-
-    /**
      * Instantiate the class.
      *
      * @return  Vulnero_WordPress
@@ -536,23 +530,25 @@ class Vulnero_WordPress
      */
     public function getDatabase()
     {
-        if ($this->_isMock) {
-            return Zend_Db::factory('Pdo_Sqlite', array(
-                'file'  => '/tmp/vulnero-unit-test.db',
-                'dbname'=> 'mock'
-            ));
+        if ($this->_isMock && !defined('DB_HOST')) {
+            $lines = file(PLUGIN_BASE_PATH . '/../../../wp-config.php');
+            foreach ($lines as $index => $line) {
+                if (preg_match('/define\(\'DB_([^\']+)\',\s*\'([^\']+)\'\);/', $line, $matches)) {
+                    define('DB_' . $matches[1], $matches[2]);
+                }
+            }
         } elseif (!defined('DB_HOST')) {
-            throw new RuntimeException('WordPress DB_HOST not defined, '
+            throw new RuntimeException('WordPress constant DB_HOST not detected, '
                 . 'cannot execute Vulnero outside of WordPress environment.'
             );
-        } else {
-            return Zend_Db::factory('Pdo_Mysql', array(
-                'host'      => DB_HOST,
-                'username'  => DB_USER,
-                'password'  => DB_PASSWORD,
-                'dbname'    => DB_NAME
-            ));
         }
+
+        return Zend_Db::factory('Pdo_Mysql', array(
+            'host'      => DB_HOST,
+            'username'  => DB_USER,
+            'password'  => DB_PASSWORD,
+            'dbname'    => DB_NAME
+        ));
     }
 
     /**
@@ -674,16 +670,6 @@ class Vulnero_WordPress
     }
 
     /**
-     * Returns custom options registered with WordPress' wp_options table.
-     *
-     * @return array
-     */
-    public function getCustomOptions()
-    {
-        return $this->_customOptions;
-    }
-
-    /**
      * Prefix the name of the option with something plugin specific to sandbox
      * our settings from other plugins and WordPress internals.
      *
@@ -692,7 +678,7 @@ class Vulnero_WordPress
      */
     protected function _getSanitizedOptionName($name)
     {
-        $pluginDir = basename(realpath(dirname(__FILE__) . '/../..'));
+        $pluginDir = basename(dirname(dirname(dirname(__FILE__))));
 
         if (strlen($pluginDir . '_' . $name) > self::WP_OPTION_MAX_LENGTH) {
             throw new UnexpectedValueException('WordPress option length is limited to '
@@ -718,9 +704,15 @@ class Vulnero_WordPress
         $name = $this->_getSanitizedOptionName($name);
 
         if ($this->_isMock) {
-            $value = isset($this->_customOptions[$name])
-                ? $this->_customOptions[$name]
-                : false;
+            $db = $this->getDatabase()->getConnection();
+
+            $stmt = $db->prepare('SELECT option_value FROM wp_options WHERE option_name = ?');
+            $stmt->execute(array($name));
+            if ($row = $stmt->fetch(PDO::FETCH_NUM)) {
+                $value = $row[0];
+            } else {
+                $value = null;
+            }
         } elseif (!function_exists('get_option')) {
             throw new RuntimeException('WordPress get_option not defined, '
                 . 'cannot execute Vulnero outside of WordPress environment.'
@@ -759,7 +751,15 @@ class Vulnero_WordPress
         }
 
         if ($this->_isMock) {
-            $this->_customOptions[$name] = $value;
+            $db = $this->getDatabase()->getConnection();
+
+            if ($cur = $this->getCustomOption($name)) {
+                $stmt = $db->prepare('UPDATE wp_options SET option_value = ? WHERE option_name = ?');
+            } else {
+                $stmt = $db->prepare('INSERT INTO wp_options (option_value, option_name) VALUES (?, ?)');
+            }
+
+            $stmt->execute(array($value, $name));
         } elseif (!function_exists('add_option')) {
             throw new RuntimeException('WordPress add_option not defined, '
                 . 'cannot execute Vulnero outside of WordPress environment.'
