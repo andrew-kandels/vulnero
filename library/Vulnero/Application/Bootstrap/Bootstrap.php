@@ -213,6 +213,7 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
     {
         $wordPress = $this->bootstrap('wordPress')
                           ->getResource('wordPress');
+        $config = $this->getOptions();
 
         switch($adapter = $wordPress->getCustomOption('cacheBackend', $this->_getBestCacheAdapter())) {
             case 'Zend_Cache_Backend_Xcache':
@@ -281,11 +282,14 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
                 break;
         }
 
-        $frontendOptions = array(
-            'lifetime' => $wordPress->getCustomOption('cacheTtl', 3600),
-            'logging' => false,
-            'automatic_serialization' => true,
-        );
+        $frontendOptions = isset($config['cache']['frontend'])
+            ? $config['cache']['frontend']
+            : array();
+
+        if (!isset($frontendOptions['lifetime'])) {
+            $frontendOptions['lifetime'] = $wordPress->getCustomOption('cacheTtl', 3600);
+        }
+        $frontendOptions['automatic_serialization'] = true;
 
         $adapter = str_replace('Zend_Cache_Backend_', '', $adapter);
         $cache = Zend_Cache::factory('Core', $adapter, $frontendOptions, $options);
