@@ -349,7 +349,6 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
         $view = $this->bootstrap('view')
                      ->getResource('view');
 
-        $view->headLink()->appendStylesheet(PLUGIN_BASE_URI . '/public/styles/main.css');
         $view->wordPress = $this->bootstrap('wordPress')
                                 ->getResource('wordPress');
 
