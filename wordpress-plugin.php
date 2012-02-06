@@ -1,15 +1,15 @@
 <?php
 /*
-Plugin Name: Vulnero
-Plugin URI: http://www.vulnero.com/
-Description: Vulnero is a WordPress plugin that transforms WordPress into an object-oriented CMS by implementing a Zend Framework application that interfaces with its API.
-Version: 0.1.2
-Author: Andrew Kandels
-Author URI: http://andrewkandels.com/
+Plugin Name: MyApp
+Plugin URI: http://appwebsite.com/
+Description: My app which is built on Vulnero, a WordPress plugin that transforms WordPress into an object-oriented CMS by implementing a Zend Framework application that interfaces with its API.
+Version: 0.1.1
+Author: Your Name
+Author URI: http://authorwebsite.com/
 */
 
 /**
- * Vulnero
+ * My App is based on Vulnero
  *
  * WordPress entry-point file containing plug-in definition.
  *
@@ -48,6 +48,8 @@ Author URI: http://andrewkandels.com/
  * @license     http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link        http://www.vulnero.com
  */
+
+// Example bootstrap (replace this with your own):
 
 if (!defined('PLUGIN_BASE_URI')) {
     $baseUrl = defined('WP_PLUGIN_URL')

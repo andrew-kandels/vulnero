@@ -3,6 +3,11 @@ Vulnero 0.1
 
 This is the list of changes for the 0.1 release series.
 
+Vulnero 0.1.3
+------------------
+* Splitting off vulnero-app (the standalone plugin) as its own repository
+* Various small bug fixes I've identified using the library for its first major project
+
 Vulnero 0.1.2
 ------------------
 * Refactored widgets slightly to simplify the capturing of options

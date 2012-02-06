@@ -1,14 +1,21 @@
-To install this Vulnero WordPress plugin, copy this folder in its
-entirety to your WordPress installation's wp_content/plugins
-directory and install it from the WordPress administration panel's
-widget setup area.
+Vulnero is a WordPress plugin that transforms WordPress into an 
+object-oriented CMS by implementing a Zend Framework application 
+that interfaces with its API.
 
-You'll need to make sure that the Zend Framework is available
-in PHP's include_path, or you can download and install the Zend
-Framework in this directory's library/Zend sub-directory.
+This directory is the core library which can be installed in an
+existing Zend Framework application by copying this directory
+into a library sub-directory and ensuring it's in your 
+include_path and that your project uses auto-loading.
 
-Edit wordpress-plugin.php to customize the name, version and 
-description to best describe your plugin.
+Secondly, you'll need to copy the wordpress-plugin.php file to
+your application's root directory. You may also want to edit
+this file to better describe your plugin.
+
+Finally, copy your entire application into WordPress' 
+'wp-content/plugins' directory.
+
+Now, when you login to WordPress as an administrator, you should 
+see your plugin in the list and have the option to activate it.
 
 For more complete instructions and documentation on how to get
 started, visit http://www.vulnero.com/.
