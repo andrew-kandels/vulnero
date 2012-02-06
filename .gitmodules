@@ -1,3 +1,6 @@
 [submodule "library/Zend"]
 	path = library/Zend
 	url = https://github.com/Enrise/Zend.git
+[submodule "library/php-github-api"]
+	path = library/php-github-api
+	url = git://github.com/ornicar/php-github-api.git
