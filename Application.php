@@ -58,6 +58,8 @@ class Vulnero_Application extends Zend_Application
 
         if (extension_loaded('apc')) {
             $cache = Zend_Cache::factory('File', 'Apc', $frontendOptions);
+        } else {
+            $cache = null;
         }
 
         // don't cache the config.ini on non-production environments so config
