@@ -606,6 +606,11 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
                 // position on the page
                 $frontController->returnResponse(true);
 
+                // Our layout is the WordPress page template
+                $layout = $this->bootstrap('layout')
+                               ->getResource('layout')
+                               ->disableLayout();
+
                 try {
                     $response = $frontController->dispatch();
                 } catch (Zend_Controller_Router_Exception $e) {
@@ -629,11 +634,6 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
                 // Controller plugin injects content into the WordPress the_content() hook
                 $frontController->setParam('response', $response)
                                 ->setParam('isVulneroRoute', true);
-
-                // Our layout is the WordPress page template
-                $layout = $this->bootstrap('layout')
-                               ->getResource('layout')
-                               ->disableLayout();
 
                 // Disable comments, links, pings and other display oddities for our own routes
                 $wordPress->addFilter('comments_open')
