@@ -1,7 +1,11 @@
-Vulnero 0.1
+Vulnero 1.0
 ==================
 
-This is the list of changes for the 0.1 release series.
+This is the list of changes for the 1.0 release series.
+
+Vulnero 1.0.1
+------------------
+* First project release, feature complete.
 
 Vulnero 0.1.3
 ------------------
