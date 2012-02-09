@@ -6,6 +6,7 @@ This is the list of changes for the 1.0 release series.
 Vulnero 1.0.1
 ------------------
 * First project release, feature complete.
+* Created a release branch for the 1.0 series.
 
 Vulnero 0.1.3
 ------------------
