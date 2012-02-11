@@ -595,7 +595,7 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
 
             // Generate a new request object built from the WordPress route
             $options         = $this->getOptions();
-            $uri             = $options['wordpress']['siteurl'] . '/' . $wpRequest;
+            $uri             = $options['wordpress']['url'] . '/' . $wpRequest;
             $uriObj          = Zend_Uri::factory($uri);
             $request         = new Zend_Controller_Request_Http($uriObj);
             $frontController->setRequest($request);

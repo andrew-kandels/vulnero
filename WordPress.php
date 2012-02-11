@@ -60,11 +60,11 @@ class Vulnero_WordPress
      * @var array
      */
     protected static $_blogInfo = array(
-        'siteurl'               => 'http://localhost',
+        'url'                   => 'http://localhost',
         'name'                  => 'Test',
         'description'           => 'Fake blog for testing.',
         'wpurl'                 => 'http://localhost',
-        'siteurl'               => 'http://localhost',
+        'url'                   => 'http://localhost',
         'admin_email'           => 'me@domain.com',
         'charset'               => 'utf8',
         'version'               => '1.0.0',

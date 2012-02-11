@@ -9,7 +9,7 @@ class Vulnero_ApplicationTest extends Vulnero_Test_PHPUnit_ControllerTestCase
                 'name' => 'Test',
                 'description' => 'Fake blog for testing.',
                 'wpurl' => 'http://localhost',
-                'siteurl' => 'http://localhost',
+                'url' => 'http://localhost',
                 'admin_email' => 'me@domain.com',
                 'charset' => 'utf8',
                 'version' => '1.0.0',

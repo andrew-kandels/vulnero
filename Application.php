@@ -93,7 +93,7 @@ class Vulnero_Application extends Zend_Application
             'name'                  => $wordPress->getBlogInfo('name'),
             'description'           => $wordPress->getBlogInfo('description'),
             'wpurl'                 => $wordPress->getBlogInfo('wpurl'),
-            'siteurl'               => $wordPress->getBlogInfo('siteurl'),
+            'url'                   => $wordPress->getBlogInfo('url'),
             'admin_email'           => $wordPress->getBlogInfo('admin_email'),
             'charset'               => $wordPress->getBlogInfo('charset'),
             'version'               => $wordPress->getBlogInfo('version'),
