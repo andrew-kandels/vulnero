@@ -61,7 +61,6 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
     {
         $wordPress = new Vulnero_WordPress($this);
         $wordPress->addAction('plugins_loaded')
-                  ->addFilter('wp_title')
                   ->addAction('wp_footer')
                   ->addAction('wp_head', 2)
                   ->registerActivationHook();
@@ -405,16 +404,25 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
      */
     public function onWpTitle($title)
     {
-        $frontController = $this->bootstrap('frontController')
-                                ->getResource('frontController');
-        // only set the title if we own the route
-        if ($frontController->getParam('isVulneroRoute')) {
-            $view = $this->bootstrap('view')
-                         ->getResource('view');
-            return strip_tags($view->headTitle()) . ' - ';
-        } else {
-            return $title;
+        $view = $this->bootstrap('view')
+                     ->getResource('view');
+
+        if ($viewTitle = trim(strip_tags($view->headTitle()))) {
+            $title = $viewTitle;
         }
+
+        return $title;
+    }
+
+    /**
+     * WordPress the_title filter
+     * We handle our own titles when we render the page.
+     *
+     * @return  string
+     */
+    public function onTheTitle($title)
+    {
+        return '';
     }
 
     /**
@@ -641,7 +649,11 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
                           ->addFilter('comments_template')
                           ->addFilter('wp_link_pages_args')
                           ->addFilter('page_template')
-                          ->addAction('the_content');
+                          ->addAction('the_content')
+                          ->addFilter('wp_title', 50)
+                          ->addFilter('the_title', 50)
+                          ->addFilter('post_title', 50)
+                          ->addFilter('posts_request');
 
                 $routeName = $frontController->getRouter()->getCurrentRouteName();
 
@@ -684,6 +696,22 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
 
             return $frontController->getRequest();
         }
+    }
+
+    /**
+     * WordPress posts_request action
+     * 
+     * Filters the SQL used to generate the loop. When WordPress is configured to "show latest posts"
+     * for the main page, it causes the loop on our rendered pages to pagination the posts showing 
+     * our rendered content multiple times. This modifies the LIMIT of the sql query to return only 
+     * one posts -- which is what we want.
+     *
+     * @param   string                  WordPress SQL the_loop query
+     * @return  string                  Filtered query w/LIMIT 1 applied
+     */
+    public function onPostsRequest($input)
+    {
+        return preg_replace('/LIMIT [0-9](,\s*[0-9]*)?/', 'LIMIT 1', $input);
     }
 
     /**
