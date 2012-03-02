@@ -5,8 +5,9 @@ This is the list of changes for the 1.0 release series.
 
 Vulnero 1.0.1
 ------------------
-* First project release, feature complete.
-* Created a release branch for the 1.0 series.
+* First project release, feature complete
+* Created a release branch for the 1.0 series
+* Fixing 'status posts' problem for the main page from 1.0.0
 
 Vulnero 0.1.3
 ------------------
