@@ -224,6 +224,29 @@ class Vulnero_WordPress
     }
 
     /**
+     * WordPress remove_filter() function.
+     * Removes a filtering function from a hook.
+     *
+     * @param   string              The hook name
+     * @param   string              The filter name
+     * @return  Vulnero_WordPress
+     */
+    public function removeFilter($name, $filter)
+    {
+        if ($this->_isMock) {
+            // @todo
+        } elseif (!function_exists('remove_filter')) {
+            throw new RuntimeException('WordPress remove_filter() not detected, '
+                . 'cannot execute Vulnero outside of WordPress environment.'
+            );
+        } else {
+            remove_filter($name, $filter);
+        }
+
+        return $this;
+    }
+
+    /**
      * WordPress add_filter() function.
      * Callback is generated based on the filter name, wp_head becomes onWpHead.
      *

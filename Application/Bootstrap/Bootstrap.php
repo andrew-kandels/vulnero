@@ -653,7 +653,9 @@ class Vulnero_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap
                           ->addFilter('wp_title', 50)
                           ->addFilter('the_title', 50)
                           ->addFilter('post_title', 50)
-                          ->addFilter('posts_request');
+                          ->addFilter('posts_request')
+                          ->removeFilter('the_content', 'wpautop')
+                          ->removeFilter('the_excerpt', 'wpautop');
 
                 $routeName = $frontController->getRouter()->getCurrentRouteName();
 
